@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using IB_Timetabler.Data;
+using ElectronNET.API;
 
 namespace IB_Timetabler {
     public class Startup {
@@ -47,6 +48,17 @@ namespace IB_Timetabler {
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+
+            if (HybridSupport.IsElectronActive) {
+                CreateWindow();
+            }
         }
+
+        private async void CreateWindow() {
+            var window = await Electron.WindowManager.CreateWindowAsync();
+            window.OnClosed += () => {
+                Electron.App.Quit();
+            };
+        } 
     }
 }

@@ -7,4 +7,4 @@ build_property.PublishSingleFile =
 build_property.IncludeAllContentForSelfExtract = 
 build_property._SupportedPlatformList = Android,iOS,Linux,macOS,Windows
 build_property.RootNamespace = IB_Timetabler
-build_property.ProjectDir = /home/noname/school/IB-Timetabler/
+build_property.ProjectDir = /home/noname/school/computerScience/IA/timetableCode/IB-Timetabler/
