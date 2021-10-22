@@ -1,0 +1,70 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/noname/school/computerScience/IA/timetableCode/TimetableGenerator/TimetableGenerator.csproj": {}
+  },
+  "projects": {
+    "/home/noname/school/computerScience/IA/timetableCode/TimetableGenerator/TimetableGenerator.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/noname/school/computerScience/IA/timetableCode/TimetableGenerator/TimetableGenerator.csproj",
+        "projectName": "TimetableGenerator",
+        "projectPath": "/home/noname/school/computerScience/IA/timetableCode/TimetableGenerator/TimetableGenerator.csproj",
+        "packagesPath": "/home/noname/.nuget/packages/",
+        "outputPath": "/home/noname/school/computerScience/IA/timetableCode/TimetableGenerator/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/noname/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "CsvHelper": {
+              "target": "Package",
+              "version": "[27.1.1, )"
+            },
+            "NPOI": {
+              "target": "Package",
+              "version": "[2.5.4, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/5.0.401/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
