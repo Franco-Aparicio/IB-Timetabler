@@ -1,0 +1,126 @@
+@page "/lessons/"
+@using System.Globalization
+
+<TitleComponent Page="Lessons"></TitleComponent>
+
+Click on a lesson to edit!
+<br/><br/>
+
+<AutoTableComponent
+    Headers="headers"
+    Items="classes"
+    ColumnsToExcludeCSV="Id, Rooms, Periods"
+    LinkFirst="/lessons/Id">
+</AutoTableComponent>
+<br/><br/>
+@code {
+
+    List<Lesson> classes = null;
+    List<string> headers = null;
+    // int selectedLessonIndex = -1;
+
+    protected override void OnInitialized() {
+        base.OnInitialized();
+        classes = new List<Lesson> {
+            new Lesson {
+                Id = 1,
+                Name = "Math AA HL",
+                Year = 13,
+                NumLessons = 4,
+                Teacher = "M1",
+                Block = 5,
+                Group = 0,
+                Rooms = new List<string> {
+                    "N 0.4", "A 1.4", "A 1.6"
+                }
+            },
+            new Lesson {
+                Id = 2,
+                Name = "Math AA SL",
+                Year = 13,
+                NumLessons = 4,
+                Teacher = "M1",
+                Block = 5,
+                Group = 0,
+                Rooms = new List<string> {
+                    "N 0.4", "A 1.4", "A 1.6"
+                }
+            },
+            new Lesson {
+                Id = 3,
+                Name = "Math AI HL",
+                Year = 13,
+                NumLessons = 4,
+                Teacher = "M2",
+                Block = 5,
+                Group = 0,
+                Rooms = new List<string> {
+                    "N 0.4", "A 1.4", "A 1.6"
+                }
+            },
+            new Lesson {
+                Id = 4,
+                Name = "Math AI SL",
+                Year = 13,
+                NumLessons = 4,
+                Teacher = "M2",
+                Block = 5,
+                Group = 0,
+                Rooms = new List<string> {
+                    "N 0.4", "A 1.4", "A 1.6"
+                }
+            }
+        };
+        headers = new List<string> {"Name", "Year", "Lessons Per Cycle", "Teacher", "Block", "Group"};
+    }
+
+    #region "View Model"
+
+    class Lesson {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Year { get; set; }
+        public int NumLessons { get; set; }
+        public string Teacher { get; set; }
+        public int Block { get; set; }
+        public int Group { get; set; }
+        public List<string> Rooms { get; set; }
+        public List<Period> Periods { get; set; }
+    }
+
+    struct Period {
+
+        public int Week { get; set; }
+        public int Day { get; set; }
+        public int TimePeriod { get; set; }
+        public int RemovedAtLevel { get; set; }
+
+        public override string ToString() {
+            string w = Week == 0 ? "A" : "B";
+            return $"Week: {w, -1} | Day: {CultureInfo.CurrentCulture.DateTimeFormat.DayNames[Day + 1], -9} | Period: {TimePeriod, -2}";
+        }
+
+        private bool Equals(Period other) {
+            return Week == other.Week && Day == other.Day && TimePeriod == other.TimePeriod;
+        }
+
+        public override bool Equals(object obj) {
+            return obj is Period other && Equals(other);
+        }
+
+        public override int GetHashCode() {
+            return HashCode.Combine(Week, Day, TimePeriod);
+        }
+
+        public static bool operator ==(Period l1, Period l2) {
+            return l1.Equals(l2);
+        }
+
+        public static bool operator !=(Period l1, Period l2) {
+            return !l1.Equals(l2);
+        }
+    }
+
+    #endregion
+
+}

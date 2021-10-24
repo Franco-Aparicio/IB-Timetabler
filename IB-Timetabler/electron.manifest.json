@@ -4,7 +4,7 @@
     "imageFile": ""
   },
   "name": "IB-Timetabler",
-  "author": "",
+  "author": "Franco Aparicio",
   "singleInstance": false,
   "environment": "Production",
   "build": {
@@ -13,8 +13,18 @@
     "copyright": "Copyright © 2020",
     "buildVersion": "1.0.0",
     "compression": "maximum",
+    "win": {
+      "icon": "Assets/favicon.ico"
+    },
+    "mac": {
+      "icon": "Assets/favicon.icns"
+    },
+    "linux": {
+      "icon": "Assets/favicon_32x32.png"
+    },
     "directories": {
-      "output": "../../../bin/Desktop"
+      "output": "../../../bin/Desktop",
+      "buildResources": "Assets"
     },
     "extraResources": [
       {

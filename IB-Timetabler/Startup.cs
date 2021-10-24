@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using IB_Timetabler.Data;
 using ElectronNET.API;
+using ElectronNET.API.Entities;
 
 namespace IB_Timetabler {
     public class Startup {
@@ -55,10 +56,64 @@ namespace IB_Timetabler {
         }
 
         private async void CreateWindow() {
-            var window = await Electron.WindowManager.CreateWindowAsync();
+            var windowOptions = new BrowserWindowOptions {
+                AutoHideMenuBar = true,
+                Title = "IB-Timetabler",
+                Width = 1500,
+                Height = 1000,
+                MinWidth = 500,
+                MinHeight = 300
+                // Icon = $"{System.IO.Directory.GetCurrentDirectory()}/Assets/favicon_32x32.png"
+            };
+            var window = await Electron.WindowManager.CreateWindowAsync(windowOptions);
+
+            var menu = new MenuItem[] {
+                new MenuItem {
+                    Label = "File",
+                    Type = MenuType.submenu,
+                    Submenu = new MenuItem[] {
+                        new MenuItem {
+                            Label = "New",
+                            Click = () => Electron.Dialog.ShowMessageBoxAsync("New menu clicked")
+                        },
+                        new MenuItem {
+                            Type = MenuType.separator
+                        },
+                        new MenuItem {
+                            Label = "Close",
+                            Role = MenuRole.close
+                        }
+                    }
+                },
+                new MenuItem {
+                    Label = "Edit",
+                    Type = MenuType.submenu,
+                    Submenu = new MenuItem[] {
+                        new MenuItem {
+                            Label = "Force Reload",
+                            Role = MenuRole.forcereload,
+                            Accelerator = "CmdOrCtrl+R"
+                        },
+                        new MenuItem {
+                            Label = "Test",
+                            Click = () => Electron.Dialog.ShowMessageBoxAsync("Test menu clicked"),
+                            Accelerator = "CmdOrCtrl+T"
+                        },
+                        new MenuItem {
+                            Label = "Dev Tools",
+                            Role = MenuRole.toggledevtools,
+                            Accelerator = "CmdOrCtrl+I"
+                        }
+                    }
+                }
+            };
+            Electron.Menu.SetApplicationMenu(menu);
+            
+            await window.WebContents.Session.ClearCacheAsync();
+            window.OnReadyToShow += () => window.Show();
             window.OnClosed += () => {
                 Electron.App.Quit();
             };
-        } 
+        }
     }
 }

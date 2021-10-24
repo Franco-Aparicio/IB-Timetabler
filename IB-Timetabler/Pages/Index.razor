@@ -1,7 +1,158 @@
 @page "/"
+@using System.Globalization
+@using System.Reflection.Emit
+@inherits IB_Timetabler.BaseComponents.DateTimeBaseComponent
 
-<h1>Hello, world!</h1>
+<TitleComponent Page="Home"></TitleComponent>
+<br/><br/>
 
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?"/>
+<InputComponent Label="Username:">
+    <Control>
+        <input class="input" type="text" id="Username:" style="width: 350px" placeholder="Username">
+    </Control>
+</InputComponent>
+<InputComponent Label="Password:">
+    <Control>
+        <input class="input" type="password" id="Password:" style="width: 350px" placeholder="Password">
+    </Control>
+</InputComponent>
+@* <p> *@
+@*     Total: @lesson.Name *@
+@* </p> *@
+@* <input type="text" @bind-value="lesson.Name" @bind-value:event="oninput"/> *@
+@* <p> *@
+@*     Year: @lesson.Year.ToString() *@
+@* </p> *@
+@* <p> *@
+@*     Teacher: @lesson.Teacher *@
+@* </p> *@
+@* <p> *@
+@*     <select @bind="selectedLessonIndex"> *@
+@*         <option value="-1"></option> *@
+@*         @for (int l = 0; l < classes.Count; l++) { *@
+@*             <option value="@l.ToString()">@classes[l].Name</option> *@
+@*         } *@
+@*     </select> *@
+@*     <br/> *@
+@*     @selectedLessonIndex.ToString() *@
+@* </p> *@
+@* <table class="table"> *@
+@*     @foreach (var l in classes) { *@
+@*         <tr> *@
+@*         <td><input type="text" @bind-value="@l.Name" @bind-value:event="oninput"></td> *@
+@*             <td>@l.Year.ToString()</td> *@
+@*             <td>@l.NumLessons.ToString()</td> *@
+@*             <td>@l.Teacher</td> *@
+@*         </tr> *@
+@*     } *@
+@* </table> *@
+@* $1$ <p> #1# *@
+@* $1$     @dateTime.ToString("MM/dd/yyyy") #1# *@
+@* $1$ </p> #1# *@
+@* *@
+@* @code { *@
+@* *@
+@*     List<Lesson> classes = null; *@
+@*     Lesson lesson = null; *@
+@*     int selectedLessonIndex = -1; *@
+@* *@
+@*     protected override void OnInitialized() { *@
+@*         base.OnInitialized(); *@
+@*         classes = new List<Lesson> { *@
+@*             new Lesson { *@
+@*                 Name = "Math AA HL", *@
+@*                 Year = 13, *@
+@*                 NumLessons = 4, *@
+@*                 Teacher = "M1", *@
+@*                 Block = 5, *@
+@*                 Group = 0, *@
+@*                 Rooms = new List<string> { *@
+@*                     "N 0.4", "A 1.4", "A 1.6" *@
+@*                 } *@
+@*             }, *@
+@*             new Lesson { *@
+@*                 Name = "Math AA SL", *@
+@*                 Year = 13, *@
+@*                 NumLessons = 4, *@
+@*                 Teacher = "M1", *@
+@*                 Block = 5, *@
+@*                 Group = 0, *@
+@*                 Rooms = new List<string> { *@
+@*                     "N 0.4", "A 1.4", "A 1.6" *@
+@*                 } *@
+@*             }, *@
+@*             new Lesson { *@
+@*                 Name = "Math AI HL", *@
+@*                 Year = 13, *@
+@*                 NumLessons = 4, *@
+@*                 Teacher = "M2", *@
+@*                 Block = 5, *@
+@*                 Group = 0, *@
+@*                 Rooms = new List<string> { *@
+@*                     "N 0.4", "A 1.4", "A 1.6" *@
+@*                 } *@
+@*             }, *@
+@*             new Lesson { *@
+@*                 Name = "Math AI SL", *@
+@*                 Year = 13, *@
+@*                 NumLessons = 4, *@
+@*                 Teacher = "M2", *@
+@*                 Block = 5, *@
+@*                 Group = 0, *@
+@*                 Rooms = new List<string> { *@
+@*                     "N 0.4", "A 1.4", "A 1.6" *@
+@*                 } *@
+@*             } *@
+@*         }; *@
+@*         lesson = classes[0]; *@
+@*     } *@
+@* *@
+@*     #region "View Model" *@
+@* *@
+@*     class Lesson { *@
+@*         public string Name { get; set; } *@
+@*         public int Year { get; set; } *@
+@*         public int NumLessons { get; set; } *@
+@*         public string Teacher { get; set; } *@
+@*         public int Block { get; set; } *@
+@*         public int Group { get; set; } *@
+@*         public List<string> Rooms { get; set; } *@
+@*         public List<Period> Periods { get; set; } *@
+@*     } *@
+@* *@
+@*     struct Period { *@
+@* *@
+@*         public int Week { get; set; } *@
+@*         public int Day { get; set; } *@
+@*         public int TimePeriod { get; set; } *@
+@*         public int RemovedAtLevel { get; set; } *@
+@* *@
+@*         public override string ToString() { *@
+@*             string w = Week == 0 ? "A" : "B"; *@
+@*             return $"Week: {w, -1} | Day: {CultureInfo.CurrentCulture.DateTimeFormat.DayNames[Day + 1], -9} | Period: {TimePeriod, -2}"; *@
+@*         } *@
+@* *@
+@*         private bool Equals(Period other) { *@
+@*             return Week == other.Week && Day == other.Day && TimePeriod == other.TimePeriod; *@
+@*         } *@
+@* *@
+@*         public override bool Equals(object obj) { *@
+@*             return obj is Period other && Equals(other); *@
+@*         } *@
+@* *@
+@*         public override int GetHashCode() { *@
+@*             return HashCode.Combine(Week, Day, TimePeriod); *@
+@*         } *@
+@* *@
+@*         public static bool operator ==(Period l1, Period l2) { *@
+@*             return l1.Equals(l2); *@
+@*         } *@
+@* *@
+@*         public static bool operator !=(Period l1, Period l2) { *@
+@*             return !l1.Equals(l2); *@
+@*         } *@
+@*     } *@
+@* *@
+@*     #endregion *@
+@* *@
+@* } *@

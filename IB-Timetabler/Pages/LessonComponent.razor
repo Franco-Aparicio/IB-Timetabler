@@ -1,0 +1,221 @@
+@page "/lessons/{id:int}"
+
+<TitleComponent Page="@($"Lesson: {lesson.Name}")"></TitleComponent>
+<br/>
+<NavLink class="button" href="lessons" style="text-decoration: none">Back to Lessons</NavLink>
+<br/><br/>
+@* <table class="table"> *@
+@*     <tr> *@
+@*         <th>ID</th> *@
+@*         <th>Name</th> *@
+@*         <th>Year</th> *@
+@*         <th>Lessons Per Cycle</th> *@
+@*         <th>Teacher</th> *@
+@*         <th>Block</th> *@
+@*         <th>Group</th> *@
+@*     </tr> *@
+@*     <tr> *@
+@*         <td>@lesson.Id.ToString()</td> *@
+@*         <td><input type="text" style="width: 150px" @bind-value="@lesson.Name" @bind-value:event="oninput"></td> *@
+@*         <td><input type="number" style="width: 60px" @bind-value="@lesson.Year" @bind-value:event="oninput"></td> *@
+@*         <td><input type="number" style="width: 60px" @bind-value="@lesson.NumLessons" @bind-value:event="oninput"></td> *@
+@*         <td><input type="text" style="width: 60px" @bind-value="@lesson.Teacher" @bind-value:event="oninput"></td> *@
+@*         <td><input type="number" style="width: 60px" @bind-value="@lesson.Block" @bind-value:event="oninput"></td> *@
+@*         <td><input type="number" style="width: 60px" @bind-value="@lesson.Group" @bind-value:event="oninput"></td> *@
+@*     </tr> *@
+@* </table> *@
+<AutoTableComponent
+    Headers="headers"
+    Items="new List<Lesson> {lesson}"
+    ColumnsToExcludeCSV="Id, Rooms, Periods"
+    LinkFirst="">
+</AutoTableComponent>
+<br/><br/>
+
+<div style="overflow-x: auto; width: 50%">
+    <form >
+        <table class="table">
+            @* <thead></thead> *@
+            @* <label class="label is-size-6" style="width: 190px;">Name:  *@
+            <tr class="has-text-centered">
+                <th><label class="label" for="name">Name: </label></th>
+                <td><input @bind-value="@lesson.Name" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Name" id="name"/></td>
+            </tr>
+            <tr class="has-text-centered">
+                <th><label class="label" for="year">Year: </label></th>
+                <td>
+                    <select @bind-value="@lesson.Year" @bind-value:event="onsubmit" id="year" style="width: 100%;">
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                    </select>
+                </td>
+            </tr>
+            <tr class="has-text-centered">
+                <th style="min-width: 150px"><label class="label" for="lessons">Lessons Per Cycle: </label></th>
+                <td><input @bind-value="@lesson.NumLessons" @bind-value:event="onsubmit" type="number" placeholder="@placeholderLesson.NumLessons.ToString()" id="lessons"/></td>
+            </tr>
+            <tr class="has-text-centered">
+                <th><label class="label" for="teacher">Teacher: </label></th>
+                <td><input @bind-value="@lesson.Teacher" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Teacher" id="teacher"/></td>
+            </tr>
+            <tr class="has-text-centered">
+                <th><label class="label" for="block">Block: </label></th>
+                <td>
+                    <select @bind-value="@lesson.Block" @bind-value:event="onsubmit" id="block" style="width: 100%;">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </td>
+            </tr>
+            <tr class="has-text-centered">
+                <th><label class="label" for="group">Group: </label></th>
+                @* <td><input @bind-value="@lesson.Group" @bind-value:event="onsubmit" type="number" placeholder="@placeholderLesson.Group.ToString()" id="group"/></td> *@
+                <td>
+                    <select @bind-value="@lesson.Group" @bind-value:event="onsubmit" id="group" style="width: 100%;">
+                        <option value="HL">HL</option>
+                        <option value="SL">SL</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <button class="btn btn-success" type="submit" style="margin-bottom: 15px; margin-left: 40%">Update</button>
+    </form>
+</div>
+<div>@Message</div>
+
+<br/><br/>
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+    string Message = "";
+    
+    Lesson placeholderLesson;
+    private Lesson lesson;
+    List<Lesson> classes;
+    List<string> headers;
+
+    protected override void OnInitialized() {
+        base.OnInitialized();
+        classes = new List<Lesson> {
+            new Lesson {
+                Id = 1,
+                Name = "Math AA HL",
+                Year = 13,
+                NumLessons = 4,
+                Teacher = "M1",
+                Block = 5,
+                Group = "HL",
+                Rooms = new List<string> {
+                    "N 0.4", "A 1.4", "A 1.6"
+                }
+            },
+            new Lesson {
+                Id = 2,
+                Name = "Math AA SL",
+                Year = 13,
+                NumLessons = 4,
+                Teacher = "M1",
+                Block = 5,
+                Group = "SL",
+                Rooms = new List<string> {
+                    "N 0.4", "A 1.4", "A 1.6"
+                }
+            },
+            new Lesson {
+                Id = 3,
+                Name = "Math AI HL",
+                Year = 13,
+                NumLessons = 4,
+                Teacher = "M2",
+                Block = 5,
+                Group = "HL",
+                Rooms = new List<string> {
+                    "N 0.4", "A 1.4", "A 1.6"
+                }
+            },
+            new Lesson {
+                Id = 4,
+                Name = "Math AI SL",
+                Year = 13,
+                NumLessons = 4,
+                Teacher = "M2",
+                Block = 5,
+                Group = "HL",
+                Rooms = new List<string> {
+                    "N 0.4", "A 1.4", "A 1.6"
+                }
+            }
+        };
+        lesson = classes.Find(x => x.Id == id);
+        headers = new List<string> {"Name", "Year", "Lessons Per Cycle", "Teacher", "Block", "Group"};
+        placeholderLesson = new Lesson {
+            Id = lesson.Id,
+            Name = lesson.Name,
+            Year = lesson.Year,
+            NumLessons = lesson.NumLessons,
+            Teacher = lesson.Teacher,
+            Block = lesson.Block,
+            Group = lesson.Group,
+            Rooms = new List<string> (lesson.Rooms)
+        };
+    }
+
+    void SubmitPressed() {
+        Message = "Successfully Submitted!";
+    }
+    
+    // #region "View Model"
+    //
+    // // class Lesson {
+    //     // public int Id { get; set; }
+    //     // public string Name { get; set; }
+    //     // public int Year { get; set; }
+    //     // public int NumLessons { get; set; }
+    //     // public string Teacher { get; set; }
+    //     // public int Block { get; set; }
+    //     // public int Group { get; set; }
+    //     // public List<string> Rooms { get; set; }
+    //     // public List<Period> Periods { get; set; }
+    // // }
+    //
+    // struct Period {
+    //
+    //     public int Week { get; set; }
+    //     public int Day { get; set; }
+    //     public int TimePeriod { get; set; }
+    //     public int RemovedAtLevel { get; set; }
+    //
+    //     public override string ToString() {
+    //         string w = Week == 0 ? "A" : "B";
+    //         return $"Week: {w, -1} | Day: {CultureInfo.CurrentCulture.DateTimeFormat.DayNames[Day + 1], -9} | Period: {TimePeriod, -2}";
+    //     }
+    //
+    //     private bool Equals(Period other) {
+    //         return Week == other.Week && Day == other.Day && TimePeriod == other.TimePeriod;
+    //     }
+    //
+    //     public override bool Equals(object obj) {
+    //         return obj is Period other && Equals(other);
+    //     }
+    //
+    //     public override int GetHashCode() {
+    //         return HashCode.Combine(Week, Day, TimePeriod);
+    //     }
+    //
+    //     public static bool operator ==(Period l1, Period l2) {
+    //         return l1.Equals(l2);
+    //     }
+    //
+    //     public static bool operator !=(Period l1, Period l2) {
+    //         return !l1.Equals(l2);
+    //     }
+    // }
+    //
+    // #endregion
+
+}

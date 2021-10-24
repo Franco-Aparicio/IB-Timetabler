@@ -82,6 +82,34 @@ using IB_Timetabler.Shared;
 #line default
 #line hidden
 #nullable disable
+#nullable restore
+#line 11 "/home/noname/school/computerScience/IA/timetableCode/IB-Timetabler/_Imports.razor"
+using ElectronNET.API.Entities;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 12 "/home/noname/school/computerScience/IA/timetableCode/IB-Timetabler/_Imports.razor"
+using ElectronNET.API;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 13 "/home/noname/school/computerScience/IA/timetableCode/IB-Timetabler/_Imports.razor"
+using IB_Timetabler.Controls;
+
+#line default
+#line hidden
+#nullable disable
+#nullable restore
+#line 14 "/home/noname/school/computerScience/IA/timetableCode/IB-Timetabler/_Imports.razor"
+using IB_Timetabler.Models;
+
+#line default
+#line hidden
+#nullable disable
     public partial class MainLayout : LayoutComponentBase
     {
         #pragma warning disable 1998
