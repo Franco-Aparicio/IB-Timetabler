@@ -32,14 +32,14 @@
 </AutoTableComponent>
 <br/><br/>
 
-<div style="overflow-x: auto; width: 50%">
+<div style="overflow-x: auto; width: 45%">
     <form >
         <table class="table">
             @* <thead></thead> *@
             @* <label class="label is-size-6" style="width: 190px;">Name:  *@
             <tr class="has-text-centered">
                 <th><label class="label" for="name">Name: </label></th>
-                <td><input @bind-value="@lesson.Name" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Name" id="name"/></td>
+                <td><input @bind-value="@lesson.Name" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Name" id="name" style="width: 100%; min-width: 150px"/></td>
             </tr>
             <tr class="has-text-centered">
                 <th><label class="label" for="year">Year: </label></th>
@@ -52,11 +52,11 @@
             </tr>
             <tr class="has-text-centered">
                 <th style="min-width: 150px"><label class="label" for="lessons">Lessons Per Cycle: </label></th>
-                <td><input @bind-value="@lesson.NumLessons" @bind-value:event="onsubmit" type="number" placeholder="@placeholderLesson.NumLessons.ToString()" id="lessons"/></td>
+                <td><input @bind-value="@lesson.NumLessons" @bind-value:event="onsubmit" type="number" placeholder="@placeholderLesson.NumLessons.ToString()" id="lessons" style="width: 100%;"/></td>
             </tr>
             <tr class="has-text-centered">
                 <th><label class="label" for="teacher">Teacher: </label></th>
-                <td><input @bind-value="@lesson.Teacher" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Teacher" id="teacher"/></td>
+                <td><input @bind-value="@lesson.Teacher" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Teacher" id="teacher" style="width: 100%;"/></td>
             </tr>
             <tr class="has-text-centered">
                 <th><label class="label" for="block">Block: </label></th>
