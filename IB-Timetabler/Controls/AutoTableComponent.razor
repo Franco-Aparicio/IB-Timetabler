@@ -2,42 +2,42 @@
 @typeparam TItem
 
 @* @if (memberInfo is {Length: > 0 }) { *@
-     <div style="overflow-x: auto">
-        <table class="table is-bordered is-striped is-hoverable" style="width: 100%">
-            <thead>
+ <div style="overflow-x: auto">
+    <table class="table is-bordered is-striped is-hoverable" style="width: 100%">
+        <thead>
+        <tr class="has-text-centered">
+            @foreach (var head in Headers) {
+                <th>
+                    @head
+                </th>
+            }
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in this.Items) {
+            <p style="display: none">@(first = true)</p><p style="display: none"></p>
             <tr class="has-text-centered">
-                @foreach (var head in Headers) {
-                    <th>
-                        @head
-                    </th>
-                }
-            </tr>
-            </thead>
-            <tbody>
-            @foreach (var item in this.Items) {
-                <p style="display: none">@(first = true)</p><p style="display: none"></p>
-                <tr class="has-text-centered">
-                    @foreach (var member in memberInfo) {
-                        @if (member.MemberType == MemberTypes.Property &&
-                             !columnsToExclude.Contains(member.Name.ToLower())) {
-                            @if (LinkFirst != "" && first) {
-                                <td>
-                                    <p style="display: none">@(first = false)</p>
-                                    <a href="@($"{LinkRoot}/{@item.GetType().GetProperty(LinkToProp).GetValue(item)}")">@item.GetType().GetProperty(member.Name).GetValue(item)</a>
-                                </td>
-                            }
-                            else {
-                                <td>
-                                    @item.GetType().GetProperty(member.Name).GetValue(item)
-                                </td>
-                            }
+                @foreach (var member in memberInfo) {
+                    @if (member.MemberType == MemberTypes.Property &&
+                         !columnsToExclude.Contains(member.Name.ToLower())) {
+                        @if (LinkFirst != "" && first) {
+                            <td>
+                                <p style="display: none">@(first = false)</p>
+                                <a href="@($"{LinkRoot}/{@item.GetType().GetProperty(LinkToProp).GetValue(item)}")">@item.GetType().GetProperty(member.Name).GetValue(item)</a>
+                            </td>
+                        }
+                        else {
+                            <td>
+                                @item.GetType().GetProperty(member.Name).GetValue(item)
+                            </td>
                         }
                     }
-                </tr>
-            }
-            </tbody>
-        </table>
-    </div>
+                }
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
 
 @code {
 

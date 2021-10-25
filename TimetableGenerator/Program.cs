@@ -117,9 +117,10 @@ namespace TimetableGenerator {
             }
             foreach (Lesson l in classes) {
                 if (specials.FindIndex(x => x.Name == l.Name) != -1) {
-                    l.Periods = l.Periods.OrderBy(x => r.Next()).Take(l.NumLessons/2).OrderBy(x=>x.Week).ThenBy(x=>x.Day).ThenBy(x=>x.TimePeriod).ToList();
+                    l.Periods = l.Periods.OrderBy(x => r.Next()).Take((int)Math.Ceiling((double) l.NumLessons / (double) 2)).OrderBy(x=>x.Week).ThenBy(x=>x.Day).ThenBy(x=>x.TimePeriod).ToList();
                 }
-                for (int period = 0; period < l.NumLessons/2; period++) {
+                int length = l.Periods.Count;
+                for (int period = 0; period < (length < l.NumLessons/2 ? length: l.NumLessons/2); period++) {
                     Period p = l.Periods[period];
                     l.Periods.Add(new Period(p.Day, p.TimePeriod, 1));
                 }

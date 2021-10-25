@@ -4,8 +4,10 @@ using System.Globalization;
 namespace TimetableGenerator {
     
     public struct Period {
-
-        public int Week, Day, TimePeriod, RemovedAtLevel;
+        public readonly int Week;
+        public readonly int Day;
+        public readonly int TimePeriod;
+        public int RemovedAtLevel;
 
         public Period(int day, int timePeriod, int week = 0) {
             Week = week;
