@@ -1,24 +1,22 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using IB_Timetabler.Models;
+using Microsoft.AspNetCore.Components;
 
 namespace IB_Timetabler.Models {
-    
+
     public class Lesson {
-        [Required(ErrorMessage = "{0} cannot be blank!")]
+
         public int Id { get; set; }
         [Required(ErrorMessage = "{0} cannot be blank!")]
+        [NameValidator]
         public string Name { get; set; }
-        [Required(ErrorMessage = "{0} cannot be blank!")]
-        [Range(12, 13, ErrorMessage = "The number should be between {1} and {2}")]
         public int Year { get; set; }
         [Required(ErrorMessage = "{0} cannot be blank!")]
-        [Range(0, 35, ErrorMessage = "The number should be greater than {1}")]
+        [Range(1, 70, ErrorMessage = "The number should be between {1} and {2}")]
         public int NumLessons { get; set; }
         [Required(ErrorMessage = "{0} cannot be blank!")]
         public string Teacher { get; set; }
         [Required(ErrorMessage = "{0} cannot be blank!")]
-        [Range(0, 6, ErrorMessage = "The number should be between {1} and {2}")]
         public int Block { get; set; }
         [Required(ErrorMessage = "{0} cannot be blank!")]
         public string Group { get; set; }

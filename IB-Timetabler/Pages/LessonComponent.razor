@@ -4,26 +4,7 @@
 <br/>
 <NavLink class="button" href="lessons" style="text-decoration: none">Back to Lessons</NavLink>
 <br/><br/>
-@* <table class="table"> *@
-@*     <tr> *@
-@*         <th>ID</th> *@
-@*         <th>Name</th> *@
-@*         <th>Year</th> *@
-@*         <th>Lessons Per Cycle</th> *@
-@*         <th>Teacher</th> *@
-@*         <th>Block</th> *@
-@*         <th>Group</th> *@
-@*     </tr> *@
-@*     <tr> *@
-@*         <td>@lesson.Id.ToString()</td> *@
-@*         <td><input type="text" style="width: 150px" @bind-value="@lesson.Name" @bind-value:event="oninput"></td> *@
-@*         <td><input type="number" style="width: 60px" @bind-value="@lesson.Year" @bind-value:event="oninput"></td> *@
-@*         <td><input type="number" style="width: 60px" @bind-value="@lesson.NumLessons" @bind-value:event="oninput"></td> *@
-@*         <td><input type="text" style="width: 60px" @bind-value="@lesson.Teacher" @bind-value:event="oninput"></td> *@
-@*         <td><input type="number" style="width: 60px" @bind-value="@lesson.Block" @bind-value:event="oninput"></td> *@
-@*         <td><input type="number" style="width: 60px" @bind-value="@lesson.Group" @bind-value:event="oninput"></td> *@
-@*     </tr> *@
-@* </table> *@
+
 <AutoTableComponent
     Headers="headers"
     Items="new List<Lesson> {lesson}"
@@ -32,59 +13,73 @@
 </AutoTableComponent>
 <br/><br/>
 
-<div style="overflow-x: auto; width: 45%">
-    <form >
-        <table class="table">
-            @* <thead></thead> *@
-            @* <label class="label is-size-6" style="width: 190px;">Name:  *@
-            <tr class="has-text-centered">
-                <th><label class="label" for="name">Name: </label></th>
-                <td><input @bind-value="@lesson.Name" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Name" id="name" style="width: 100%; min-width: 150px"/></td>
-            </tr>
-            <tr class="has-text-centered">
-                <th><label class="label" for="year">Year: </label></th>
-                <td>
-                    <select @bind-value="@lesson.Year" @bind-value:event="onsubmit" id="year" style="width: 100%;">
-                        <option value="12">12</option>
-                        <option value="13">13</option>
-                    </select>
-                </td>
-            </tr>
-            <tr class="has-text-centered">
-                <th style="min-width: 150px"><label class="label" for="lessons">Lessons Per Cycle: </label></th>
-                <td><input @bind-value="@lesson.NumLessons" @bind-value:event="onsubmit" type="number" placeholder="@placeholderLesson.NumLessons.ToString()" id="lessons" style="width: 100%;"/></td>
-            </tr>
-            <tr class="has-text-centered">
-                <th><label class="label" for="teacher">Teacher: </label></th>
-                <td><input @bind-value="@lesson.Teacher" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Teacher" id="teacher" style="width: 100%;"/></td>
-            </tr>
-            <tr class="has-text-centered">
-                <th><label class="label" for="block">Block: </label></th>
-                <td>
-                    <select @bind-value="@lesson.Block" @bind-value:event="onsubmit" id="block" style="width: 100%;">
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                    </select>
-                </td>
-            </tr>
-            <tr class="has-text-centered">
-                <th><label class="label" for="group">Group: </label></th>
-                @* <td><input @bind-value="@lesson.Group" @bind-value:event="onsubmit" type="number" placeholder="@placeholderLesson.Group.ToString()" id="group"/></td> *@
-                <td>
-                    <select @bind-value="@lesson.Group" @bind-value:event="onsubmit" id="group" style="width: 100%;">
-                        <option value="HL">HL</option>
-                        <option value="SL">SL</option>
-                    </select>
-                </td>
-            </tr>
-        </table>
-        <button class="btn btn-success" type="submit" style="margin-bottom: 15px; margin-left: 40%">Update</button>
-    </form>
-</div>
+@* <div style="overflow-x: auto; width: 45%"> *@
+@*     <form > *@
+@*         <table class="table"> *@
+@*             $1$ <thead></thead> #1# *@
+@*             $1$ <label class="label is-size-6" style="width: 190px;">Name:  #1# *@
+@*             <tr class="has-text-centered"> *@
+@*                 <th><label class="label" for="name">Name: </label></th> *@
+@*                 <td><input @bind-value="@lesson.Name" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Name" id="name" style="width: 100%; min-width: 150px"/></td> *@
+@*             </tr> *@
+@*             <tr class="has-text-centered"> *@
+@*                 <th><label class="label" for="year">Year: </label></th> *@
+@*                 <td> *@
+@*                     <select @bind-value="@lesson.Year" @bind-value:event="onsubmit" id="year" style="width: 100%;"> *@
+@*                         <option value="12">12</option> *@
+@*                         <option value="13">13</option> *@
+@*                     </select> *@
+@*                 </td> *@
+@*             </tr> *@
+@*             <tr class="has-text-centered"> *@
+@*                 <th style="min-width: 150px"><label class="label" for="lessons">Lessons Per Cycle: </label></th> *@
+@*                 <td><input @bind-value="@lesson.NumLessons" @bind-value:event="onsubmit" type="number" placeholder="@placeholderLesson.NumLessons.ToString()" id="lessons" style="width: 100%;"/></td> *@
+@*             </tr> *@
+@*             <tr class="has-text-centered"> *@
+@*                 <th><label class="label" for="teacher">Teacher: </label></th> *@
+@*                 <td><input @bind-value="@lesson.Teacher" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Teacher" id="teacher" style="width: 100%;"/></td> *@
+@*             </tr> *@
+@*             <tr class="has-text-centered"> *@
+@*                 <th><label class="label" for="block">Block: </label></th> *@
+@*                 <td> *@
+@*                     <select @bind-value="@lesson.Block" @bind-value:event="onsubmit" id="block" style="width: 100%;"> *@
+@*                         <option value="1">1</option> *@
+@*                         <option value="2">2</option> *@
+@*                         <option value="3">3</option> *@
+@*                         <option value="4">4</option> *@
+@*                         <option value="5">5</option> *@
+@*                         <option value="6">6</option> *@
+@*                     </select> *@
+@*                 </td> *@
+@*             </tr> *@
+@*             <tr class="has-text-centered"> *@
+@*                 <th><label class="label" for="group">Group: </label></th> *@
+@*                 $1$ <td><input @bind-value="@lesson.Group" @bind-value:event="onsubmit" type="number" placeholder="@placeholderLesson.Group.ToString()" id="group"/></td> #1# *@
+@*                 <td> *@
+@*                     <select @bind-value="@lesson.Group" @bind-value:event="onsubmit" id="group" style="width: 100%;"> *@
+@*                         <option value="HL">HL</option> *@
+@*                         <option value="SL">SL</option> *@
+@*                     </select> *@
+@*                 </td> *@
+@*             </tr> *@
+@*         </table> *@
+@*         <button class="btn btn-success" type="submit" style="margin-bottom: 15px; margin-left: 40%">Update</button> *@
+@*     </form> *@
+@* </div> *@
+
+<InputComponent Label="Name:">
+    <Control>
+        <input class="input" @bind-value="@lesson.Name" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Name" id="Name:" style="width: 100%; min-width: 150px"/>
+    </Control>
+</InputComponent>
+<InputComponent Label="Year:">
+    <Control>
+         <select class="select" @bind-value="@lesson.Year" @bind-value:event="onsubmit" id="Year:" style="width: 100%;">
+             <option value="12">12</option>
+             <option value="13">13</option>
+         </select>
+    </Control>
+</InputComponent>
 <div>@Message</div>
 
 <br/><br/>
