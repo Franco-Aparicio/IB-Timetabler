@@ -6,7 +6,7 @@ namespace IB_Timetabler.Models {
 
     public class Lesson {
 
-        public int Id { get; set; }
+        public string ClassCode { get; set; }
         [Required(ErrorMessage = "{0} cannot be blank!")]
         [NameValidator]
         public string Name { get; set; }
@@ -16,19 +16,19 @@ namespace IB_Timetabler.Models {
         public int NumLessons { get; set; }
         [Required(ErrorMessage = "{0} cannot be blank!")]
         public string Teacher { get; set; }
-        [Required(ErrorMessage = "{0} cannot be blank!")]
-        public int Block { get; set; }
+        [MinLength(1, ErrorMessage = "{0} cannot be blank!")]
+        public int[] Blocks { get; set; }
         [Required(ErrorMessage = "{0} cannot be blank!")]
         public string Group { get; set; }
         public List<string> Rooms { get; set; }
         public List<Period> Periods { get; set; }
         
-        // public int Id { get; init; }
+        // public int ClassCode { get; init; }
         // public string Name { get; set; }
         // public int Year { get; set; }
         // public int NumLessons { get; set; }
         // public string Teacher { get; set; }
-        // public int Block { get; set; }
+        // public int Blocks { get; set; }
         // public int Group { get; set; }
         // public List<string> Rooms { get; set; }
         // public List<Period> Periods { get; set; }
@@ -38,7 +38,7 @@ namespace IB_Timetabler.Models {
         //     Year = year;
         //     NumLessons = numLessons;
         //     Group = group;
-        //     Block = block;
+        //     Blocks = block;
         //     Teacher = teacher;
         // }
     }

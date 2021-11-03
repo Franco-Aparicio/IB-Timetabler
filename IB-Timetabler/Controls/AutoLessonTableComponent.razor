@@ -23,12 +23,19 @@
                         @if (LinkFirst != "" && first) {
                             <td>
                                 <p style="display: none">@(first = false)</p>
-                                <a href="@($"{LinkRoot}/{@item.GetType().GetProperty(LinkToProp).GetValue(item)}")">@item.GetType().GetProperty(member.Name).GetValue(item)</a>
+                                <a href="@($"{LinkRoot}/{@item.GetType().GetProperty(LinkToProp)?.GetValue(item)}")">@item.GetType().GetProperty(member.Name)?.GetValue(item)</a>
                             </td>
                         }
                         else {
+                                @if (@item.GetType().GetProperty(member.Name)?.GetValue(item)?.ToString() == "System.Int32[]") {
+                                    int[] items = (int[]) item.GetType().GetProperty(member.Name)?.GetValue(item);
+                                    cell = String.Join(", ", items.Select(x=>x.ToString()));
+                                }
+                                else {
+                                    cell = @item.GetType().GetProperty(member.Name)?.GetValue(item);
+                                }
                             <td>
-                                @item.GetType().GetProperty(member.Name).GetValue(item)
+                                @cell
                             </td>
                         }
                     }
@@ -46,6 +53,7 @@
     bool first;
     string LinkToProp;
     string LinkRoot;
+    object cell;
 
     protected override void OnParametersSet() {
         base.OnParametersSet();

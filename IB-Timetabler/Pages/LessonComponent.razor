@@ -1,71 +1,17 @@
-@page "/lessons/{id:int}"
+@page "/lessons/{Code}"
 
 <TitleComponent Page="@($"Lesson: {lesson.Name}")"></TitleComponent>
 <br/>
 <NavLink class="button" href="lessons" style="text-decoration: none">Back to Lessons</NavLink>
 <br/><br/>
 
-<AutoTableComponent
+<AutoLessonTableComponent
     Headers="headers"
     Items="new List<Lesson> {lesson}"
-    ColumnsToExcludeCSV="Id, Rooms, Periods"
+    ColumnsToExcludeCSV="Rooms, Periods"
     LinkFirst="">
-</AutoTableComponent>
+</AutoLessonTableComponent>
 <br/><br/>
-
-@* <div style="overflow-x: auto; width: 45%"> *@
-@*     <form > *@
-@*         <table class="table"> *@
-@*             $1$ <thead></thead> #1# *@
-@*             $1$ <label class="label is-size-6" style="width: 190px;">Name:  #1# *@
-@*             <tr class="has-text-centered"> *@
-@*                 <th><label class="label" for="name">Name: </label></th> *@
-@*                 <td><input @bind-value="@lesson.Name" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Name" id="name" style="width: 100%; min-width: 150px"/></td> *@
-@*             </tr> *@
-@*             <tr class="has-text-centered"> *@
-@*                 <th><label class="label" for="year">Year: </label></th> *@
-@*                 <td> *@
-@*                     <select @bind-value="@lesson.Year" @bind-value:event="onsubmit" id="year" style="width: 100%;"> *@
-@*                         <option value="12">12</option> *@
-@*                         <option value="13">13</option> *@
-@*                     </select> *@
-@*                 </td> *@
-@*             </tr> *@
-@*             <tr class="has-text-centered"> *@
-@*                 <th style="min-width: 150px"><label class="label" for="lessons">Lessons Per Cycle: </label></th> *@
-@*                 <td><input @bind-value="@lesson.NumLessons" @bind-value:event="onsubmit" type="number" placeholder="@placeholderLesson.NumLessons.ToString()" id="lessons" style="width: 100%;"/></td> *@
-@*             </tr> *@
-@*             <tr class="has-text-centered"> *@
-@*                 <th><label class="label" for="teacher">Teacher: </label></th> *@
-@*                 <td><input @bind-value="@lesson.Teacher" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Teacher" id="teacher" style="width: 100%;"/></td> *@
-@*             </tr> *@
-@*             <tr class="has-text-centered"> *@
-@*                 <th><label class="label" for="block">Block: </label></th> *@
-@*                 <td> *@
-@*                     <select @bind-value="@lesson.Block" @bind-value:event="onsubmit" id="block" style="width: 100%;"> *@
-@*                         <option value="1">1</option> *@
-@*                         <option value="2">2</option> *@
-@*                         <option value="3">3</option> *@
-@*                         <option value="4">4</option> *@
-@*                         <option value="5">5</option> *@
-@*                         <option value="6">6</option> *@
-@*                     </select> *@
-@*                 </td> *@
-@*             </tr> *@
-@*             <tr class="has-text-centered"> *@
-@*                 <th><label class="label" for="group">Group: </label></th> *@
-@*                 $1$ <td><input @bind-value="@lesson.Group" @bind-value:event="onsubmit" type="number" placeholder="@placeholderLesson.Group.ToString()" id="group"/></td> #1# *@
-@*                 <td> *@
-@*                     <select @bind-value="@lesson.Group" @bind-value:event="onsubmit" id="group" style="width: 100%;"> *@
-@*                         <option value="HL">HL</option> *@
-@*                         <option value="SL">SL</option> *@
-@*                     </select> *@
-@*                 </td> *@
-@*             </tr> *@
-@*         </table> *@
-@*         <button class="btn btn-success" type="submit" style="margin-bottom: 15px; margin-left: 40%">Update</button> *@
-@*     </form> *@
-@* </div> *@
 
 <InputComponent Label="Name:">
     <Control>
@@ -90,16 +36,29 @@
         <input class="input" @bind-value="@lesson.Teacher" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Teacher" id="Teacher:" style="width: 100%; min-width: 150px; max-width: 400px"/>
     </Control>
 </InputComponent>
-<InputComponent Label="Block:">
+<InputComponent Label="Blocks:">
     <Control>
          @for (int b = 1; b <= 6; b++) {
-             <label style="align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;font-size:1rem;height:2.5em;justify-content:flex-start;line-height:1.5;padding: calc(.5em - 1px) calc(.75em - 1px);position:relative;vertical-align:top">@b.ToString()
-                 <input type="checkbox" class="checkbox" style="align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;font-size:1rem;height:2.5em;justify-content:flex-start;line-height:1.5;padding: calc(.5em - 1px) calc(.75em - 1px);position:relative;vertical-align:top">
-             </label>
+             <label style="align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;font-size:1.2rem;height:1.8em;justify-content:flex-start;line-height:1.5;padding: calc(.5em - 1px) calc(.5em - 1px);position:relative;vertical-align:top">@b.ToString()
+                 @if (placeholderLesson.Blocks.Contains(b)) {
+                     <input type="checkbox" class="checkbox" style="margin-left: 5px;align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;height:1.8em;justify-content:flex-start;line-height:1.5;padding: calc(.5em - 1px) calc(.5em - 1px);position:relative;vertical-align:top" value="@b.ToString()" checked>
+                 }
+                 else {
+                    <input type="checkbox" class="checkbox" style="margin-left: 5px;align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;height:1.8em;justify-content:flex-start;line-height:1.5;padding: calc(.5em - 1px) calc(.5em - 1px);position:relative;vertical-align:top" value="@b.ToString()">
+                }
+                </label>
          }
     </Control>
 </InputComponent>
 @* align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;font-size:1rem;height:2.5em;justify-content:flex-start;line-height:1.5;padding-bottom:calc(.5em - 1px);padding-left:calc(.75em - 1px);padding-right:calc(.75em - 1px);padding-top:calc(.5em - 1px);position:relative;vertical-align:top *@
+<InputComponent Label="Group:">
+    <Control>
+         <select class="select" @bind-value="@lesson.Group" @bind-value:event="onsubmit" id="Group:" style="width: 100%; min-width: 150px; max-width: 400px">
+             <option value="SL">SL</option>
+             <option value="HL">HL</option>
+         </select>
+    </Control>
+</InputComponent>
 
 <div>@Message</div>
 
@@ -107,7 +66,7 @@
 @code {
 
     [Parameter]
-    public int id { get; set; }
+    public string Code { get; set; }
     string Message = "";
     
     Lesson placeholderLesson;
@@ -119,63 +78,63 @@
         base.OnInitialized();
         classes = new List<Lesson> {
             new Lesson {
-                Id = 1,
+                ClassCode = "1",
                 Name = "Math AA HL",
                 Year = 13,
                 NumLessons = 4,
                 Teacher = "M1",
-                Block = 5,
+                Blocks = new [] {5},
                 Group = "HL",
                 Rooms = new List<string> {
                     "N 0.4", "A 1.4", "A 1.6"
                 }
             },
             new Lesson {
-                Id = 2,
+                ClassCode = "2",
                 Name = "Math AA SL",
                 Year = 13,
                 NumLessons = 4,
                 Teacher = "M1",
-                Block = 5,
+                Blocks = new [] {5},
                 Group = "SL",
                 Rooms = new List<string> {
                     "N 0.4", "A 1.4", "A 1.6"
                 }
             },
             new Lesson {
-                Id = 3,
+                ClassCode = "3",
                 Name = "Math AI HL",
                 Year = 13,
                 NumLessons = 4,
                 Teacher = "M2",
-                Block = 5,
+                Blocks = new [] {5},
                 Group = "HL",
                 Rooms = new List<string> {
                     "N 0.4", "A 1.4", "A 1.6"
                 }
             },
             new Lesson {
-                Id = 4,
+                ClassCode = "4",
                 Name = "Math AI SL",
                 Year = 13,
                 NumLessons = 4,
                 Teacher = "M2",
-                Block = 5,
-                Group = "HL",
+                Blocks = new [] {5},
+                Group = "SL",
                 Rooms = new List<string> {
                     "N 0.4", "A 1.4", "A 1.6"
                 }
             }
         };
-        lesson = classes.Find(x => x.Id == id);
-        headers = new List<string> {"Name", "Year", "Lessons Per Cycle", "Teacher", "Block", "Group"};
+        lesson = classes.Find(x => x.ClassCode == Code);
+        headers = new List<string> {"Class Code", "Name", "Year", "Lessons Per Cycle", "Teacher", "Block(s)", "Group"};
         placeholderLesson = new Lesson {
-            Id = lesson.Id,
+            ClassCode = lesson.ClassCode,
             Name = lesson.Name,
             Year = lesson.Year,
             NumLessons = lesson.NumLessons,
             Teacher = lesson.Teacher,
-            Block = lesson.Block,
+            Blocks = lesson.Blocks,
             Group = lesson.Group,
             Rooms = new List<string> (lesson.Rooms)
         };
@@ -184,54 +143,4 @@
     void SubmitPressed() {
         Message = "Successfully Submitted!";
     }
-    
-    // #region "View Model"
-    //
-    // // class Lesson {
-    //     // public int Id { get; set; }
-    //     // public string Name { get; set; }
-    //     // public int Year { get; set; }
-    //     // public int NumLessons { get; set; }
-    //     // public string Teacher { get; set; }
-    //     // public int Block { get; set; }
-    //     // public int Group { get; set; }
-    //     // public List<string> Rooms { get; set; }
-    //     // public List<Period> Periods { get; set; }
-    // // }
-    //
-    // struct Period {
-    //
-    //     public int Week { get; set; }
-    //     public int Day { get; set; }
-    //     public int TimePeriod { get; set; }
-    //     public int RemovedAtLevel { get; set; }
-    //
-    //     public override string ToString() {
-    //         string w = Week == 0 ? "A" : "B";
-    //         return $"Week: {w, -1} | Day: {CultureInfo.CurrentCulture.DateTimeFormat.DayNames[Day + 1], -9} | Period: {TimePeriod, -2}";
-    //     }
-    //
-    //     private bool Equals(Period other) {
-    //         return Week == other.Week && Day == other.Day && TimePeriod == other.TimePeriod;
-    //     }
-    //
-    //     public override bool Equals(object obj) {
-    //         return obj is Period other && Equals(other);
-    //     }
-    //
-    //     public override int GetHashCode() {
-    //         return HashCode.Combine(Week, Day, TimePeriod);
-    //     }
-    //
-    //     public static bool operator ==(Period l1, Period l2) {
-    //         return l1.Equals(l2);
-    //     }
-    //
-    //     public static bool operator !=(Period l1, Period l2) {
-    //         return !l1.Equals(l2);
-    //     }
-    // }
-    //
-    // #endregion
-
 }
