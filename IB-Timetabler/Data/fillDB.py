@@ -27,7 +27,6 @@ print(selectTable("Rooms"))
 # insertRecord("Rooms", {"Number": "N2.21", "Floor": 2})
 # deleteRecord("Rooms", "Number", "N2.21")
 print(selectTable("Rooms"))
-connection.close()
 
 
 class Lesson:
@@ -485,7 +484,7 @@ A1
 A1
 """
 
-# Just did math below. Continue with English
+# Just did math below. Continue with BTEC
 
 optionBlocks = """4
 4
@@ -518,6 +517,35 @@ optionBlocks = """4
 5
 5
 5
+1
+1
+1
+2
+2
+6
+1
+1
+2
+6
+3
+3
+3
+3
+3
+3
+3
+3
+3
+3
+3
+3
+3
+3
+6
+6
+3
+6
+3
 """
 
 groups = """SL
@@ -551,5 +579,42 @@ SL
 SL
 SL
 HL
+SL
+SL
+HL
+HL
+HL
+HL
+SL
+HL
+HL
+HL
+SL
+HL
+SL
+HL
+SL
+HL
+SL
+HL
+SL
+HL
+SL
+HL
+SL
+HL
+SL
+HL
+SL
+SL
+HL
 """
 
+classes = []
+for i in range(len(names)):
+    classes.append(Lesson(names[i], years[i], numLessons[i], teachers[i], optionBlocks[i], groups[i]))
+
+for c in classes:
+    pass
+
+connection.close()

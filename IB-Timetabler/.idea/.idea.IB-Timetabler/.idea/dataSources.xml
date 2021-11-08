@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="IB-Timetabler.db" uuid="3cec6031-72a9-42af-b23f-9ddb33368d05">
+    <data-source source="LOCAL" name="IB-Timetabler.db" uuid="e7ae548c-b2e3-4c2c-b500-9733cffba898">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
