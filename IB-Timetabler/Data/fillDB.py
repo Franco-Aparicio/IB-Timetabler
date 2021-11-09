@@ -14,12 +14,13 @@ def selectTable(table):
     return cursor.execute(f"SELECT * FROM {table}").fetchall()
 
 
-def selectAllWhere(table, field, value):
-    return cursor.execute(f"SELECT * FROM {table} Where {field} = ?", (value,)).fetchall()
+def selectAllWhere(table, values):
+    return cursor.execute(f"SELECT * FROM {table} Where ({', '.join(values.keys())}) = (:{', :'.join(values.keys())})",
+                          values).fetchall()
 
 
-def deleteRecord(table, field, value):
-    cursor.execute(f"DELETE FROM {table} WHERE {field} = ?", (value,))
+def deleteRecord(table, values):
+    cursor.execute(f"DELETE FROM {table} WHERE ({', '.join(values.keys())}) = (:{', :'.join(values.keys())})", values)
     connection.commit()
 
 
@@ -27,6 +28,9 @@ def deleteRecord(table, field, value):
 # insertRecord("Rooms", {"Number": "N2.21", "Floor": 2})
 # deleteRecord("Rooms", "Number", "N2.21")
 # print(selectTable("Rooms"))
+# print(selectAllWhere("Teachers", {"Name": "S8"}))
+# connection.close()
+# exit()
 
 
 class Lesson:
@@ -46,7 +50,7 @@ def makeTables():
     cursor.execute('CREATE TABLE IF NOT EXISTS LessonIDBlockID ( LessonID INTEGER NOT NULL, BlockID '
                    'INTEGER NOT NULL )')
     cursor.execute('CREATE TABLE IF NOT EXISTS Lessons ( ID INTEGER NOT NULL, Name TEXT NOT NULL, '
-                   'Year INTEGER NOT NULL, Group TEXT NOT NULL, ClassCode TEXT NOT NULL, NumLessons '
+                   'Year INTEGER NOT NULL, "Group" TEXT NOT NULL, ClassCode TEXT NOT NULL, NumLessons '
                    'INTEGER NOT NULL, TeacherID INTEGER NOT NULL, PRIMARY KEY(ID AUTOINCREMENT) )')
     cursor.execute('CREATE TABLE IF NOT EXISTS Periods ( ID INTEGER NOT NULL, Week INTEGER NOT NULL, '
                    'Day INTEGER NOT NULL, TimePeriod INTEGER NOT NULL, PRIMARY KEY(ID AUTOINCREMENT) )')
@@ -730,6 +734,48 @@ def fillDB():
     SL
     HL"""
 
+    rooms = """A0.11
+A0.2
+N0.40
+N0.41
+A1.2
+A1.3
+A1.4
+A1.6
+A1.16
+A1.15
+A1.12
+A1.13
+A1.14
+A1.17
+A1. GET ALL MUSIC ROOMS
+N2.2
+N2.4
+N2.6
+N2.8
+N2.10
+N2.12
+N2.14
+N2.16
+N2.18
+N2.20
+N2.22
+N2.24
+N2.11
+N2.13
+N2.15
+N2.17
+N2.23
+N2.25
+N2.27
+N2.29
+Hall
+Art 1
+Art 2
+Gym 1
+Gym 2
+Gym 3"""
+
     names = names.split("\n")
     years = years.split("\n")
     numLessons = numLessons.split("\n")
@@ -750,21 +796,22 @@ def fillDB():
     #   Group: {c.Group}")
 
     for c in classes:
-        try:
-            print(cursor.execute(f'SELECT name FROM Teachers WHERE name = "%S8%")').fetchall())
-            exit()
-        except sqlite3.OperationalError as e:
-            print(e)
-            exit()
+        # try:
+        #     print(cursor.execute(f'SELECT ID FROM Teachers WHERE Name = "S1"').fetchall())
+        #     exit()
+        # except sqlite3.OperationalError as e:
+        #     print(e)
+        #     exit()
+        teacher = cursor.execute(f'SELECT ID FROM Teachers WHERE Name = "{c.Teacher}" LIMIT 1').fetchall()
+        if len(teacher) != 0:
+            insertRecord("Teachers", {"Name": c.Teacher})
+            teacher = cursor.execute(f'SELECT ID FROM Teachers WHERE Name = "{c.Teacher}" LIMIT 1').fetchall()
         values = {"Name": c.Name,
                   "Year": c.Year,
                   "Group": c.Group,
                   "ClassCode": c.Name,
                   "NumLessons": c.NumLessons,
-                  "TeacherID": None,
-                  "BlockID": None,
-                  "RoomID": None,
-                  "SaveID": None}
+                  "TeacherID": teacher[0][0]}
 
 
 fillDB()
