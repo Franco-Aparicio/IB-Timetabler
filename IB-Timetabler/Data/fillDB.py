@@ -1,8 +1,5 @@
 import sqlite3
 
-connection = sqlite3.connect("IB-Timetabler.db")
-cursor = connection.cursor()
-
 
 def insertRecord(table, values):
     cursor.execute(f"INSERT INTO {table} ({', '.join(values.keys())}) VALUES (:{', :'.join(values.keys())})", values)
@@ -23,15 +20,6 @@ def deleteRecord(table, values):
     connection.commit()
 
 
-# print(selectTable("Rooms"))
-# insertRecord("Rooms", {"Number": "N2.21", "Floor": 2})
-# deleteRecord("Rooms", "Number", "N2.21")
-# print(selectTable("Rooms"))
-# print(selectAllWhere("Teachers", {"Name": "S8"}))
-# connection.close()
-# exit()
-
-
 class Lesson:
 
     def __init__(self, name, year, numLessons, teacher, blocks, level):
@@ -49,7 +37,7 @@ def makeTables():
     cursor.execute('CREATE TABLE IF NOT EXISTS LessonIDBlockID ( LessonID INTEGER NOT NULL, BlockID '
                    'INTEGER NOT NULL )')
     cursor.execute('CREATE TABLE IF NOT EXISTS Lessons ( ID INTEGER NOT NULL, Name TEXT NOT NULL, '
-                   'Year INTEGER NOT NULL, "Group" TEXT NOT NULL, ClassCode TEXT NOT NULL, NumLessons '
+                   'Year INTEGER NOT NULL, "Level" TEXT NOT NULL, ClassCode TEXT NOT NULL, NumLessons '
                    'INTEGER NOT NULL, TeacherID INTEGER NOT NULL, PRIMARY KEY(ID AUTOINCREMENT) )')
     cursor.execute('CREATE TABLE IF NOT EXISTS Periods ( ID INTEGER NOT NULL, Week INTEGER NOT NULL, '
                    'Day INTEGER NOT NULL, TimePeriod INTEGER NOT NULL, PRIMARY KEY(ID AUTOINCREMENT) )')
@@ -154,24 +142,39 @@ def fillDB():
         classes.append(Lesson(names[i], years[i], numLessons[i], teachers[i], optionBlocks[i], levels[i]))
 
     for c in classes:
-        # try:
-        #     print(cursor.execute(f'SELECT ID FROM Teachers WHERE Name = "S1"').fetchall())
-        #     exit()
-        # except sqlite3.OperationalError as e:
-        #     print(e)
-        #     exit()
-        teacherID = cursor.execute(f'SELECT ID FROM Teachers WHERE Name = "{c.Teacher}" LIMIT 1').fetchall()[0][0]
+        teacherID = cursor.execute('SELECT ID FROM Teachers WHERE Name = (?) LIMIT 1', (c.Teacher,)).fetchall()[0][0]
         values = {"Name": c.Name,
                   "Year": c.Year,
                   "Level": c.Level,
                   "ClassCode": c.Name,
                   "NumLessons": c.NumLessons,
                   "TeacherID": teacherID}
-        insertRecord("Lessons", values)
         lessonID = cursor.execute(f'SELECT ID FROM Lessons WHERE ({", ".join(values.keys())}) = '
-                                  f'(:{", :".join(values.keys())})', values).fetchall()[0][0]
-        print(lessonID, "Teacher:", c.Teacher, "=", teacherID)
+                                  f'(:{", :".join(values.keys())})', values).fetchall()
+        if len(lessonID) == 0:
+            insertRecord("Lessons", values)
+            lessonID = cursor.execute(f'SELECT ID FROM Lessons WHERE ({", ".join(values.keys())}) = '
+                                      f'(:{", :".join(values.keys())})', values).fetchall()
+        lessonID = lessonID[0][0]
+        entries = cursor.execute(f'SELECT BlockID FROM LessonIDBlockID WHERE LessonID = {lessonID}').fetchall()
+        if len(entries) != len(c.Blocks):
+            for e in range(len(entries)):
+                entries[e] = entries[e][0]
+            blocks = [b for b in c.Blocks if b not in entries]
+            for b in blocks:
+                blockID = cursor.execute(f'SELECT ID FROM Blocks WHERE Block = {b}').fetchall()[0][0]
+                insertRecord("LessonIDBlockID", {"LessonID": lessonID,
+                                                 "BlockID": blockID})
+        if len(cursor.execute(f'SELECT RoomID FROM RoomIDLessonID WHERE LessonID = {lessonID}').fetchall()) == 0:
+            rooms = selectTable("Rooms")
+            for r in rooms:
+                if "Gym" in r[1]:
+                    continue
+                insertRecord("RoomIDLessonID", {"RoomID": r[0],
+                                                "LessonID": lessonID})
 
 
+connection = sqlite3.connect("IB-Timetabler.db")
+cursor = connection.cursor()
 fillDB()
 connection.close()
