@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Microsoft.AspNetCore.Components;
 
-namespace IB_Timetabler.Models {
+namespace IB_Timetabler.Data {
     
     public class NameValidator : ValidationAttribute {
         

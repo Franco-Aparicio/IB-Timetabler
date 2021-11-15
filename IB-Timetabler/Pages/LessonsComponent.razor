@@ -1,76 +1,227 @@
 @page "/lessons/"
-@using System.Globalization
+@inject LessonService Service
 
 <TitleComponent Page="Lessons"></TitleComponent>
 
 Click on a lesson name to edit!
 <br/><br/>
 
-<AutoLessonTableComponent
-    Headers="headers"
-    Items="classes"
-    ColumnsToExcludeCSV="ClassCode, Rooms, Periods"
-    LinkFirst="/lessons/ClassCode">
-</AutoLessonTableComponent>
+@* <AutoLessonTableComponent *@
+@*     Headers="headers" *@
+@*     Items="classes" *@
+@*     ColumnsToExcludeCSV="ClassCode, Rooms, Periods" *@
+@*     LinkFirst="/lessons/ClassCode"> *@
+@* </AutoLessonTableComponent> *@
+
+<div class="container">
+    <div class="row bg-light">
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Lesson Id</th>
+                    <th>Name</th>
+                    <th>Lessons Per Cycle</th>
+                    <th>Teacher</th>
+                    <th>Block(s)</th>
+                    <th>Level</th>
+                    <th>Delete Lesson</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Lessons.Any()) {
+                @foreach (var Lesson in Lessons) {
+                    <tr @onclick="(() => SetLessonForUpdate(Lesson))">
+                        <td>@Lesson.ID.ToString()</td>
+                        <td>@Lesson.Name</td>
+                        <td>@Lesson.NumLessons.ToString()</td>
+                        <td>@Lesson.Teacher</td>
+                        <td>@String.Join(", ", Lesson.Blocks.Select(x=>x.ToString()))</td>
+                        <td>@Lesson.Level</td>
+                        <td><button class="btn btn-danger" @onclick="(() => DeleteLesson(Lesson))">Delete</button></td>
+                    </tr>
+                }
+            }
+            else {
+                <tr><td colspan="6"><strong>No Lessons available</strong></td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row m-5">
+        <div class="col-5 bg-light m-2 justify-content-start">
+
+            <div class="p-3 mb-3 bg-primary text-white text-center">Add New Lesson</div>
+
+            <EditForm Model="@NewLesson">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" class="form-control" @bind-value="@NewLesson.Name" />
+                </div>
+
+                <div class="form-group">
+                    <label for="numLessons">Lessons Per Cycle</label>
+                    <input type="text" id="numLessons" class="form-control" @bind="@NewLesson.NumLessons" />
+                </div>
+
+                <div class="form-group">
+                    <label for="teacher">Teacher</label>
+                    <input type="text" id="teacher" class="form-control" @bind="@NewLesson.Teacher" />
+                </div>
+
+                <div class="form-group">
+                    <label for="blocks">Blocks</label>
+                    <input type="text" id="blocks" class="form-control" @bind="@NewLesson.Blocks" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="level">Level</label>
+                    <input type="text" id="level" class="form-control" @bind="@NewLesson.Level" />
+                </div>
+
+                <div class="text-center p-3 mb-3">
+                    <button class="btn btn-info" @onclick="AddNewLesson">Add Lesson</button>
+                </div>
+            </EditForm>
+        </div>
+
+        <div class="col-5 bg-light m-2 justify-content-end">
+            <div class="p-3 mb-1 bg-primary text-white text-center">Update Lesson</div>
+
+            <EditForm Model="@UpdateLesson">
+                <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" class="form-control" @bind-value="@UpdateLesson.Name" />
+            </div>
+
+            <div class="form-group">
+                <label for="numLessons">Lessons Per Cycle</label>
+                <input type="text" id="numLessons" class="form-control" @bind="@UpdateLesson.NumLessons" />
+            </div>
+
+            <div class="form-group">
+                <label for="teacher">Teacher</label>
+                <input type="text" id="teacher" class="form-control" @bind="@UpdateLesson.Teacher" />
+            </div>
+
+            <div class="form-group">
+                <label for="blocks">Blocks</label>
+                <input type="text" id="blocks" class="form-control" @bind="@UpdateLesson.Blocks" />
+            </div>
+            
+            <div class="form-group">
+                <label for="level">Level</label>
+                <input type="text" id="level" class="form-control" @bind="@UpdateLesson.Level" />
+            </div>
+
+            <div class="text-center p-3 mb-3">
+                <button class="btn btn-info" @onclick="AddNewLesson">Add Lesson</button>
+            </div>
+            </EditForm>
+        </div>
+    </div>
+
+
+</div>
 <br/><br/>
 @code {
 
-    List<Lesson> classes = null;
-    List<string> headers = null;
-    // int selectedLessonIndex = -1;
+    // List<Lesson> classes = null;
+    // List<string> headers = null;
+    // // int selectedLessonIndex = -1;
+    //
+    // protected override void OnInitialized() {
+    //     base.OnInitialized();
+    //     classes = new List<Lesson> {
+    //         new Lesson {
+    //             ClassCode = "1",
+    //             Name = "Math AA HL",
+    //             Year = 13,
+    //             NumLessons = 4,
+    //             Teacher = "M1",
+    //             Blocks = new [] {5},
+    //             Level = "HL",
+    //             Rooms = new List<string> {
+    //                 "N 0.4", "A 1.4", "A 1.6"
+    //             }
+    //         },
+    //         new Lesson {
+    //             ClassCode = "2",
+    //             Name = "Math AA SL",
+    //             Year = 13,
+    //             NumLessons = 4,
+    //             Teacher = "M1",
+    //             Blocks = new [] {5},
+    //             Level = "SL",
+    //             Rooms = new List<string> {
+    //                 "N 0.4", "A 1.4", "A 1.6"
+    //             }
+    //         },
+    //         new Lesson {
+    //             ClassCode = "3",
+    //             Name = "Math AI HL",
+    //             Year = 13,
+    //             NumLessons = 4,
+    //             Teacher = "M2",
+    //             Blocks = new [] {5},
+    //             Level = "HL",
+    //             Rooms = new List<string> {
+    //                 "N 0.4", "A 1.4", "A 1.6"
+    //             }
+    //         },
+    //         new Lesson {
+    //             ClassCode = "4",
+    //             Name = "Math AI SL",
+    //             Year = 13,
+    //             NumLessons = 4,
+    //             Teacher = "M2",
+    //             Blocks = new [] {5},
+    //             Level = "SL",
+    //             Rooms = new List<string> {
+    //                 "N 0.4", "A 1.4", "A 1.6"
+    //             }
+    //         }
+    //     };
+    //     headers = new List<string> {"Name", "Year", "Lessons Per Cycle", "Teacher", "Block(s)", "Group"};
+    // }
+    
+    List<Lesson> Lessons = new List<Lesson>();
 
-    protected override void OnInitialized() {
-        base.OnInitialized();
-        classes = new List<Lesson> {
-            new Lesson {
-                ClassCode = "1",
-                Name = "Math AA HL",
-                Year = 13,
-                NumLessons = 4,
-                Teacher = "M1",
-                Blocks = new [] {5},
-                Group = "HL",
-                Rooms = new List<string> {
-                    "N 0.4", "A 1.4", "A 1.6"
-                }
-            },
-            new Lesson {
-                ClassCode = "2",
-                Name = "Math AA SL",
-                Year = 13,
-                NumLessons = 4,
-                Teacher = "M1",
-                Blocks = new [] {5},
-                Group = "SL",
-                Rooms = new List<string> {
-                    "N 0.4", "A 1.4", "A 1.6"
-                }
-            },
-            new Lesson {
-                ClassCode = "3",
-                Name = "Math AI HL",
-                Year = 13,
-                NumLessons = 4,
-                Teacher = "M2",
-                Blocks = new [] {5},
-                Group = "HL",
-                Rooms = new List<string> {
-                    "N 0.4", "A 1.4", "A 1.6"
-                }
-            },
-            new Lesson {
-                ClassCode = "4",
-                Name = "Math AI SL",
-                Year = 13,
-                NumLessons = 4,
-                Teacher = "M2",
-                Blocks = new [] {5},
-                Group = "SL",
-                Rooms = new List<string> {
-                    "N 0.4", "A 1.4", "A 1.6"
-                }
-            }
-        };
-        headers = new List<string> {"Name", "Year", "Lessons Per Cycle", "Teacher", "Block(s)", "Group"};
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshLessons();
+    }
+
+    private async Task RefreshLessons()
+    {
+        Lessons = await Service.GetLessonAsync();
+    }
+
+
+    public Lesson NewLesson { get; set; } = new Lesson();
+
+    private async Task AddNewLesson()
+    {
+        await Service.AddLessonAsync(NewLesson);
+        NewLesson = new Lesson();
+        await RefreshLessons();
+    }
+
+    Lesson UpdateLesson = new Lesson();
+    private void SetLessonForUpdate(Lesson Lesson)
+    {
+        UpdateLesson = Lesson;
+    }
+
+    private async Task UpdateLessonData()
+    {
+        await Service.UpdateLessonAsync(UpdateLesson);
+        await RefreshLessons();
+    }
+
+    private async Task DeleteLesson(Lesson Lesson)
+    {
+        await Service.DeleteLessonAsync(Lesson);
+        await RefreshLessons();
     }
 }

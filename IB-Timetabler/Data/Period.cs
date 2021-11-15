@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace IB_Timetabler.Models {
+namespace IB_Timetabler.Data {
     
     public struct Period {
         

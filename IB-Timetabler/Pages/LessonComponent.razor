@@ -51,14 +51,64 @@
     </Control>
 </InputComponent>
 @* align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;font-size:1rem;height:2.5em;justify-content:flex-start;line-height:1.5;padding-bottom:calc(.5em - 1px);padding-left:calc(.75em - 1px);padding-right:calc(.75em - 1px);padding-top:calc(.5em - 1px);position:relative;vertical-align:top *@
-<InputComponent Label="Group:">
+<InputComponent Label="Level:">
     <Control>
-         <select class="select" @bind-value="@lesson.Group" @bind-value:event="onsubmit" id="Group:" style="width: 100%; min-width: 150px; max-width: 400px">
-             <option value="SL">SL</option>
-             <option value="HL">HL</option>
-         </select>
+        <select class="select" @bind-value="@lesson.Level" @bind-value:event="onsubmit" id="Level:" style="width: 100%; min-width: 150px; max-width: 400px">
+            <option value="SL">SL</option>
+            <option value="HL">HL</option>
+        </select>
     </Control>
 </InputComponent>
+
+@* <InputComponent Label="Available Rooms:"> *@
+@*     <Control> *@
+@*          <select multiple class="select is-multiple" @bind-value="@lesson.Level" @bind-value:event="onsubmit" id="Available Rooms:" style="width: 100%; min-width: 150px; max-width: 400px"> *@
+@*              @foreach (string room in rooms.Where(x=>lesson.Rooms.All(y=>x != y))) { *@
+@*                  <option value=@room>@room</option> *@
+@*              } *@
+@*          </select> *@
+@*     </Control> *@
+@* </InputComponent> *@
+@* <InputComponent Label="Selected Rooms:"> *@
+@*     <Control> *@
+@*          <select multiple class="select is-multiple" @bind-value="@lesson.Level" @bind-value:event="onsubmit" id="Selected Rooms:" style="width: 100%; min-width: 150px; max-width: 400px"> *@
+@*              @foreach (string room in lesson.Rooms) { *@
+@*                  <option value=@room>@room</option> *@
+@*              } *@
+@*          </select> *@
+@*     </Control> *@
+@* </InputComponent> *@
+
+<div style="overflow-x: auto">
+    <table class="table is-bordered is-striped is-hoverable" style="width: 49%; display: inline-table">
+        <thead>
+        <tr class="has-text-centered">
+            <th>Available Rooms</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (string room in rooms.Where(x=>lesson.Rooms.All(y=> x != y))) {
+            <tr class="has-text-centered">
+                <td class="has-text-centered">@room</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <table class="table is-bordered is-striped is-hoverable" style="width: 49%; display: inline-table">
+        <thead>
+            <tr class="has-text-centered">
+                <th>Selected Rooms</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (string room in lesson.Rooms) {
+                <tr class="has-text-centered">
+                    <td class="has-text-centered">@room</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
 <div>@Message</div>
 
@@ -73,6 +123,7 @@
     private Lesson lesson;
     List<Lesson> classes;
     List<string> headers;
+    List<string> rooms;
 
     protected override void OnInitialized() {
         base.OnInitialized();
@@ -84,7 +135,7 @@
                 NumLessons = 4,
                 Teacher = "M1",
                 Blocks = new [] {5},
-                Group = "HL",
+                Level = "HL",
                 Rooms = new List<string> {
                     "N 0.4", "A 1.4", "A 1.6"
                 }
@@ -96,7 +147,7 @@
                 NumLessons = 4,
                 Teacher = "M1",
                 Blocks = new [] {5},
-                Group = "SL",
+                Level = "SL",
                 Rooms = new List<string> {
                     "N 0.4", "A 1.4", "A 1.6"
                 }
@@ -108,7 +159,7 @@
                 NumLessons = 4,
                 Teacher = "M2",
                 Blocks = new [] {5},
-                Group = "HL",
+                Level = "HL",
                 Rooms = new List<string> {
                     "N 0.4", "A 1.4", "A 1.6"
                 }
@@ -120,13 +171,15 @@
                 NumLessons = 4,
                 Teacher = "M2",
                 Blocks = new [] {5},
-                Group = "SL",
+                Level = "SL",
                 Rooms = new List<string> {
                     "N 0.4", "A 1.4", "A 1.6"
                 }
             }
         };
         lesson = classes.Find(x => x.ClassCode == Code);
+        rooms = new List<string>(lesson.Rooms);
+        rooms = rooms.Concat(new List<string>{"Gym 1", "Art 1", "Gym 2"}).ToList();
         headers = new List<string> {"Class Code", "Name", "Year", "Lessons Per Cycle", "Teacher", "Block(s)", "Group"};
         placeholderLesson = new Lesson {
             ClassCode = lesson.ClassCode,
@@ -135,7 +188,7 @@
             NumLessons = lesson.NumLessons,
             Teacher = lesson.Teacher,
             Blocks = lesson.Blocks,
-            Group = lesson.Group,
+            Level = lesson.Level,
             Rooms = new List<string> (lesson.Rooms)
         };
     }

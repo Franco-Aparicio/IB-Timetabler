@@ -2,10 +2,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components;
 
-namespace IB_Timetabler.Models {
+namespace IB_Timetabler.Data {
 
     public class Lesson {
 
+        public int ID { get; set; }
         public string ClassCode { get; set; }
         [Required(ErrorMessage = "{0} cannot be blank!")]
         [NameValidator]
@@ -19,7 +20,7 @@ namespace IB_Timetabler.Models {
         [MinLength(1, ErrorMessage = "{0} cannot be blank!")]
         public int[] Blocks { get; set; }
         [Required(ErrorMessage = "{0} cannot be blank!")]
-        public string Group { get; set; }
+        public string Level { get; set; }
         public List<string> Rooms { get; set; }
         public List<Period> Periods { get; set; }
         
