@@ -12,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using IB_Timetabler.Data;
 using ElectronNET.API;
 using ElectronNET.API.Entities;
+using IB_Timetabler.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace IB_Timetabler {
@@ -28,10 +29,10 @@ namespace IB_Timetabler {
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
-            services.AddDbContext<LessonDbContext>(option => {
+            services.AddDbContext<IBTimetablerContext>(option => {
                 option.UseSqlite("Data Source = IB-Timetabler.db");
             });
-            services.AddScoped<LessonService>();
+            // services.AddScoped<LessonService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,6 +55,11 @@ namespace IB_Timetabler {
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+            
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope()) {
+                var context = serviceScope.ServiceProvider.GetRequiredService<IBTimetablerContext>();
+                context.Database.Migrate();
+            }
 
             if (HybridSupport.IsElectronActive) {
                 CreateWindow();

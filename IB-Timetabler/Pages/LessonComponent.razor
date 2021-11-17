@@ -5,10 +5,11 @@
 <NavLink class="button" href="lessons" style="text-decoration: none">Back to Lessons</NavLink>
 <br/><br/>
 
+@* ColumnsToExcludeCSV="ID, Rooms, Periods" *@
 <AutoLessonTableComponent
     Headers="headers"
     Items="new List<Lesson> {lesson}"
-    ColumnsToExcludeCSV="Rooms, Periods"
+    ColumnsToExcludeCSV="ID"
     LinkFirst="">
 </AutoLessonTableComponent>
 <br/><br/>
@@ -31,25 +32,25 @@
         <input class="input" @bind-value="@lesson.NumLessons" @bind-value:event="onsubmit" type="number" placeholder="@placeholderLesson.NumLessons.ToString()" id="Lessons Per Cycle:" style="width: 100%; min-width: 150px; max-width: 400px"/>
     </Control>
 </InputComponent>
-<InputComponent Label="Teacher:">
-    <Control>
-        <input class="input" @bind-value="@lesson.Teacher" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Teacher" id="Teacher:" style="width: 100%; min-width: 150px; max-width: 400px"/>
-    </Control>
-</InputComponent>
-<InputComponent Label="Blocks:">
-    <Control>
-         @for (int b = 1; b <= 6; b++) {
-             <label style="align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;font-size:1.2rem;height:1.8em;justify-content:flex-start;line-height:1.5;padding: calc(.5em - 1px) calc(.5em - 1px);position:relative;vertical-align:top">@b.ToString()
-                 @if (placeholderLesson.Blocks.Contains(b)) {
-                     <input type="checkbox" class="checkbox" style="margin-left: 5px;align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;height:1.8em;justify-content:flex-start;line-height:1.5;padding: calc(.5em - 1px) calc(.5em - 1px);position:relative;vertical-align:top" value="@b.ToString()" checked>
-                 }
-                 else {
-                    <input type="checkbox" class="checkbox" style="margin-left: 5px;align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;height:1.8em;justify-content:flex-start;line-height:1.5;padding: calc(.5em - 1px) calc(.5em - 1px);position:relative;vertical-align:top" value="@b.ToString()">
-                }
-                </label>
-         }
-    </Control>
-</InputComponent>
+@* <InputComponent Label="Teacher:"> *@
+@*     <Control> *@
+@*         <input class="input" @bind-value="@lesson.Teacher" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Teacher" id="Teacher:" style="width: 100%; min-width: 150px; max-width: 400px"/> *@
+@*     </Control> *@
+@* </InputComponent> *@
+@* <InputComponent Label="Blocks:"> *@
+@*     <Control> *@
+@*          @for (int b = 1; b <= 6; b++) { *@
+@*              <label style="align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;font-size:1.2rem;height:1.8em;justify-content:flex-start;line-height:1.5;padding: calc(.5em - 1px) calc(.5em - 1px);position:relative;vertical-align:top">@b.ToString() *@
+@*                  @if (placeholderLesson.Blocks.Contains(b)) { *@
+@*                      <input type="checkbox" class="checkbox" style="margin-left: 5px;align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;height:1.8em;justify-content:flex-start;line-height:1.5;padding: calc(.5em - 1px) calc(.5em - 1px);position:relative;vertical-align:top" value="@b.ToString()" checked> *@
+@*                  } *@
+@*                  else { *@
+@*                     <input type="checkbox" class="checkbox" style="margin-left: 5px;align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;height:1.8em;justify-content:flex-start;line-height:1.5;padding: calc(.5em - 1px) calc(.5em - 1px);position:relative;vertical-align:top" value="@b.ToString()"> *@
+@*                 } *@
+@*                 </label> *@
+@*          } *@
+@*     </Control> *@
+@* </InputComponent> *@
 @* align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;font-size:1rem;height:2.5em;justify-content:flex-start;line-height:1.5;padding-bottom:calc(.5em - 1px);padding-left:calc(.75em - 1px);padding-right:calc(.75em - 1px);padding-top:calc(.5em - 1px);position:relative;vertical-align:top *@
 <InputComponent Label="Level:">
     <Control>
@@ -79,36 +80,36 @@
 @*     </Control> *@
 @* </InputComponent> *@
 
-<div style="overflow-x: auto">
-    <table class="table is-bordered is-striped is-hoverable" style="width: 49%; display: inline-table">
-        <thead>
-        <tr class="has-text-centered">
-            <th>Available Rooms</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (string room in rooms.Where(x=>lesson.Rooms.All(y=> x != y))) {
-            <tr class="has-text-centered">
-                <td class="has-text-centered">@room</td>
-            </tr>
-        }
-        </tbody>
-    </table>
-    <table class="table is-bordered is-striped is-hoverable" style="width: 49%; display: inline-table">
-        <thead>
-            <tr class="has-text-centered">
-                <th>Selected Rooms</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (string room in lesson.Rooms) {
-                <tr class="has-text-centered">
-                    <td class="has-text-centered">@room</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+@* <div style="overflow-x: auto"> *@
+@*     <table class="table is-bordered is-striped is-hoverable" style="width: 49%; display: inline-table"> *@
+@*         <thead> *@
+@*         <tr class="has-text-centered"> *@
+@*             <th>Available Rooms</th> *@
+@*         </tr> *@
+@*         </thead> *@
+@*         <tbody> *@
+@*         @foreach (string room in rooms.Where(x=>lesson.Rooms.All(y=> x != y))) { *@
+@*             <tr class="has-text-centered"> *@
+@*                 <td class="has-text-centered">@room</td> *@
+@*             </tr> *@
+@*         } *@
+@*         </tbody> *@
+@*     </table> *@
+@*     <table class="table is-bordered is-striped is-hoverable" style="width: 49%; display: inline-table"> *@
+@*         <thead> *@
+@*             <tr class="has-text-centered"> *@
+@*                 <th>Selected Rooms</th> *@
+@*             </tr> *@
+@*         </thead> *@
+@*         <tbody> *@
+@*             @foreach (string room in lesson.Rooms) { *@
+@*                 <tr class="has-text-centered"> *@
+@*                     <td class="has-text-centered">@room</td> *@
+@*                 </tr> *@
+@*             } *@
+@*         </tbody> *@
+@*     </table> *@
+@* </div> *@
 
 <div>@Message</div>
 
@@ -133,63 +134,64 @@
                 Name = "Math AA HL",
                 Year = 13,
                 NumLessons = 4,
-                Teacher = "M1",
-                Blocks = new [] {5},
+                // Teacher = "M1",
+                // Blocks = new [] {5},
                 Level = "HL",
-                Rooms = new List<string> {
-                    "N 0.4", "A 1.4", "A 1.6"
-                }
+                // Rooms = new List<string> {
+                //     "N 0.4", "A 1.4", "A 1.6"
+                // }
             },
             new Lesson {
                 ClassCode = "2",
                 Name = "Math AA SL",
                 Year = 13,
                 NumLessons = 4,
-                Teacher = "M1",
-                Blocks = new [] {5},
+                // Teacher = "M1",
+                // Blocks = new [] {5},
                 Level = "SL",
-                Rooms = new List<string> {
-                    "N 0.4", "A 1.4", "A 1.6"
-                }
+                // Rooms = new List<string> {
+                //     "N 0.4", "A 1.4", "A 1.6"
+                // }
             },
             new Lesson {
                 ClassCode = "3",
                 Name = "Math AI HL",
                 Year = 13,
                 NumLessons = 4,
-                Teacher = "M2",
-                Blocks = new [] {5},
+                // Teacher = "M2",
+                // Blocks = new [] {5},
                 Level = "HL",
-                Rooms = new List<string> {
-                    "N 0.4", "A 1.4", "A 1.6"
-                }
+                // Rooms = new List<string> {
+                //     "N 0.4", "A 1.4", "A 1.6"
+                // }
             },
             new Lesson {
                 ClassCode = "4",
                 Name = "Math AI SL",
                 Year = 13,
                 NumLessons = 4,
-                Teacher = "M2",
-                Blocks = new [] {5},
+                // Teacher = "M2",
+                // Blocks = new [] {5},
                 Level = "SL",
-                Rooms = new List<string> {
-                    "N 0.4", "A 1.4", "A 1.6"
-                }
+                // Rooms = new List<string> {
+                //     "N 0.4", "A 1.4", "A 1.6"
+                // }
             }
         };
         lesson = classes.Find(x => x.ClassCode == Code);
-        rooms = new List<string>(lesson.Rooms);
-        rooms = rooms.Concat(new List<string>{"Gym 1", "Art 1", "Gym 2"}).ToList();
-        headers = new List<string> {"Class Code", "Name", "Year", "Lessons Per Cycle", "Teacher", "Block(s)", "Group"};
+        // rooms = new List<string>(lesson.Rooms);
+        // rooms = rooms.Concat(new List<string>{"Gym 1", "Art 1", "Gym 2"}).ToList();
+        // headers = new List<string> {"Class Code", "Name", "Year", "Lessons Per Cycle", "Teacher", "Block(s)", "Level"};
+        headers = new List<string> {"Name", "Year", "Level", "Class Code", "Lessons Per Cycle", "Teacher"};
         placeholderLesson = new Lesson {
             ClassCode = lesson.ClassCode,
             Name = lesson.Name,
             Year = lesson.Year,
             NumLessons = lesson.NumLessons,
-            Teacher = lesson.Teacher,
-            Blocks = lesson.Blocks,
+            // Teacher = lesson.Teacher,
+            // Blocks = lesson.Blocks,
             Level = lesson.Level,
-            Rooms = new List<string> (lesson.Rooms)
+            // Rooms = new List<string> (lesson.Rooms)
         };
     }
 

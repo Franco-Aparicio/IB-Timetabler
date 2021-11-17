@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Components;
 
 namespace IB_Timetabler.Data {
 
@@ -23,24 +22,5 @@ namespace IB_Timetabler.Data {
         public string Level { get; set; }
         public List<string> Rooms { get; set; }
         public List<Period> Periods { get; set; }
-        
-        // public int ClassCode { get; init; }
-        // public string Name { get; set; }
-        // public int Year { get; set; }
-        // public int NumLessons { get; set; }
-        // public string Teacher { get; set; }
-        // public int Blocks { get; set; }
-        // public int Group { get; set; }
-        // public List<string> Rooms { get; set; }
-        // public List<Period> Periods { get; set; }
-        
-        // public Lesson(string name, int year, int numLessons, string teacher, int block, int group) {
-        //     Name = name;
-        //     Year = year;
-        //     NumLessons = numLessons;
-        //     Group = group;
-        //     Blocks = block;
-        //     Teacher = teacher;
-        // }
     }
 }
