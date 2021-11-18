@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 #nullable disable
 
@@ -22,14 +23,16 @@ namespace IB_Timetabler.Models {
         public virtual DbSet<SavedLesson> SavedLessons { get; set; }
         public virtual DbSet<SavedLessonIdperiodId> SavedLessonIdperiodIds { get; set; }
         public virtual DbSet<Teacher> Teachers { get; set; }
-
+        
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
             if (!optionsBuilder.IsConfigured) {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
                 optionsBuilder.UseSqlite("Data Source = IB-Timetabler.db");
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
+            OnModelCreatingPartial(modelBuilder);
             modelBuilder.Entity<Block>(entity => {
                 entity.Property(e => e.Id).HasColumnName("ID");
                 entity.Property(e => e.Block1).HasColumnName("Block");
@@ -44,7 +47,7 @@ namespace IB_Timetabler.Models {
             });
             
             modelBuilder.Entity<LessonIdblockId>(entity => {
-                entity.HasNoKey();
+                entity.HasKey(x => new {x.BlockId, x.LessonId});
                 entity.ToTable("LessonIDBlockID");
                 entity.Property(e => e.BlockId).HasColumnName("BlockID");
                 entity.Property(e => e.LessonId).HasColumnName("LessonID");
@@ -63,7 +66,7 @@ namespace IB_Timetabler.Models {
             });
             
             modelBuilder.Entity<RoomIdlessonId>(entity => {
-                entity.HasNoKey();
+                entity.HasKey(x => new {x.LessonId, x.RoomId});
                 entity.ToTable("RoomIDLessonID");
                 entity.Property(e => e.LessonId).HasColumnName("LessonID");
                 entity.Property(e => e.RoomId).HasColumnName("RoomID");
@@ -75,7 +78,7 @@ namespace IB_Timetabler.Models {
             });
             
             modelBuilder.Entity<SavedLesson>(entity => {
-                entity.HasNoKey();
+                entity.HasKey(x => new {x.Lesson, x.SaveId});
                 entity.Property(e => e.Lesson).IsRequired();
                 entity.Property(e => e.Room).IsRequired();
                 entity.Property(e => e.SaveId).HasColumnName("SaveID");
@@ -83,7 +86,7 @@ namespace IB_Timetabler.Models {
             });
             
             modelBuilder.Entity<SavedLessonIdperiodId>(entity => {
-                entity.HasNoKey();
+                entity.HasKey(x => new {x.PeriodId, x.SavedLessonId});
                 entity.ToTable("SavedLessonIDPeriodID");
                 entity.Property(e => e.PeriodId).HasColumnName("PeriodID");
                 entity.Property(e => e.SavedLessonId).HasColumnName("SavedLessonID");
@@ -188,5 +191,7 @@ namespace IB_Timetabler.Models {
             modelBuilder.Entity<Room>().HasData(rooms);
             modelBuilder.Entity<RoomIdlessonId>().HasData(lessonRooms);
         }
+
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }
