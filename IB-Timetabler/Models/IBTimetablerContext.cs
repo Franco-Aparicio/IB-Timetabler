@@ -91,8 +91,7 @@ namespace IB_Timetabler.Models {
                 entity.Property(e => e.PeriodId).HasColumnName("PeriodID");
                 entity.Property(e => e.SavedLessonId).HasColumnName("SavedLessonID");
             });
-            
-            
+
             modelBuilder.Entity<Teacher>(entity => {
                 entity.Property(e => e.Id).HasColumnName("ID");
                 entity.Property(e => e.Name).IsRequired();
