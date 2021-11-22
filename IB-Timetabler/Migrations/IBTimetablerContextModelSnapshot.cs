@@ -17,15 +17,14 @@ namespace IB_Timetabler.Migrations {
             modelBuilder.Entity("IB_Timetabler.Models.Block", b => {
                 b.Property<long>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER").HasColumnName("ID");
 
-                b.Property<long>("Block1").HasColumnType("INTEGER").HasColumnName("Block");
+                b.Property<long>("BlockNum").HasColumnType("INTEGER").HasColumnName("Block");
 
                 b.HasKey("Id");
 
                 b.ToTable("Blocks");
 
-                b.HasData(new { Id = 1L, Block1 = 1L }, new { Id = 2L, Block1 = 2L }, new { Id = 3L, Block1 = 3L },
-                    new { Id = 4L, Block1 = 4L }, new { Id = 5L, Block1 = 5L }, new { Id = 6L, Block1 = 6L });
-            });
+                b.HasData(new { Id = 1L, BlockNum = 1L }, new { Id = 2L, BlockNum = 2L }, new { Id = 3L, BlockNum = 3L },
+                    new { Id = 4L, BlockNum = 4L }, new { Id = 5L, BlockNum = 5L }, new { Id = 6L, BlockNum = 6L }); });
 
             modelBuilder.Entity("IB_Timetabler.Models.Lesson", b => {
                 b.Property<long>("Id").ValueGeneratedOnAdd().HasColumnType("INTEGER").HasColumnName("ID");

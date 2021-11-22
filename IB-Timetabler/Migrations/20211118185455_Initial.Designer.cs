@@ -24,7 +24,7 @@ namespace IB_Timetabler.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("ID");
 
-                    b.Property<long>("Block1")
+                    b.Property<long>("BlockNum")
                         .HasColumnType("INTEGER")
                         .HasColumnName("Block");
 

@@ -1,40 +1,30 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace IB_Timetabler.Migrations
-{
-    public partial class Initial : Migration
-    {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
+namespace IB_Timetabler.Migrations {
+    
+    public partial class Initial : Migration {
+        
+        protected override void Up(MigrationBuilder migrationBuilder) {
             migrationBuilder.CreateTable(
                 name: "Blocks",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Block = table.Column<long>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Blocks", x => x.ID);
-                });
+                    Block = table.Column<long>(type: "INTEGER", nullable: false) },
+                constraints: table => {
+                    table.PrimaryKey("PK_Blocks", x => x.ID); });
 
             migrationBuilder.CreateTable(
                 name: "LessonIDBlockID",
-                columns: table => new
-                {
+                columns: table => new {
                     LessonID = table.Column<long>(type: "INTEGER", nullable: false),
-                    BlockID = table.Column<long>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_LessonIDBlockID", x => new { x.BlockID, x.LessonID });
-                });
+                    BlockID = table.Column<long>(type: "INTEGER", nullable: false) },
+                constraints: table => {
+                    table.PrimaryKey("PK_LessonIDBlockID", x => new { x.BlockID, x.LessonID }); });
 
             migrationBuilder.CreateTable(
                 name: "Lessons",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
@@ -44,103 +34,73 @@ namespace IB_Timetabler.Migrations
                     NumLessons = table.Column<long>(type: "INTEGER", nullable: false),
                     TeacherID = table.Column<long>(type: "INTEGER", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Lessons", x => x.ID);
-                });
+                constraints: table => {
+                    table.PrimaryKey("PK_Lessons", x => x.ID); });
 
             migrationBuilder.CreateTable(
                 name: "Periods",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Week = table.Column<long>(type: "INTEGER", nullable: false),
                     Day = table.Column<long>(type: "INTEGER", nullable: false),
-                    TimePeriod = table.Column<long>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Periods", x => x.ID);
-                });
+                    TimePeriod = table.Column<long>(type: "INTEGER", nullable: false) },
+                constraints: table => {
+                    table.PrimaryKey("PK_Periods", x => x.ID); });
 
             migrationBuilder.CreateTable(
                 name: "RoomIDLessonID",
-                columns: table => new
-                {
+                columns: table => new {
                     RoomID = table.Column<long>(type: "INTEGER", nullable: false),
-                    LessonID = table.Column<long>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RoomIDLessonID", x => new { x.LessonID, x.RoomID });
-                });
+                    LessonID = table.Column<long>(type: "INTEGER", nullable: false) },
+                constraints: table => {
+                    table.PrimaryKey("PK_RoomIDLessonID", x => new { x.LessonID, x.RoomID }); });
 
             migrationBuilder.CreateTable(
                 name: "Rooms",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Number = table.Column<string>(type: "TEXT", nullable: false),
-                    Floor = table.Column<long>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Rooms", x => x.ID);
-                });
+                    Floor = table.Column<long>(type: "INTEGER", nullable: false) },
+                constraints: table => {
+                    table.PrimaryKey("PK_Rooms", x => x.ID); });
 
             migrationBuilder.CreateTable(
                 name: "SavedLessonIDPeriodID",
-                columns: table => new
-                {
+                columns: table => new {
                     SavedLessonID = table.Column<long>(type: "INTEGER", nullable: false),
-                    PeriodID = table.Column<long>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SavedLessonIDPeriodID", x => new { x.PeriodID, x.SavedLessonID });
-                });
+                    PeriodID = table.Column<long>(type: "INTEGER", nullable: false) },
+                constraints: table => {
+                    table.PrimaryKey("PK_SavedLessonIDPeriodID", x => new { x.PeriodID, x.SavedLessonID }); });
 
             migrationBuilder.CreateTable(
                 name: "SavedLessons",
-                columns: table => new
-                {
+                columns: table => new {
                     SaveID = table.Column<long>(type: "INTEGER", nullable: false),
                     Lesson = table.Column<string>(type: "TEXT", nullable: false),
                     Teacher = table.Column<string>(type: "TEXT", nullable: false),
-                    Room = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SavedLessons", x => new { x.Lesson, x.SaveID });
-                });
+                    Room = table.Column<string>(type: "TEXT", nullable: false) },
+                constraints: table => {
+                    table.PrimaryKey("PK_SavedLessons", x => new { x.Lesson, x.SaveID }); });
 
             migrationBuilder.CreateTable(
                 name: "Saves",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Saves", x => x.ID);
-                });
+                    Name = table.Column<string>(type: "TEXT", nullable: false) },
+                constraints: table => {
+                    table.PrimaryKey("PK_Saves", x => x.ID); });
 
             migrationBuilder.CreateTable(
                 name: "Teachers",
-                columns: table => new
-                {
+                columns: table => new {
                     ID = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Teachers", x => x.ID);
-                });
+                    Name = table.Column<string>(type: "TEXT", nullable: false) },
+                constraints: table => {
+                    table.PrimaryKey("PK_Teachers", x => x.ID); });
 
             migrationBuilder.InsertData(
                 table: "Blocks",
@@ -2608,37 +2568,17 @@ namespace IB_Timetabler.Migrations
                 values: new object[] { 109L, "A1" });
         }
 
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "Blocks");
-
-            migrationBuilder.DropTable(
-                name: "LessonIDBlockID");
-
-            migrationBuilder.DropTable(
-                name: "Lessons");
-
-            migrationBuilder.DropTable(
-                name: "Periods");
-
-            migrationBuilder.DropTable(
-                name: "RoomIDLessonID");
-
-            migrationBuilder.DropTable(
-                name: "Rooms");
-
-            migrationBuilder.DropTable(
-                name: "SavedLessonIDPeriodID");
-
-            migrationBuilder.DropTable(
-                name: "SavedLessons");
-
-            migrationBuilder.DropTable(
-                name: "Saves");
-
-            migrationBuilder.DropTable(
-                name: "Teachers");
+        protected override void Down(MigrationBuilder migrationBuilder) {
+            migrationBuilder.DropTable(name: "Blocks");
+            migrationBuilder.DropTable(name: "LessonIDBlockID");
+            migrationBuilder.DropTable(name: "Lessons");
+            migrationBuilder.DropTable(name: "Periods");
+            migrationBuilder.DropTable(name: "RoomIDLessonID");
+            migrationBuilder.DropTable(name: "Rooms");
+            migrationBuilder.DropTable(name: "SavedLessonIDPeriodID");
+            migrationBuilder.DropTable(name: "SavedLessons");
+            migrationBuilder.DropTable(name: "Saves");
+            migrationBuilder.DropTable(name: "Teachers");
         }
     }
 }

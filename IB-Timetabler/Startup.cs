@@ -30,9 +30,9 @@ namespace IB_Timetabler {
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
             services.AddDbContext<IBTimetablerContext>(option => {
-                option.UseSqlite("Data Source = IB-Timetabler.db");
+                option.UseSqlite(Configuration.GetConnectionString("Default"));
             });
-            // services.AddScoped<LessonService>();
+            services.AddScoped<LessonService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

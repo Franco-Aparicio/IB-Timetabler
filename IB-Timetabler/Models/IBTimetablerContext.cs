@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 #nullable disable
 
@@ -24,18 +22,17 @@ namespace IB_Timetabler.Models {
         public virtual DbSet<SavedLessonIdperiodId> SavedLessonIdperiodIds { get; set; }
         public virtual DbSet<Teacher> Teachers { get; set; }
         
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-            if (!optionsBuilder.IsConfigured) {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlite("Data Source = IB-Timetabler.db");
-            }
-        }
+        // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
+        //     if (!optionsBuilder.IsConfigured) {
+        //         optionsBuilder.UseSqlite("Data Source = IB-Timetabler.db");
+        //     }
+        // }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             OnModelCreatingPartial(modelBuilder);
             modelBuilder.Entity<Block>(entity => {
                 entity.Property(e => e.Id).HasColumnName("ID");
-                entity.Property(e => e.Block1).HasColumnName("Block");
+                entity.Property(e => e.BlockNum).HasColumnName("Block");
             });
             
             modelBuilder.Entity<Lesson>(entity => {
@@ -99,7 +96,7 @@ namespace IB_Timetabler.Models {
 
             Block[] blocks = new Block[6];
             for (int i = 1; i < 7; i++) {
-                blocks[i - 1] = new Block {Id = i, Block1 = i};
+                blocks[i - 1] = new Block {Id = i, BlockNum = i};
             }
             string[] names = new[] {"12 SL Bio", "12 HL Bio Z1", "12 HL Bio Z2", "12 SL Che", "12 HL Che", "12 SL Phy", "12 HL Phy", "13 SL Bio", "13 HL Bio Z1", "13 HL Bio Z2", "13 SL Che", "13 HL Che",
                 "13 SL Phy", "13 HL Phy", "12 SL Comp", "12 HL Comp", "13 SL Comp", "13 HL Comp", "12 AI SL Mat", "12 AI SL/HL Mat", "12 AI HL Mat", "12 AA SL Mat", "12 AA SL/HL Mat", "12 AA HL Mat",
