@@ -1,17 +1,18 @@
 @page "/lessons/{Id}"
+@inject LessonService lessonService
 
-<TitleComponent Page="@($"Lesson: {lesson.Name}")"></TitleComponent>
+<TitleComponent Page="@($"Lesson: {Lesson.Name}")"></TitleComponent>
 <br/>
 <NavLink class="button" href="lessons" style="text-decoration: none">Back to Lessons</NavLink>
 <br/><br/>
 
 @* ColumnsToExcludeCSV="ID, Rooms, Periods" *@
-<AutoLessonTableComponent
-    Headers="headers"
-    Items="new List<Lesson> {lesson}"
-    ColumnsToExcludeCSV="ID"
-    LinkFirst="">
-</AutoLessonTableComponent>
+@* <AutoLessonTableComponent *@
+@*     Headers="headers" *@
+@*     Items="new List<Lesson> {lesson}" *@
+@*     ColumnsToExcludeCSV="ID" *@
+@*     LinkFirst=""> *@
+@* </AutoLessonTableComponent> *@
 <br/><br/>
 
 @* <InputComponent Label="Name:"> *@
@@ -117,82 +118,21 @@
 @code {
 
     [Parameter]
-    public string Code { get; set; }
+    public string Id { get; set; }
     string Message = "";
     
-    Lesson placeholderLesson;
-    private Lesson lesson;
-    List<Lesson> classes;
-    List<string> headers;
-    List<string> rooms;
+    // Lesson placeholderLesson;
+    private Lesson Lesson;
+    // List<Lesson> classes;
+    List<string> headers = new List<string> {"Name", "Year", "Level", "Class Code", "Lessons Per Cycle", "Teacher"};
+    // List<string> rooms;
 
-    protected override void OnInitialized() {
-        base.OnInitialized();
-        classes = new List<Lesson> {
-            new Lesson {
-                ClassCode = "1",
-                Name = "Math AA HL",
-                Year = 13,
-                NumLessons = 4,
-                // Teacher = "M1",
-                // Blocks = new [] {5},
-                Level = "HL",
-                // Rooms = new List<string> {
-                //     "N 0.4", "A 1.4", "A 1.6"
-                // }
-            },
-            new Lesson {
-                ClassCode = "2",
-                Name = "Math AA SL",
-                Year = 13,
-                NumLessons = 4,
-                // Teacher = "M1",
-                // Blocks = new [] {5},
-                Level = "SL",
-                // Rooms = new List<string> {
-                //     "N 0.4", "A 1.4", "A 1.6"
-                // }
-            },
-            new Lesson {
-                ClassCode = "3",
-                Name = "Math AI HL",
-                Year = 13,
-                NumLessons = 4,
-                // Teacher = "M2",
-                // Blocks = new [] {5},
-                Level = "HL",
-                // Rooms = new List<string> {
-                //     "N 0.4", "A 1.4", "A 1.6"
-                // }
-            },
-            new Lesson {
-                ClassCode = "4",
-                Name = "Math AI SL",
-                Year = 13,
-                NumLessons = 4,
-                // Teacher = "M2",
-                // Blocks = new [] {5},
-                Level = "SL",
-                // Rooms = new List<string> {
-                //     "N 0.4", "A 1.4", "A 1.6"
-                // }
-            }
-        };
-        lesson = classes.Find(x => x.ClassCode == Code);
-        // rooms = new List<string>(lesson.Rooms);
-        // rooms = rooms.Concat(new List<string>{"Gym 1", "Art 1", "Gym 2"}).ToList();
-        // headers = new List<string> {"Class Code", "Name", "Year", "Lessons Per Cycle", "Teacher", "Block(s)", "Level"};
-        headers = new List<string> {"Name", "Year", "Level", "Class Code", "Lessons Per Cycle", "Teacher"};
-        placeholderLesson = new Lesson {
-            ClassCode = lesson.ClassCode,
-            Name = lesson.Name,
-            Year = lesson.Year,
-            NumLessons = lesson.NumLessons,
-            // Teacher = lesson.Teacher,
-            // Blocks = lesson.Blocks,
-            Level = lesson.Level,
-            // Rooms = new List<string> (lesson.Rooms)
-        };
+    protected override async void OnInitialized() {
+        await GetLesson();
+    }
+
+    private async Task GetLesson() {
+        Lesson = await lessonService.GetLessonAsync(int.Parse(Id));
     }
 
     void SubmitPressed() {

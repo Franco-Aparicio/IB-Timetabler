@@ -1,42 +1,18 @@
 @page "/lessons/"
 @using System.Reflection
-@* @using Microsoft.EntityFrameworkCore *@
 @inject LessonService lessonService
 
 <TitleComponent Page="Lessons"></TitleComponent>
 
-<NavLink class="button is-small" href="lessons/addLesson" style="text-decoration: none">
+<br/>
+<NavLink class="button" href="lessons/addLesson" style="text-decoration: none; margin-bottom: 15px">
     <span class="icon is-medium"><i class="fas fa-plus"></i></span>
     <span>Add Lesson</span>
 </NavLink>
 
-<br/><br/>
+<br/>
 Click on a lesson name to edit!
 <br/>
-
-@* ColumnsToExcludeCSV="ID, ClassCode, Rooms, Periods" *@
-@* <AutoLessonTableComponent *@
-@*     Headers="headers" *@
-@*     Items="classes" *@
-@*     ColumnsToExcludeCSV="ID, ClassCode" *@
-@*     LinkFirst="/lessons/ClassCode"> *@
-@* </AutoLessonTableComponent> *@
-
-@* <tr> *@
-@*     <td>@emp.Id</td> *@
-@*     <td>@emp.EmployeName</td> *@
-@*     <td>@emp.Gender</td> *@
-@*     <td>@emp.Designation</td> *@
-@*     <td>@emp.City</td> *@
-@*     <td> *@
-@*         <a class="nav-link" href="EditEmployee/@emp.Id"> *@
-@*             <span class="oi oi-pencil" aria-hidden="true">Edit</span> *@
-@*         </a> *@
-@*         <a class="nav-link" href="Delete/@emp.Id"> *@
-@*             <span class="oi oi-trash" aria-hidden="true">Delete</span> *@
-@*         </a> *@
-@*     </td> *@
-@* </tr> *@
 
 @if (Lessons is null) {
     <button class="button is-loading is-large border-0 has-text-centered"></button>
@@ -47,7 +23,7 @@ else {
         <table class="table is-bordered is-striped is-hoverable" style="width: 100%">
             <thead>
             <tr class="has-text-centered">
-                @foreach (var head in headers) {
+                @foreach (var head in Headers) {
                     <th>
                         @head
                     </th>
@@ -57,6 +33,10 @@ else {
             <tbody>
             @foreach (Lesson l in Lessons) {
                 <tr class="has-text-centered">
+                    <td>
+                        @* onactivate="@((e) => SelectLesson(l.Id))" ondeactivate="@((e) => DeselectLesson(l.Id))" *@
+                        <input type="checkbox" @onchange="eventArgs => { SelectedLesssons(l.Id, eventArgs.Value); }"/>
+                    </td>
                 @foreach (var member in l.GetType().GetMembers()) {
                     @if (member.MemberType == MemberTypes.Property &&
                          !columnsToExclude.Contains(member.Name.ToLower())) {
@@ -67,7 +47,7 @@ else {
                         }
                         else {
                             <td>
-                                @l.GetType().GetProperty(member.Name)?.GetValue(l);
+                                @l.GetType().GetProperty(member.Name)?.GetValue(l)
                             </td>
                         }
                     }
@@ -82,9 +62,10 @@ else {
 <br/><br/>
 @code {
 
-    List<Lesson> Lessons = new List<Lesson>();
-    List<string> headers = new List<string> {"Name", "Year", "Level", "Lessons Per Cycle", "Teacher"};
+    List<Lesson> Lessons = null;
+    List<string> Headers = new List<string> {"", "Name", "Year", "Level", "Lessons Per Cycle", "Teacher"};
     string[] columnsToExclude = new[] {"id", "classcode"};
+    List<long> Selected = new List<long>();
     // int selectedLessonIndex = -1;
     
     protected override async void OnInitialized() {
@@ -93,5 +74,28 @@ else {
 
     private async Task RefreshLessons() {
         Lessons = await lessonService.GetAllLessonsAsync();
+    }
+
+    private void SelectedLesssons(long id, object checkedValue) {
+        if ((bool)checkedValue) {
+            if (!Selected.Contains(id)) {
+                Selected.Add(id);
+            }
+        }
+        else {
+            if (Selected.Contains(id)) {
+                Selected.Remove(id);
+            }
+        }
+    }
+
+    private void SelectLesson(long id) {
+        Selected.Add(id);
+        Console.WriteLine(Selected.Count);
+    }
+    
+    private void DeselectLesson(long id) {
+        Selected.Remove(id);
+        Console.WriteLine(Selected.Count);
     }
 }
