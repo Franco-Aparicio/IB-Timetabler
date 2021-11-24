@@ -8,13 +8,13 @@
 .ascending {
     transform: rotate(-135deg);
     -webkit-transform: rotate(-135deg);
-    margin: 8px;
+    margin: 10px 8px 0 0;
 }
 
 .descending {
     transform: rotate(45deg);
     -webkit-transform: rotate(45deg);
-    margin: 5px;
+    margin: 5px 8px 0 0;
 }
 
 .no-sort {

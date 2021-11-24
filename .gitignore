@@ -6131,3 +6131,5 @@ IB-Timetabler/bin/Debug/net5.0/Microsoft.EntityFrameworkCore.Design.dll
 IB-Timetabler/bin/Debug/net5.0/Microsoft.EntityFrameworkCore.Abstractions.dll
 IB-Timetabler/bin/Debug/net5.0/Microsoft.DotNet.PlatformAbstractions.dll
 IB-Timetabler/bin/Debug/net5.0/Microsoft.Data.Sqlite.dll
+IB-Timetabler/obj/Debug/net5.0/RazorDeclaration/Pages/AddLessonComponent.razor.g.cs
+IB-Timetabler/obj/Debug/net5.0/Razor/Pages/AddLessonComponent.razor.g.cs
