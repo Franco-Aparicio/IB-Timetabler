@@ -1,2 +1,26 @@
-/*.table-x-scroll {overflow-x: scroll !important;}*/
-/*th, td {min-width: 150px;}*/
+.sort {
+    border: solid black;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+}
+
+.ascending {
+    transform: rotate(-135deg);
+    -webkit-transform: rotate(-135deg);
+    margin: 8px;
+}
+
+.descending {
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    margin: 5px;
+}
+
+.no-sort {
+    display: none;
+}
+
+thead th {
+    cursor: pointer;
+}

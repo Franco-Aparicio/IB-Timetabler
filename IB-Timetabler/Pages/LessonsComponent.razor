@@ -1,6 +1,6 @@
 @page "/lessons/"
-@using System.Reflection
 @inject LessonService lessonService
+@inject TeacherService teacherService
 
 <TitleComponent Page="Lessons"></TitleComponent>
 
@@ -9,6 +9,12 @@
     <span class="icon is-medium"><i class="fas fa-plus"></i></span>
     <span>Add Lesson</span>
 </NavLink>
+@if (Selected.Count == 1) {
+    <button class="button" @onclick="DeleteSelected" style="margin-left: 15px">Delete Selected Lesson</button>
+}
+else if (Selected.Count > 1) {
+    <button class="button" @onclick="DeleteSelected" style="margin-left: 15px">Delete Selected Lessons</button>
+}
 
 <br/>
 Click on a lesson name to edit!
@@ -19,65 +25,84 @@ Click on a lesson name to edit!
 }
 else {
     <br/>
-    <div style="overflow-x: auto">
-        <table class="table is-bordered is-striped is-hoverable" style="width: 100%">
-            <thead>
-            <tr class="has-text-centered">
-                @foreach (var head in Headers) {
-                    <th>
-                        @head
-                    </th>
-                }
-            </tr>
-            </thead>
-            <tbody>
-            @foreach (Lesson l in Lessons) {
-                <tr class="has-text-centered">
-                    <td>
-                        @* onactivate="@((e) => SelectLesson(l.Id))" ondeactivate="@((e) => DeselectLesson(l.Id))" *@
-                        <input type="checkbox" @onchange="eventArgs => { SelectedLesssons(l.Id, eventArgs.Value); }"/>
-                    </td>
-                @foreach (var member in l.GetType().GetMembers()) {
-                    @if (member.MemberType == MemberTypes.Property &&
-                         !columnsToExclude.Contains(member.Name.ToLower())) {
-                        @if (member.Name == "Name") {
-                            <td>
-                                <a href="@($"lessons/{l.Id.ToString()}")">@l.Name</a>
-                            </td>
-                        }
-                        else {
-                            <td>
-                                @l.GetType().GetProperty(member.Name)?.GetValue(l)
-                            </td>
-                        }
-                    }
-                }
-            </tr>
-            }
-            </tbody>
-        </table>
-    </div>
+     <div style="overflow-x: auto">
+         <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 100%">
+             <thead>
+             <tr>
+                 <th style="cursor: default;"></th>
+                 @foreach (ColumnDefinition column in Columns) {
+                     <th @onclick="@(() => SortData(column))">
+                         @column.Title
+                         <span style="float: right" class="@(SortClass(column))"></span>
+                     </th>
+                 }
+             </tr>
+             </thead>
+             <tbody>
+             @foreach (Lesson l in Lessons) {
+                 bool check = Selected.Contains(l.Id);
+                 <tr>
+                     <td @onclick="() => HandleSelectedLesssons(l.Id, check)">
+                         <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedLesssons(l.Id, check))"/>
+                     </td>
+                     @foreach (var column in Columns) {
+                         @if (column.Title == "Name") {
+                             <td>
+                                 <a href="@($"lessons/{l.Id.ToString()}")">@l.Name</a>
+                             </td>
+                         }
+                         else if (column.Title == "Teacher") {
+                             <td>
+                                 @Teachers.Find(x=>x.Id == l.TeacherId).Name
+                             </td>
+                         }
+                         else {
+                             <td>
+                                 @l.GetType().GetProperty(column.Property)?.GetValue(l)
+                             </td>
+                         }
+                     }
+                 </tr>
+             }
+             </tbody>
+         </table>
+     </div>
 }
 
 <br/><br/>
 @code {
 
     List<Lesson> Lessons = null;
-    List<string> Headers = new List<string> {"", "Name", "Year", "Level", "Lessons Per Cycle", "Teacher"};
-    string[] columnsToExclude = new[] {"id", "classcode"};
-    List<long> Selected = new List<long>();
-    // int selectedLessonIndex = -1;
+    List<Teacher> Teachers = null;
+    List<ColumnDefinition> Columns = new List<ColumnDefinition>();
+    public List<long> Selected { get; set; } = new List<long>();
     
     protected override async void OnInitialized() {
+        await base.OnInitializedAsync();
+        Columns.AddRange(
+            new [] {
+                // new ColumnDefinition {Property = "", Title = ""},
+                new ColumnDefinition {Property = "Name", Title = "Name", SortDirection = SortDirection.Descending},
+                new ColumnDefinition {Property = "Year", Title = "Year"},
+                new ColumnDefinition {Property = "Level", Title = "Level"},
+                new ColumnDefinition {Property = "NumLessons", Title = "Lessons Per Cycle"},
+                new ColumnDefinition {Property = "TeacherId", Title = "Teacher"}
+            });
         await RefreshLessons();
+        await RefreshTeachers();
+        SortData();
     }
 
     private async Task RefreshLessons() {
         Lessons = await lessonService.GetAllLessonsAsync();
     }
 
-    private void SelectedLesssons(long id, object checkedValue) {
-        if ((bool)checkedValue) {
+    private async Task RefreshTeachers() {
+        Teachers = await teacherService.GetAllTeachersAsync();
+    }
+
+    public void HandleSelectedLesssons(long id, bool checkedValue) {
+        if (!checkedValue) {
             if (!Selected.Contains(id)) {
                 Selected.Add(id);
             }
@@ -89,13 +114,98 @@ else {
         }
     }
 
-    private void SelectLesson(long id) {
-        Selected.Add(id);
-        Console.WriteLine(Selected.Count);
+    private async void DeleteSelected() {
+        string message = Selected.Count > 1 ? $"Are you sure you want to delete {Selected.Count.ToString()} lessons?" : $"Are you sure you want to delete {Selected.Count.ToString()} lesson?";
+        var options = new MessageBoxOptions(message) {
+            Title = "Confirm Action",
+            Buttons = new []{"Confirm", "Cancel"}
+        };
+        var choice = await Electron.Dialog.ShowMessageBoxAsync(options);
+        if (choice.Response == 1) return;
+        int i = 0;
+        while (Selected.Count > 0) {
+            Lesson l = Lessons.Find(x => x.Id == Selected[i]);
+            await lessonService.DeleteLessonAsync(l);
+            if (!Lessons.Any(x => x.TeacherId == l.TeacherId && x.Id != l.Id)) {
+                await teacherService.DeleteTeacherAsync(Teachers.Find(x => x.Id == l.TeacherId));
+            }
+            Selected.RemoveAt(i);
+        }
+        await RefreshLessons();
+        StateHasChanged();
     }
     
-    private void DeselectLesson(long id) {
-        Selected.Remove(id);
-        Console.WriteLine(Selected.Count);
+    private string SortClass(ColumnDefinition column) {
+        return column.SortDirection != SortDirection.NotSet ? $"sort {column.SortDirection.ToString().ToLower()}" : "no-sort";
+    }
+
+    private void SortData(ColumnDefinition sortByColumn = null) {
+        bool initial = sortByColumn is null;
+        if (sortByColumn is null) {
+            sortByColumn = Columns.FirstOrDefault(x => x.SortDirection != SortDirection.NotSet);
+            if (sortByColumn is null) return;
+        }
+        foreach (ColumnDefinition column in Columns) {
+            if (column.Property != sortByColumn.Property) column.SortDirection = SortDirection.NotSet;
+        }
+        if (!initial)
+            switch (sortByColumn.SortDirection) {
+                case SortDirection.NotSet:
+                    sortByColumn.SortDirection = SortDirection.Descending;
+                    break;
+                case SortDirection.Ascending:
+                    sortByColumn.SortDirection = SortDirection.Descending;
+                    break;
+                case SortDirection.Descending:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+                default:
+                    sortByColumn.SortDirection = SortDirection.Descending;
+                    break;
+            }
+        switch (sortByColumn.Property) {
+            case "NumLessons": {
+                Lessons.Sort((x, y) => {
+                    int first = x.NumLessons.CompareTo(y.NumLessons);
+                    return first != 0 ? first : x.Name.CompareTo(y.Name);
+                });
+                if (sortByColumn.SortDirection == SortDirection.Ascending) {
+                    Lessons.Sort((x, y) => {
+                        int first = y.NumLessons.CompareTo(x.NumLessons);
+                        return first != 0 ? first : x.Name.CompareTo(y.Name);
+                    });
+                }
+                break;
+            }
+            case "TeacherId":
+                Lessons.Sort((x, y) => {
+                    int first = Teachers.Find(t => t.Id == x.TeacherId).Name
+                        .CompareTo(Teachers.Find(t => t.Id == y.TeacherId).Name);
+                    return first != 0 ? first : x.Name.CompareTo(y.Name);
+                });
+                if (sortByColumn.SortDirection == SortDirection.Ascending) {
+                    Lessons.Sort((x, y) => {
+                        int first = Teachers.Find(t => t.Id == y.TeacherId).Name
+                            .CompareTo(Teachers.Find(t => t.Id == x.TeacherId).Name);
+                        return first != 0 ? first : x.Name.CompareTo(y.Name);
+                    });
+                }
+                break;
+            default: {
+                Lessons.Sort((x, y) => {
+                    int first = x.GetType().GetProperty(sortByColumn.Property).GetValue(x).ToString()
+                        .CompareTo(y.GetType().GetProperty(sortByColumn.Property).GetValue(y).ToString());
+                    return first != 0 ? first : x.Name.CompareTo(y.Name);
+                });
+                if (sortByColumn.SortDirection == SortDirection.Ascending) {
+                    Lessons.Sort((x, y) => {
+                        int first = y.GetType().GetProperty(sortByColumn.Property).GetValue(y).ToString()
+                            .CompareTo(x.GetType().GetProperty(sortByColumn.Property).GetValue(x).ToString());
+                        return first != 0 ? first : x.Name.CompareTo(y.Name);
+                    });
+                }
+                break;
+            }
+        }
     }
 }
