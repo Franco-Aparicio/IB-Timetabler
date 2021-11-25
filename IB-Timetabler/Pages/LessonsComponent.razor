@@ -30,8 +30,8 @@ else {
          <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 100%">
              <thead>
              <tr>
-                 <th @onclick="() => HandleSelectAllLesssons(checkAll)" style="cursor: default;">
-                     <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllLesssons(checkAll))"/>
+                 <th @onclick="() => HandleSelectAllLesssons(checkAll)">
+                     <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllLesssons(checkAll))" style="cursor: pointer;"/>
                  </th>
                  @foreach (ColumnDefinition column in Columns) {
                      <th @onclick="@(() => SortData(column))">
@@ -45,8 +45,8 @@ else {
              @foreach (Lesson l in Lessons) {
                  bool check = Selected.Contains(l.Id);
                  <tr>
-                     <td @onclick="() => HandleSelectedLesssons(l.Id, check)">
-                         <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedLesssons(l.Id, check))"/>
+                     <td @onclick="() => HandleSelectedLesssons(l.Id, check)" style="cursor: pointer;">
+                         <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedLesssons(l.Id, check))" style="cursor: pointer;"/>
                      </td>
                      @foreach (var column in Columns) {
                          @if (column.Title == "Name") {
@@ -136,14 +136,13 @@ else {
         };
         var choice = await Electron.Dialog.ShowMessageBoxAsync(options);
         if (choice.Response == 1) return;
-        int i = 0;
         while (Selected.Count > 0) {
-            Lesson l = Lessons.Find(x => x.Id == Selected[i]);
+            Lesson l = Lessons.Find(x => x.Id == Selected[0]);
             await lessonService.DeleteLessonAsync(l);
             if (!Lessons.Any(x => x.TeacherId == l.TeacherId && x.Id != l.Id)) {
                 await teacherService.DeleteTeacherAsync(Teachers.Find(x => x.Id == l.TeacherId));
             }
-            Selected.RemoveAt(i);
+            Selected.RemoveAt(0);
         }
         await RefreshLessons();
         StateHasChanged();

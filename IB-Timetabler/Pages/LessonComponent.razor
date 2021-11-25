@@ -1,12 +1,41 @@
 @page "/lessons/{Id}"
 @inject LessonService lessonService
+@inject TeacherService teacherService
 
 <TitleComponent Page="@($"Lesson: {Lesson.Name}")"></TitleComponent>
 <br/>
 <NavLink class="button" href="lessons" style="text-decoration: none">Back to Lessons</NavLink>
 <br/><br/>
 
-@* ColumnsToExcludeCSV="ID, Rooms, Periods" *@
+<div style="overflow-x: auto">
+    <table class="table is-bordered is-hoverable has-text-centered" style="width: 100%">
+         <thead>
+             <tr>
+                 @foreach (string column in Headers) {
+                     <th style="cursor: default;">
+                         @column
+                     </th>
+                 }
+             </tr>
+         </thead>
+         <tbody>
+             <tr>
+                 @foreach (string prop in Properties) {
+                     if (prop == "TeacherId") {
+                         <td>
+                             @teacherService.GetTeacherAsync(Lesson.TeacherId).Result.Name
+                         </td>
+                     }
+                     else {
+                         <td>
+                             @Lesson.GetType().GetProperty(prop)?.GetValue(Lesson)
+                         </td>
+                     }
+                 }
+             </tr>
+         </tbody>
+    </table>
+</div>
 <br/><br/>
 
 @* <InputComponent Label="Name:"> *@
@@ -106,19 +135,17 @@
 @*     </table> *@
 @* </div> *@
 
-<div>@Message</div>
-
 <br/><br/>
 @code {
 
     [Parameter]
     public string Id { get; set; }
-    string Message = "";
     
     // Lesson placeholderLesson;
     private Lesson Lesson;
     // List<Lesson> classes;
-    List<string> headers = new List<string> {"Name", "Year", "Level", "Class Code", "Lessons Per Cycle", "Teacher"};
+    List<string> Headers = new List<string> {"Name", "Year", "Level", "Lessons Per Cycle", "Teacher"};
+    List<string> Properties = new List<string> {"Name", "Year", "Level", "NumLessons", "TeacherId"};
     // List<string> rooms;
 
     protected override async void OnInitialized() {
@@ -127,9 +154,5 @@
 
     private async Task GetLesson() {
         Lesson = await lessonService.GetLessonAsync(int.Parse(Id));
-    }
-
-    void SubmitPressed() {
-        Message = "Successfully Submitted!";
     }
 }
