@@ -24,12 +24,15 @@ Click on a lesson name to edit!
     <button class="button is-loading is-large border-0 has-text-centered"></button>
 }
 else {
+    bool checkAll = Selected.Count == Lessons.Count;
     <br/>
      <div style="overflow-x: auto">
          <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 100%">
              <thead>
              <tr>
-                 <th style="cursor: default;"></th>
+                 <th @onclick="() => HandleSelectAllLesssons(checkAll)" style="cursor: default;">
+                     <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllLesssons(checkAll))"/>
+                 </th>
                  @foreach (ColumnDefinition column in Columns) {
                      <th @onclick="@(() => SortData(column))">
                          @column.Title
@@ -75,13 +78,12 @@ else {
     List<Lesson> Lessons = null;
     List<Teacher> Teachers = null;
     List<ColumnDefinition> Columns = new List<ColumnDefinition>();
-    public List<long> Selected { get; set; } = new List<long>();
-    
+    List<long> Selected = new List<long>();
+
     protected override async void OnInitialized() {
         await base.OnInitializedAsync();
         Columns.AddRange(
             new [] {
-                // new ColumnDefinition {Property = "", Title = ""},
                 new ColumnDefinition {Property = "Name", Title = "Name", SortDirection = SortDirection.Descending},
                 new ColumnDefinition {Property = "Year", Title = "Year"},
                 new ColumnDefinition {Property = "Level", Title = "Level"},
@@ -101,7 +103,7 @@ else {
         Teachers = await teacherService.GetAllTeachersAsync();
     }
 
-    public void HandleSelectedLesssons(long id, bool checkedValue) {
+    private void HandleSelectedLesssons(long id, bool checkedValue) {
         if (!checkedValue) {
             if (!Selected.Contains(id)) {
                 Selected.Add(id);
@@ -111,6 +113,18 @@ else {
             if (Selected.Contains(id)) {
                 Selected.Remove(id);
             }
+        }
+    }
+
+    private void HandleSelectAllLesssons(bool checkAll) {
+        if (!checkAll) {
+            foreach (Lesson l in Lessons) {
+                if (Selected.Contains(l.Id)) continue;
+                Selected.Add(l.Id);
+            }
+        }
+        else {
+            Selected.Clear();
         }
     }
 
