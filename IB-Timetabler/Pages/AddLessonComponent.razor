@@ -2,6 +2,33 @@
 
 <TitleComponent Page="Add Lesson"></TitleComponent>
 
+<SfTextBox Placeholder="Enter Name"></SfTextBox>
+
+<div>Year:</div>
+<div class="sample-padding">
+    <SfChip ID="chip-choice" Selection="SelectionType.Single" SelectedChips=@Year>
+        <ChipItems>
+            <ChipItem Text="12" cssClass="e-outline" Enabled="true"></ChipItem>
+            <ChipItem Text="13" cssClass="e-outline" Enabled="true"></ChipItem>
+        </ChipItems>
+    </SfChip>
+</div>
+
+<div>Blocks:</div>
+<div class="sample-padding">
+    <SfChip Selection="SelectionType.Multiple" SelectedChips=@Blocks>
+        <ChipItems>
+            <ChipItem Text="1" Enabled="true"></ChipItem>
+            <ChipItem Text="2" Enabled="true"></ChipItem>
+            <ChipItem Text="3" Enabled="true"></ChipItem>
+            <ChipItem Text="4" Enabled="true"></ChipItem>
+            <ChipItem Text="5" Enabled="true"></ChipItem>
+            <ChipItem Text="6" Enabled="true"></ChipItem>
+        </ChipItems>
+    </SfChip>
+</div>
+
 @code {
-    
+    private List<string> Blocks;
+    private string[] Year;
 }
