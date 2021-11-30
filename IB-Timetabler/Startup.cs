@@ -14,6 +14,7 @@ using ElectronNET.API;
 using ElectronNET.API.Entities;
 using IB_Timetabler.Models;
 using Microsoft.EntityFrameworkCore;
+using Syncfusion.Blazor;
 
 namespace IB_Timetabler {
     public class Startup {
@@ -34,10 +35,12 @@ namespace IB_Timetabler {
             });
             services.AddScoped<LessonService>();
             services.AddScoped<TeacherService>();
+            services.AddSyncfusionBlazor();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NTQxNTk4QDMxMzkyZTMzMmUzMElhRGc2cVNhQVpGTVMxR0NvdzRCanZpSGVhTU5TS1NvS01yMi90UFlPYjQ9");
             if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
             }
