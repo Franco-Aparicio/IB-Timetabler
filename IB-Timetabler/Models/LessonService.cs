@@ -26,6 +26,10 @@ namespace IB_Timetabler.Models {
             return await _ibTimetablerContext.Lessons.FirstOrDefaultAsync(x=>x.Id.Equals(id));
         }
         
+        // public async Task<List<Room>> GetLessonRoomsAsync(long id) {
+        //     return await _ibTimetablerContext.Lessons.FirstOrDefaultAsync(x=>x.Id.Equals(id));
+        // }
+        
         public async Task<bool> UpdateLessonAsync(Lesson lesson) {
             _ibTimetablerContext.Lessons.Update(lesson);
             await _ibTimetablerContext.SaveChangesAsync();
