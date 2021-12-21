@@ -23,19 +23,19 @@
 
 thead th {
     cursor: pointer;
-    font-weight: 60 !important;
-    font-family: BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;
+    /*font-weight: 60 !important;*/
+    /*font-family: BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;*/
 }
 
-h2 {
-    font-size: 1.75em;
-    margin-bottom: .5714em;
-    font-weight: 60 !important;
-    --font-family: BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;
-    --font-family-monospace: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace !important;
-}
+/*h2 {*/
+/*    font-size: 1.75em;*/
+/*    margin-bottom: .5714em;*/
+/*    font-weight: 60 !important;*/
+/*    --font-family: BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;*/
+/*    --font-family-monospace: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace !important;*/
+/*}*/
 
-.e-control, 
-.e-wrapper { 
-  font-family: "Roboto", sans-serif !important; 
-} 
+/*.e-control, */
+/*.e-wrapper { */
+/*  font-family: "Roboto", sans-serif !important; */
+/*} */

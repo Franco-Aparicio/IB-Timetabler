@@ -22,24 +22,9 @@ namespace IB_Timetabler.Models {
             await _ibTimetablerContext.SaveChangesAsync();
             return true;
         }
-        
-        public async Task<List<long>> GetBlockIdsAsync(long id) {
-            List<LessonIdblockId> blocks = await _ibTimetablerContext.LessonIdblockIds.Where(x=>x.LessonId.Equals(id)).ToListAsync();
-            List<long> ids = new List<long>();
-            foreach (LessonIdblockId block in blocks) {
-                ids.Add(block.BlockId);
-            }
-            return ids;
-        }
-        
-        public async Task<bool> UpdateLessonAsync(Lesson lesson) {
-            _ibTimetablerContext.Lessons.Update(lesson);
-            await _ibTimetablerContext.SaveChangesAsync();
-            return true;
-        }
-        
-        public async Task<bool> DeleteLessonAsync(Lesson lesson) {
-            _ibTimetablerContext.Remove(lesson);
+
+        public async Task<bool> DeleteLessonIdblockIdsAsync(IEnumerable<LessonIdblockId> lessonIdblockIds) {
+            _ibTimetablerContext.RemoveRange(lessonIdblockIds);
             await _ibTimetablerContext.SaveChangesAsync();
             return true;
         }

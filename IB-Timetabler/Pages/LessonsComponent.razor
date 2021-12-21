@@ -1,6 +1,9 @@
 @page "/lessons/"
 @inject LessonService lessonService
 @inject TeacherService teacherService
+@inject BlockService blockService
+@inject LessonIdblockIdService lessonIdblockIdService
+@inject RoomIdlessonIdService roomIdlessonIdService
 
 <TitleComponent Page="Lessons"></TitleComponent>
 
@@ -59,6 +62,12 @@ else {
                                  @Teachers.Find(x=>x.Id == l.TeacherId).Name
                              </td>
                          }
+                         else if (column.Title == "Block(s)") {
+                             <td>
+                                 @string.Join(", ", LessonIdblockIds.Where(x=>x.LessonId == l.Id)
+                                     .Select(x=>Blocks.Find(y=>y.Id == x.BlockId).BlockNum).OrderBy(x=>x))
+                             </td>
+                         }
                          else {
                              <td>
                                  @l.GetType().GetProperty(column.Property)?.GetValue(l)
@@ -77,21 +86,28 @@ else {
 
     List<Lesson> Lessons = null;
     List<Teacher> Teachers = null;
-    List<ColumnDefinition> Columns = new List<ColumnDefinition>();
-    List<long> Selected = new List<long>();
+    List<Block> Blocks = null;
+    List<LessonIdblockId> LessonIdblockIds = null;
+    List<RoomIdlessonId> RoomIdlessonIds = null;
+    List<ColumnDefinition> Columns = null;
+    List<long> Selected = null;
 
     protected override async void OnInitialized() {
         await base.OnInitializedAsync();
-        Columns.AddRange(
-            new [] {
+        Columns = new List<ColumnDefinition> {
                 new ColumnDefinition {Property = "Name", Title = "Name", SortDirection = SortDirection.Descending},
                 new ColumnDefinition {Property = "Year", Title = "Year"},
                 new ColumnDefinition {Property = "Level", Title = "Level"},
+                new ColumnDefinition {Property = "Block", Title = "Block(s)"},
                 new ColumnDefinition {Property = "NumLessons", Title = "Lessons Per Cycle"},
                 new ColumnDefinition {Property = "TeacherId", Title = "Teacher"}
-            });
+            };
+        Selected = new List<long>();
         await RefreshLessons();
         await RefreshTeachers();
+        await RefreshBlocks();
+        await RefreshLessonIdblockIds();
+        await RefreshRoomIdlessonIds();
         SortData();
     }
 
@@ -101,6 +117,18 @@ else {
 
     private async Task RefreshTeachers() {
         Teachers = await teacherService.GetAllTeachersAsync();
+    }
+
+    private async Task RefreshBlocks() {
+        Blocks = await blockService.GetAllBlocksAsync();
+    }
+    
+    private async Task RefreshLessonIdblockIds() {
+        LessonIdblockIds = await lessonIdblockIdService.GetAllLessonIdblockIdsAsync();
+    }
+    
+    private async Task RefreshRoomIdlessonIds() {
+        RoomIdlessonIds = await roomIdlessonIdService.GetAllRoomIdlessonIdsAsync();
     }
 
     private void HandleSelectedLesssons(long id, bool checkedValue) {
@@ -139,12 +167,25 @@ else {
         while (Selected.Count > 0) {
             Lesson l = Lessons.Find(x => x.Id == Selected[0]);
             await lessonService.DeleteLessonAsync(l);
+            var blocks = LessonIdblockIds.Where(x => x.LessonId == l.Id);
+            await lessonIdblockIdService.DeleteLessonIdblockIdsAsync(blocks);
+            await RefreshLessonIdblockIds();
+            await roomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds.Where(x=>x.LessonId == l.Id));
             if (!Lessons.Any(x => x.TeacherId == l.TeacherId && x.Id != l.Id)) {
                 await teacherService.DeleteTeacherAsync(Teachers.Find(x => x.Id == l.TeacherId));
+            }
+            foreach (var block in blocks) {
+                if (LessonIdblockIds.All(x => x.BlockId != block.BlockId)) {
+                    await blockService.DeleteBlockAsync(Blocks.Find(x => x.Id == block.BlockId));
+                }
             }
             Selected.RemoveAt(0);
         }
         await RefreshLessons();
+        await RefreshTeachers();
+        await RefreshBlocks();
+        await RefreshRoomIdlessonIds();
+        SortData();
         StateHasChanged();
     }
     
@@ -190,7 +231,7 @@ else {
                 }
                 break;
             }
-            case "TeacherId":
+            case "TeacherId": {
                 Lessons.Sort((x, y) => {
                     int first = Teachers.Find(t => t.Id == x.TeacherId).Name
                         .CompareTo(Teachers.Find(t => t.Id == y.TeacherId).Name);
@@ -204,6 +245,30 @@ else {
                     });
                 }
                 break;
+            }
+            case "Block": {
+                Lessons.Sort((x, y) => {
+                    int first = LessonIdblockIds.Where(l=>l.LessonId == x.Id)
+                        .Select(l=>Blocks.Find(b=>b.Id == l.BlockId).BlockNum)
+                            .OrderBy(x=>x).ToList()[0]
+                        .CompareTo(LessonIdblockIds.Where(l=>l.LessonId == y.Id)
+                            .Select(l=>Blocks.Find(b=>b.Id == l.BlockId).BlockNum)
+                            .OrderBy(x=>x).ToList()[0]);
+                    return first != 0 ? first : x.Name.CompareTo(y.Name);
+                });
+                if (sortByColumn.SortDirection == SortDirection.Ascending) {
+                    Lessons.Sort((x, y) => {
+                        int first = LessonIdblockIds.Where(l=>l.LessonId == y.Id)
+                            .Select(l=>Blocks.Find(b=>b.Id == l.BlockId).BlockNum)
+                            .OrderByDescending(x=>x).ToList()[0]
+                            .CompareTo(LessonIdblockIds.Where(l=>l.LessonId == x.Id)
+                                .Select(l=>Blocks.Find(b=>b.Id == l.BlockId).BlockNum)
+                                .OrderByDescending(x=>x).ToList()[0]);
+                        return first != 0 ? first : x.Name.CompareTo(y.Name);
+                    });
+                }
+                break;
+            }
             default: {
                 Lessons.Sort((x, y) => {
                     int first = x.GetType().GetProperty(sortByColumn.Property).GetValue(x).ToString()

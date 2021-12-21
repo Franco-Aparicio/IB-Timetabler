@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,10 +27,6 @@ namespace IB_Timetabler.Models {
         public async Task<Lesson> GetLessonAsync(long id) {
             return await _ibTimetablerContext.Lessons.FirstOrDefaultAsync(x=>x.Id.Equals(id));
         }
-        
-        // public async Task<List<Room>> GetLessonRoomsAsync(long id) {
-        //     return await _ibTimetablerContext.Lessons.FirstOrDefaultAsync(x=>x.Id.Equals(id));
-        // }
         
         public async Task<bool> UpdateLessonAsync(Lesson lesson) {
             _ibTimetablerContext.Lessons.Update(lesson);
