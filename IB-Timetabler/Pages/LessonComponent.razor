@@ -1,46 +1,153 @@
 @page "/lessons/{Id}"
+@inject NavigationManager NavigationManager
 @inject LessonService lessonService
 @inject TeacherService teacherService
+@inject BlockService blockService
+@inject LessonIdblockIdService lessonIdblockIdService
+@inject RoomIdlessonIdService roomIdlessonIdService
 
 <TitleComponent Page="@($"Lesson: {Lesson.Name}")"></TitleComponent>
 <br/>
 <NavLink class="button" href="lessons" style="text-decoration: none; margin-bottom: 15px">
-    <span class="icon is-medium"><i class="fas fa-arrow"></i></span>
+    <span class="icon"><i class="sort left"></i></span>
     <span>Back to Lessons</span>
 </NavLink>
+<button class="button" @onclick="Delete" style="margin-left: 15px;">
+    Delete Lesson
+</button>
 <br/><br/>
 
 <div style="overflow-x: auto">
-    <table class="table is-bordered is-hoverable has-text-centered" style="width: 100%">
-         <thead>
-             <tr>
-                 @foreach (string column in Headers) {
-                     <th style="cursor: default;">
-                         @column
-                     </th>
-                 }
-             </tr>
-         </thead>
-         <tbody>
-             <tr>
-                 @foreach (string prop in Properties) {
-                     if (prop == "TeacherId") {
-                         <td>
-                             @teacherService.GetTeacherAsync(Lesson.TeacherId).Result.Name
-                         </td>
-                     }
-                     else {
-                         <td>
-                             @Lesson.GetType().GetProperty(prop)?.GetValue(Lesson)
-                         </td>
-                     }
-                 }
-             </tr>
-         </tbody>
+    <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 100%">
+        <thead>
+        <tr>
+            @foreach (ColumnDefinition column in Columns) {
+                <th style="cursor: auto !important;">
+                    @column.Title
+                </th>
+            }
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            @foreach (var column in Columns) {
+                @switch (column.Title) {
+                    case "Name": {
+                        <td>
+                            <input class="input" value="@CopyLesson.Name" @oninput="HandleNameAsync" type="text" placeholder="@Lesson.Name" style="width: 100%; min-width: 150px;"/>
+                            @if (NameWarn.Length > 0 && NameWarn.Substring(0, 4) == "INFO") {
+                                <span style="font-size: 12px; color: dodgerblue; display: block;">@NameWarn</span>
+                            }
+                            else {
+                                <span style="font-size: 12px; color: red; display: block;">@NameWarn</span>
+                            }
+                        </td>
+                        break;
+                    }
+                    case "Year": {
+                        <td>
+                            <div class="select">
+                                <select @bind-value="@CopyLesson.Year" @bind-value:event="oninput" style="width: 100%; min-width: 75px;">
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>
+                                </select>
+                            </div>
+                        </td>
+                        break;
+                    }
+                    case "Level": {
+                        <td>
+                            <div class="select">
+                                <select @bind-value="@CopyLesson.Level" @bind-value:event="oninput" style="width: 100%; min-width: 75px;">
+                                    <option value="SL">SL</option>
+                                    <option value="HL">HL</option>
+                                </select>
+                            </div>
+                        </td>
+                        break;
+                    }
+                    case "Block(s)": {
+                        <td>
+                            
+                            @string.Join(", ", ))
+                        </td>
+                        break;
+                    }
+                    case "Lessons Per Cycle": {
+                        <td>
+                            @CopyLesson.NumLessons.ToString()
+                        </td>
+                        break;
+                    }
+                    case "Teacher": {
+                        <td>
+                            @Teachers.Find(x => x.Id == Lesson.TeacherId).Name
+                        </td>
+                        break;
+                    }
+                }
+            }
+        </tr>
+        </tbody>
+    </table>
+    <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 100%">
+        <thead>
+        <tr>
+            @foreach (ColumnDefinition column in Columns) {
+                <th style="cursor: auto !important;">
+                    @column.Title
+                </th>
+            }
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            @foreach (var column in Columns) {
+                @switch (column.Title) {
+                    case "Name": {
+                        <td>
+                            @CopyLesson.Name
+                        </td>
+                        break;
+                    }
+                    case "Year": {
+                        <td>
+                            @CopyLesson.Year.ToString()
+                        </td>
+                        break;
+                    }
+                    case "Level": {
+                        <td>
+                            @CopyLesson.Level
+                        </td>
+                        break;
+                    }
+                    case "Block(s)": {
+                        <td>
+                            @string.Join(", ", LessonIdblockIds.Where(x => x.LessonId == CopyLesson.Id)
+                                .Select(x => Blocks.Find(y => y.Id == x.BlockId).BlockNum).OrderBy(x => x))
+                        </td>
+                        break;
+                    }
+                    case "Lessons Per Cycle": {
+                        <td>
+                            @CopyLesson.NumLessons.ToString()
+                        </td>
+                        break;
+                    }
+                    case "Teacher": {
+                        <td>
+                            @Teachers.Find(x => x.Id == CopyLesson.TeacherId).Name
+                        </td>
+                        break;
+                    }
+                }
+            }
+        </tr>
+        </tbody>
     </table>
 </div>
 <br/><br/>
-
 @* <InputComponent Label="Name:"> *@
 @*     <Control> *@
 @*         <input class="input" @bind-value="@lesson.Name" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Name" id="Name:" style="width: 100%; min-width: 150px; max-width: 400px"/> *@
@@ -48,10 +155,10 @@
 @* </InputComponent> *@
 @* <InputComponent Label="Year:"> *@
 @*     <Control> *@
-@*          <select class="select" @bind-value="@lesson.Year" @bind-value:event="onsubmit" id="Year:" style="width: 100%; min-width: 150px; max-width: 400px"> *@
-@*              <option value="12">12</option> *@
-@*              <option value="13">13</option> *@
-@*          </select> *@
+          @* <select class="select" @bind-value="@lesson.Year" @bind-value:event="onsubmit" id="Year:" style="width: 100%; min-width: 150px; max-width: 400px"> *@
+          @*     <option value="12">12</option> *@
+          @*     <option value="13">13</option> *@
+          @* </select> *@
 @*     </Control> *@
 @* </InputComponent> *@
 @* <InputComponent Label="Lessons Per Cycle:"> *@
@@ -144,18 +251,60 @@
     [Parameter]
     public string Id { get; set; }
     
-    // Lesson placeholderLesson;
-    private Lesson Lesson;
-    // List<Lesson> classes;
-    List<string> Headers = new List<string> {"Name", "Year", "Level", "Lessons Per Cycle", "Teacher"};
-    List<string> Properties = new List<string> {"Name", "Year", "Level", "NumLessons", "TeacherId"};
-    // List<string> rooms;
+    Lesson Lesson = null;
+    Lesson CopyLesson = null;
+    List<Teacher> Teachers = null;
+    List<Block> Blocks = null;
+    List<long> CopyBlocks = null; ------------------------------------
+    List<LessonIdblockId> LessonIdblockIds = null;
+    List<RoomIdlessonId> RoomIdlessonIds = null;
+    List<ColumnDefinition> Columns = null;
+    string NameWarn;
 
     protected override async void OnInitialized() {
-        await GetLesson();
+        await base.OnInitializedAsync();
+        Columns = new List<ColumnDefinition> {
+            new ColumnDefinition {Property = "Name", Title = "Name", SortDirection = SortDirection.Descending},
+            new ColumnDefinition {Property = "Year", Title = "Year"},
+            new ColumnDefinition {Property = "Level", Title = "Level"},
+            new ColumnDefinition {Property = "Block", Title = "Block(s)"},
+            new ColumnDefinition {Property = "NumLessons", Title = "Lessons Per Cycle"},
+            new ColumnDefinition {Property = "TeacherId", Title = "Teacher"}
+        };
+        Lesson = await lessonService.GetLessonAsync(int.Parse(Id));
+        Teachers = await teacherService.GetAllTeachersAsync();
+        Blocks = await blockService.GetAllBlocksAsync();
+        LessonIdblockIds = await lessonIdblockIdService.GetAllLessonIdblockIdsAsync();
+        RoomIdlessonIds = await roomIdlessonIdService.GetAllRoomIdlessonIdsAsync();
+        CopyLesson = new Lesson {Id = Lesson.Id, ClassCode = Lesson.ClassCode, Level = Lesson.Level,
+            Name = Lesson.Name, NumLessons = Lesson.NumLessons, TeacherId = Lesson.TeacherId, Year = Lesson.Year};
+        NameWarn = "";
     }
 
-    private async Task GetLesson() {
-        Lesson = await lessonService.GetLessonAsync(int.Parse(Id));
+    private async void HandleNameAsync(ChangeEventArgs args) {
+        if (args.Value == null || args.Value.ToString().Trim().Length == 0) {
+            NameWarn = "The lesson must have a name!";
+            return;
+        }
+        CopyLesson.Name = args.Value.ToString();
+        NameWarn = "";
+        if (lessonService.GetAllLessonsAsync().Result.Any(x =>
+            x.Id != CopyLesson.Id && x.Name == CopyLesson.Name))
+            NameWarn = "INFO: This name is already in use";
+    }
+    
+    private async void Delete() {
+        string message = $"Are you sure you want to delete {Lesson.Name}?";
+        var options = new MessageBoxOptions(message) {
+            Title = "Confirm Action",
+            Buttons = new []{"Confirm", "Cancel"}
+        };
+        var choice = await Electron.Dialog.ShowMessageBoxAsync(options);
+        if (choice.Response == 1) return;
+        await lessonService.DeleteLessonAsync(Lesson);
+        var blocks = LessonIdblockIds.Where(x => x.LessonId == Lesson.Id);
+        await lessonIdblockIdService.DeleteLessonIdblockIdsAsync(blocks);
+        await roomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds.Where(x=>x.LessonId == Lesson.Id));
+        NavigationManager.NavigateTo("lessons");
     }
 }

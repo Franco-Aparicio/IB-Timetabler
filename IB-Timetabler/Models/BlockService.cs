@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace IB_Timetabler.Models {
     
@@ -23,7 +22,7 @@ namespace IB_Timetabler.Models {
             return true;
         }
 
-        public async Task<Block> GetBlock(long id) {
+        public async Task<Block> GetBlockAsync(long id) {
             return await _ibTimetablerContext.Blocks.FirstOrDefaultAsync(x => x.Id.Equals(id));
         }
         

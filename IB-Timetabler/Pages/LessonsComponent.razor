@@ -9,7 +9,7 @@
 
 <br/>
 <NavLink class="button" href="lessons/addLesson" style="text-decoration: none; margin-bottom: 15px">
-    <span class="icon is-medium"><i class="fas fa-plus"></i></span>
+    <span class="icon"><i class="fas fa-plus"></i></span>
     <span>Add Lesson</span>
 </NavLink>
 @if (Selected.Count == 1) {
@@ -171,9 +171,6 @@ else {
             await lessonIdblockIdService.DeleteLessonIdblockIdsAsync(blocks);
             await RefreshLessonIdblockIds();
             await roomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds.Where(x=>x.LessonId == l.Id));
-            if (!Lessons.Any(x => x.TeacherId == l.TeacherId && x.Id != l.Id)) {
-                await teacherService.DeleteTeacherAsync(Teachers.Find(x => x.Id == l.TeacherId));
-            }
             foreach (var block in blocks) {
                 if (LessonIdblockIds.All(x => x.BlockId != block.BlockId)) {
                     await blockService.DeleteBlockAsync(Blocks.Find(x => x.Id == block.BlockId));

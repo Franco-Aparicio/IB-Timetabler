@@ -21,6 +21,12 @@
     display: none;
 }
 
+.left {
+    transform: rotate(135deg);
+    -webkit-transform: rotate(135deg);
+    border-width: 0 2px 2px 0;
+}
+
 thead th {
     cursor: pointer;
     /*font-weight: 60 !important;*/
