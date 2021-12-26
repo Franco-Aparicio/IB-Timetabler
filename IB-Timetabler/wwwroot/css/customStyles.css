@@ -29,19 +29,49 @@
 
 thead th {
     cursor: pointer;
-    /*font-weight: 60 !important;*/
-    /*font-family: BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;*/
 }
 
-/*h2 {*/
-/*    font-size: 1.75em;*/
-/*    margin-bottom: .5714em;*/
-/*    font-weight: 60 !important;*/
-/*    --font-family: BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;*/
-/*    --font-family-monospace: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace !important;*/
-/*}*/
+.banner {
+    display: none;
+    padding: 1.5rem;
+    color: #fff;
+    z-index: 2;
+    position: absolute;
+    width: 25rem;
+    top: 2.5rem;
+    border-radius: 1rem;
+    right: 30px;
+}
 
-/*.e-control, */
-/*.e-wrapper { */
-/*  font-family: "Roboto", sans-serif !important; */
-/*} */
+.banner-icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 1rem;
+    font-size: 2.5rem;
+}
+
+.banner-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding-left: 1rem;
+}
+
+.banner-body p {
+    margin-bottom: 0;
+}
+
+.banner-visible {
+    display: flex;
+    flex-direction: row;
+    transition: opacity 1.5s linear;
+    opacity: 0.75;
+}
+
+.banner-hidden {
+    display: flex;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 1.5s, opacity 1.5s linear;
+}

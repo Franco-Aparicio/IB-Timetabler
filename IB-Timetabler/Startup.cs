@@ -9,12 +9,10 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using IB_Timetabler.Data;
 using ElectronNET.API;
 using ElectronNET.API.Entities;
 using IB_Timetabler.Models;
 using Microsoft.EntityFrameworkCore;
-using Syncfusion.Blazor;
 
 namespace IB_Timetabler {
     public class Startup {
@@ -29,7 +27,6 @@ namespace IB_Timetabler {
         public void ConfigureServices(IServiceCollection services) {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
             services.AddDbContext<IBTimetablerContext>(option => {
                 option.UseSqlite(Configuration.GetConnectionString("Default"));
             });
@@ -38,12 +35,11 @@ namespace IB_Timetabler {
             services.AddScoped<BlockService>();
             services.AddScoped<LessonIdblockIdService>();
             services.AddScoped<RoomIdlessonIdService>();
-            services.AddSyncfusionBlazor();
+            services.AddScoped<SaveBannerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
-            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NTQxNTk4QDMxMzkyZTMzMmUzMElhRGc2cVNhQVpGTVMxR0NvdzRCanZpSGVhTU5TS1NvS01yMi90UFlPYjQ9");
             if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
             }

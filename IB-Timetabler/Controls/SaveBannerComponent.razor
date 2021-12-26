@@ -1,0 +1,12 @@
+@inherits SaveBannerBaseComponent
+
+<div class="banner @(IsVisible ? "banner-visible" : "banner-hidden") @BackgroundCssClass">
+    <div class="banner-icon">
+        <i class="fas fa-@IconCssClass" aria-hidden="true"></i>
+    </div>
+    <div class="banner-body">
+        <h1 style="font-size: larger;">@Heading</h1>
+        <p>@Message</p>
+    </div>
+</div>
+

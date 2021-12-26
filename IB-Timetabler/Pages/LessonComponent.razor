@@ -1,10 +1,13 @@
 @page "/lessons/{Id}"
+@using System.Linq
+@inject SaveBannerService SaveBannerService
 @inject NavigationManager NavigationManager
-@inject LessonService lessonService
-@inject TeacherService teacherService
-@inject BlockService blockService
-@inject LessonIdblockIdService lessonIdblockIdService
-@inject RoomIdlessonIdService roomIdlessonIdService
+@inject LessonService LessonService
+@inject TeacherService TeacherService
+@inject BlockService BlockService
+@inject LessonIdblockIdService LessonIdblockIdService
+@inject RoomIdlessonIdService RoomIdlessonIdService
+
 
 <TitleComponent Page="@($"Lesson: {Lesson.Name}")"></TitleComponent>
 <br/>
@@ -12,7 +15,7 @@
     <span class="icon"><i class="sort left"></i></span>
     <span>Back to Lessons</span>
 </NavLink>
-<button class="button" @onclick="Delete" style="margin-left: 15px;">
+<button class="button is-danger" @onclick="Delete" style="margin-left: 15px;">
     Delete Lesson
 </button>
 <br/><br/>
@@ -34,7 +37,7 @@
                 @switch (column.Title) {
                     case "Name": {
                         <td>
-                            <input class="input" value="@CopyLesson.Name" @oninput="HandleNameAsync" type="text" placeholder="@Lesson.Name" style="width: 100%; min-width: 150px;"/>
+                            <input class="input" value="@Lesson.Name" @oninput="HandleName" @onfocusout="SubmitName" type="text" placeholder="@Lesson.Name" style="width: 100%; min-width: 150px;"/>
                             @if (NameWarn.Length > 0 && NameWarn.Substring(0, 4) == "INFO") {
                                 <span style="font-size: 12px; color: dodgerblue; display: block;">@NameWarn</span>
                             }
@@ -46,7 +49,7 @@
                     }
                     case "Year": {
                         <td>
-                            <div class="select">
+                            <div class="select" style="width: 100%; min-width: 75px;">
                                 <select @bind-value="@CopyLesson.Year" @bind-value:event="oninput" style="width: 100%; min-width: 75px;">
                                     <option value="12">12</option>
                                     <option value="13">13</option>
@@ -57,7 +60,7 @@
                     }
                     case "Level": {
                         <td>
-                            <div class="select">
+                            <div class="select" style="width: 100%; min-width: 75px;">
                                 <select @bind-value="@CopyLesson.Level" @bind-value:event="oninput" style="width: 100%; min-width: 75px;">
                                     <option value="SL">SL</option>
                                     <option value="HL">HL</option>
@@ -68,8 +71,22 @@
                     }
                     case "Block(s)": {
                         <td>
-                            
-                            @string.Join(", ", ))
+                            @foreach (Block b in Blocks) {
+                                <label for="@($"block-{@b.BlockNum.ToString()}")" style="display: inline-block;padding-right: 5px;padding-left: 5px; cursor: pointer;">
+                                    <label for="@($"block-{@b.BlockNum.ToString()}")" style="cursor: pointer;display:inline-flex;font-size:1.2rem; margin-bottom: 2px; margin-top: 2px;">@b.BlockNum.ToString()</label>
+                                    <input class="checkbox" type="checkbox" @oninput="eventArgs => {HandleBlockAsync(b.Id, eventArgs.Value?.ToString());}" checked=@LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id) id="@($"block-{@b.BlockNum.ToString()}")" style="align-items:center; margin-bottom: 2px; margin-top: 2px;"/>
+                                </label>
+                            }
+                            @if (BlockWarn.Length > 0 && BlockWarn.Substring(0, 4) == "INFO") {
+                                <span style="font-size: 12px; color: dodgerblue; display: block;">@BlockWarn</span>
+                            }
+                            else {
+                                <span style="font-size: 12px; color: red; display: block;">@BlockWarn</span>
+                            }
+                            <NavLink class="button is-small" href="blocks" style="text-decoration: none;">
+                                <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
+                                <span>Add</span>
+                            </NavLink>
                         </td>
                         break;
                     }
@@ -124,8 +141,8 @@
                     }
                     case "Block(s)": {
                         <td>
-                            @string.Join(", ", LessonIdblockIds.Where(x => x.LessonId == CopyLesson.Id)
-                                .Select(x => Blocks.Find(y => y.Id == x.BlockId).BlockNum).OrderBy(x => x))
+                            @string.Join(", ", LessonIdblockIds.Select(x =>
+                                Blocks.Find(y => y.Id == x.BlockId).BlockNum).OrderBy(x => x))
                         </td>
                         break;
                     }
@@ -255,11 +272,11 @@
     Lesson CopyLesson = null;
     List<Teacher> Teachers = null;
     List<Block> Blocks = null;
-    List<long> CopyBlocks = null; ------------------------------------
     List<LessonIdblockId> LessonIdblockIds = null;
     List<RoomIdlessonId> RoomIdlessonIds = null;
     List<ColumnDefinition> Columns = null;
     string NameWarn;
+    string BlockWarn;
 
     protected override async void OnInitialized() {
         await base.OnInitializedAsync();
@@ -271,26 +288,42 @@
             new ColumnDefinition {Property = "NumLessons", Title = "Lessons Per Cycle"},
             new ColumnDefinition {Property = "TeacherId", Title = "Teacher"}
         };
-        Lesson = await lessonService.GetLessonAsync(int.Parse(Id));
-        Teachers = await teacherService.GetAllTeachersAsync();
-        Blocks = await blockService.GetAllBlocksAsync();
-        LessonIdblockIds = await lessonIdblockIdService.GetAllLessonIdblockIdsAsync();
-        RoomIdlessonIds = await roomIdlessonIdService.GetAllRoomIdlessonIdsAsync();
+        Lesson = await LessonService.GetLessonAsync(int.Parse(Id));
+        Teachers = await TeacherService.GetAllTeachersAsync();
+        Blocks = await BlockService.GetAllBlocksAsync();
+        LessonIdblockIds = LessonIdblockIdService.GetAllLessonIdblockIdsAsync().Result.Where(x=>x.LessonId == Lesson.Id).ToList();
+        RoomIdlessonIds = await RoomIdlessonIdService.GetAllRoomIdlessonIdsAsync();
         CopyLesson = new Lesson {Id = Lesson.Id, ClassCode = Lesson.ClassCode, Level = Lesson.Level,
             Name = Lesson.Name, NumLessons = Lesson.NumLessons, TeacherId = Lesson.TeacherId, Year = Lesson.Year};
         NameWarn = "";
+        BlockWarn = "";
     }
 
-    private async void HandleNameAsync(ChangeEventArgs args) {
-        if (args.Value == null || args.Value.ToString().Trim().Length == 0) {
+    private void HandleName(ChangeEventArgs args) {
+        if (args.Value.ToString().Trim().Length == 0) {
             NameWarn = "The lesson must have a name!";
+            CopyLesson.Name = Lesson.Name;
             return;
         }
         CopyLesson.Name = args.Value.ToString();
         NameWarn = "";
-        if (lessonService.GetAllLessonsAsync().Result.Any(x =>
+        if (LessonService.GetAllLessonsAsync().Result.Any(x =>
             x.Id != CopyLesson.Id && x.Name == CopyLesson.Name))
             NameWarn = "INFO: This name is already in use";
+    }
+
+    private async void SubmitName() {
+        bool saved = Lesson.Name != CopyLesson.Name;
+        Lesson.Name = CopyLesson.Name;
+        await LessonService.UpdateLessonAsync(Lesson);
+        if (saved) SaveBannerService.ShowBanner(
+            "Lesson name updated successfully", SaveBannerType.Success);
+    }
+
+    private async void HandleBlockAsync(long id, string value) {
+        Console.WriteLine(id.ToString());
+        Console.WriteLine(value);
+        
     }
     
     private async void Delete() {
@@ -301,10 +334,9 @@
         };
         var choice = await Electron.Dialog.ShowMessageBoxAsync(options);
         if (choice.Response == 1) return;
-        await lessonService.DeleteLessonAsync(Lesson);
-        var blocks = LessonIdblockIds.Where(x => x.LessonId == Lesson.Id);
-        await lessonIdblockIdService.DeleteLessonIdblockIdsAsync(blocks);
-        await roomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds.Where(x=>x.LessonId == Lesson.Id));
+        await LessonService.DeleteLessonAsync(Lesson);
+        await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIds);
+        await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds.Where(x=>x.LessonId == Lesson.Id));
         NavigationManager.NavigateTo("lessons");
     }
 }

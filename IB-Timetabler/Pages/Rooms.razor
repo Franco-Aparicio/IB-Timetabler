@@ -1,0 +1,15 @@
+@page "/rooms"
+
+<TitleComponent Page="Manage Available Rooms"></TitleComponent>
+
+<p>Current count: @currentCount.ToString()</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount() {
+        currentCount++;
+    }
+}
