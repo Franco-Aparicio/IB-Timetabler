@@ -73,7 +73,7 @@ namespace IB_Timetabler {
             var windowOptions = new BrowserWindowOptions {
                 AutoHideMenuBar = true,
                 Title = "IB-Timetabler",
-                Width = 1500,
+                Width = 1570,
                 Height = 1000,
                 MinWidth = 500,
                 MinHeight = 300

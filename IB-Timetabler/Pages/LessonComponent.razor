@@ -47,10 +47,22 @@
                         </td>
                         break;
                     }
+                    case "Class Code": {
+                        <td>
+                            <input class="input" value="@Lesson.ClassCode" @oninput="HandleClassCode" @onfocusout="SubmitClassCode" type="text" placeholder="@Lesson.ClassCode" style="width: 100%; min-width: 150px;"/>
+                            @if (ClassCodeWarn.Length > 0 && ClassCodeWarn.Substring(0, 4) == "INFO") {
+                                <span style="font-size: 12px; color: dodgerblue; display: block;">@ClassCodeWarn</span>
+                            }
+                            else {
+                                <span style="font-size: 12px; color: red; display: block;">@ClassCodeWarn</span>
+                            }
+                        </td>
+                        break;
+                    }
                     case "Year": {
                         <td>
                             <div class="select" style="width: 100%; min-width: 75px;">
-                                <select @bind-value="@CopyLesson.Year" @bind-value:event="oninput" style="width: 100%; min-width: 75px;">
+                                <select @bind-value="@CopyLesson.Year" @bind-value:event="oninput" @onchange="SubmitYear" style="width: 100%; min-width: 75px;">
                                     <option value="12">12</option>
                                     <option value="13">13</option>
                                 </select>
@@ -61,7 +73,7 @@
                     case "Level": {
                         <td>
                             <div class="select" style="width: 100%; min-width: 75px;">
-                                <select @bind-value="@CopyLesson.Level" @bind-value:event="oninput" style="width: 100%; min-width: 75px;">
+                                <select @bind-value="@CopyLesson.Level" @bind-value:event="oninput" @onchange="SubmitLevel" style="width: 100%; min-width: 75px;">
                                     <option value="SL">SL</option>
                                     <option value="HL">HL</option>
                                 </select>
@@ -70,11 +82,14 @@
                         break;
                     }
                     case "Block(s)": {
-                        <td>
+                        <td style="min-width: 100px">
                             @foreach (Block b in Blocks) {
                                 <label for="@($"block-{@b.BlockNum.ToString()}")" style="display: inline-block;padding-right: 5px;padding-left: 5px; cursor: pointer;">
                                     <label for="@($"block-{@b.BlockNum.ToString()}")" style="cursor: pointer;display:inline-flex;font-size:1.2rem; margin-bottom: 2px; margin-top: 2px;">@b.BlockNum.ToString()</label>
-                                    <input class="checkbox" type="checkbox" @oninput="eventArgs => {HandleBlockAsync(b.Id, eventArgs.Value?.ToString());}" checked=@LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id) id="@($"block-{@b.BlockNum.ToString()}")" style="align-items:center; margin-bottom: 2px; margin-top: 2px;"/>
+                                    <input class="checkbox" type="checkbox" @onclick="() => {HandleBlockAsync(b.Id,LessonIdblockIds.Where(x=>x.LessonId == Lesson.Id).Select(x=>x.BlockId).Contains(b.Id));}"
+                                           checked=@LessonIdblockIds.Where(x=>x.LessonId == Lesson.Id).Select(x=>x.BlockId).Contains(b.Id)
+                                           @onclick:preventDefault="true" id="@($"block-{@b.BlockNum.ToString()}")"
+                                           style="align-items:center; margin-bottom: 2px; margin-top: 2px;"/>
                                 </label>
                             }
                             @if (BlockWarn.Length > 0 && BlockWarn.Substring(0, 4) == "INFO") {
@@ -92,69 +107,25 @@
                     }
                     case "Lessons Per Cycle": {
                         <td>
-                            @CopyLesson.NumLessons.ToString()
+                            <input class="input" value="@Lesson.NumLessons.ToString()" @oninput="HandleNumLessons"
+                                   @onfocusout="SubmitNumLessons" type="number" placeholder="@Lesson.NumLessons.ToString()" style="width: 100%; min-width: 50px;"/>
+                            <span style="font-size: 12px; color: red; display: block;">@NumLessonsWarn</span>
                         </td>
                         break;
                     }
                     case "Teacher": {
                         <td>
-                            @Teachers.Find(x => x.Id == Lesson.TeacherId).Name
-                        </td>
-                        break;
-                    }
-                }
-            }
-        </tr>
-        </tbody>
-    </table>
-    <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 100%">
-        <thead>
-        <tr>
-            @foreach (ColumnDefinition column in Columns) {
-                <th style="cursor: auto !important;">
-                    @column.Title
-                </th>
-            }
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            @foreach (var column in Columns) {
-                @switch (column.Title) {
-                    case "Name": {
-                        <td>
-                            @CopyLesson.Name
-                        </td>
-                        break;
-                    }
-                    case "Year": {
-                        <td>
-                            @CopyLesson.Year.ToString()
-                        </td>
-                        break;
-                    }
-                    case "Level": {
-                        <td>
-                            @CopyLesson.Level
-                        </td>
-                        break;
-                    }
-                    case "Block(s)": {
-                        <td>
-                            @string.Join(", ", LessonIdblockIds.Select(x =>
-                                Blocks.Find(y => y.Id == x.BlockId).BlockNum).OrderBy(x => x))
-                        </td>
-                        break;
-                    }
-                    case "Lessons Per Cycle": {
-                        <td>
-                            @CopyLesson.NumLessons.ToString()
-                        </td>
-                        break;
-                    }
-                    case "Teacher": {
-                        <td>
-                            @Teachers.Find(x => x.Id == CopyLesson.TeacherId).Name
+                            <div class="select" style="width: 100%; min-width: 75px;">
+                                <select @bind-value="@CopyLesson.TeacherId" @bind-value:event="oninput" @onchange="SubmitTeacher" style="width: 100%; min-width: 100px;">
+                                    @foreach (var teacher in Teachers.OrderBy(x=>x.Name)) {
+                                        <option value="@teacher.Id.ToString()">@teacher.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <NavLink class="button is-small" href="teachers" style="text-decoration: none; margin-top: 8px">
+                                <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
+                                <span>Add</span>
+                            </NavLink>
                         </td>
                         break;
                     }
@@ -164,105 +135,7 @@
         </tbody>
     </table>
 </div>
-<br/><br/>
-@* <InputComponent Label="Name:"> *@
-@*     <Control> *@
-@*         <input class="input" @bind-value="@lesson.Name" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Name" id="Name:" style="width: 100%; min-width: 150px; max-width: 400px"/> *@
-@*     </Control> *@
-@* </InputComponent> *@
-@* <InputComponent Label="Year:"> *@
-@*     <Control> *@
-          @* <select class="select" @bind-value="@lesson.Year" @bind-value:event="onsubmit" id="Year:" style="width: 100%; min-width: 150px; max-width: 400px"> *@
-          @*     <option value="12">12</option> *@
-          @*     <option value="13">13</option> *@
-          @* </select> *@
-@*     </Control> *@
-@* </InputComponent> *@
-@* <InputComponent Label="Lessons Per Cycle:"> *@
-@*     <Control> *@
-@*         <input class="input" @bind-value="@lesson.NumLessons" @bind-value:event="onsubmit" type="number" placeholder="@placeholderLesson.NumLessons.ToString()" id="Lessons Per Cycle:" style="width: 100%; min-width: 150px; max-width: 400px"/> *@
-@*     </Control> *@
-@* </InputComponent> *@
-@* <InputComponent Label="Teacher:"> *@
-@*     <Control> *@
-@*         <input class="input" @bind-value="@lesson.Teacher" @bind-value:event="onsubmit" type="text" placeholder="@placeholderLesson.Teacher" id="Teacher:" style="width: 100%; min-width: 150px; max-width: 400px"/> *@
-@*     </Control> *@
-@* </InputComponent> *@
-@* <InputComponent Label="Blocks:"> *@
-@*     <Control> *@
-@*          @for (int b = 1; b <= 6; b++) { *@
-@*              <label style="align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;font-size:1.2rem;height:1.8em;justify-content:flex-start;line-height:1.5;padding: calc(.5em - 1px) calc(.5em - 1px);position:relative;vertical-align:top">@b.ToString() *@
-@*                  @if (placeholderLesson.Blocks.Contains(b)) { *@
-@*                      <input type="checkbox" class="checkbox" style="margin-left: 5px;align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;height:1.8em;justify-content:flex-start;line-height:1.5;padding: calc(.5em - 1px) calc(.5em - 1px);position:relative;vertical-align:top" value="@b.ToString()" checked> *@
-@*                  } *@
-@*                  else { *@
-@*                     <input type="checkbox" class="checkbox" style="margin-left: 5px;align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;height:1.8em;justify-content:flex-start;line-height:1.5;padding: calc(.5em - 1px) calc(.5em - 1px);position:relative;vertical-align:top" value="@b.ToString()"> *@
-@*                 } *@
-@*                 </label> *@
-@*          } *@
-@*     </Control> *@
-@* </InputComponent> *@
-@* align-items:center;border:1px solid transparent;border-radius:4px;box-shadow:none;display:inline-flex;font-size:1rem;height:2.5em;justify-content:flex-start;line-height:1.5;padding-bottom:calc(.5em - 1px);padding-left:calc(.75em - 1px);padding-right:calc(.75em - 1px);padding-top:calc(.5em - 1px);position:relative;vertical-align:top *@
-@* <InputComponent Label="Level:"> *@
-@*     <Control> *@
-@*         <select class="select" @bind-value="@lesson.Level" @bind-value:event="onsubmit" id="Level:" style="width: 100%; min-width: 150px; max-width: 400px"> *@
-@*             <option value="SL">SL</option> *@
-@*             <option value="HL">HL</option> *@
-@*         </select> *@
-@*     </Control> *@
-@* </InputComponent> *@
-
-@* <InputComponent Label="Available Rooms:"> *@
-@*     <Control> *@
-@*          <select multiple class="select is-multiple" @bind-value="@lesson.Level" @bind-value:event="onsubmit" id="Available Rooms:" style="width: 100%; min-width: 150px; max-width: 400px"> *@
-@*              @foreach (string room in rooms.Where(x=>lesson.Rooms.All(y=>x != y))) { *@
-@*                  <option value=@room>@room</option> *@
-@*              } *@
-@*          </select> *@
-@*     </Control> *@
-@* </InputComponent> *@
-@* <InputComponent Label="Selected Rooms:"> *@
-@*     <Control> *@
-@*          <select multiple class="select is-multiple" @bind-value="@lesson.Level" @bind-value:event="onsubmit" id="Selected Rooms:" style="width: 100%; min-width: 150px; max-width: 400px"> *@
-@*              @foreach (string room in lesson.Rooms) { *@
-@*                  <option value=@room>@room</option> *@
-@*              } *@
-@*          </select> *@
-@*     </Control> *@
-@* </InputComponent> *@
-
-@* <div style="overflow-x: auto"> *@
-@*     <table class="table is-bordered is-striped is-hoverable" style="width: 49%; display: inline-table"> *@
-@*         <thead> *@
-@*         <tr class="has-text-centered"> *@
-@*             <th>Available Rooms</th> *@
-@*         </tr> *@
-@*         </thead> *@
-@*         <tbody> *@
-@*         @foreach (string room in rooms.Where(x=>lesson.Rooms.All(y=> x != y))) { *@
-@*             <tr class="has-text-centered"> *@
-@*                 <td class="has-text-centered">@room</td> *@
-@*             </tr> *@
-@*         } *@
-@*         </tbody> *@
-@*     </table> *@
-@*     <table class="table is-bordered is-striped is-hoverable" style="width: 49%; display: inline-table"> *@
-@*         <thead> *@
-@*             <tr class="has-text-centered"> *@
-@*                 <th>Selected Rooms</th> *@
-@*             </tr> *@
-@*         </thead> *@
-@*         <tbody> *@
-@*             @foreach (string room in lesson.Rooms) { *@
-@*                 <tr class="has-text-centered"> *@
-@*                     <td class="has-text-centered">@room</td> *@
-@*                 </tr> *@
-@*             } *@
-@*         </tbody> *@
-@*     </table> *@
-@* </div> *@
-
-<br/><br/>
+<br/><br/><br/><br/>
 @code {
 
     [Parameter]
@@ -276,12 +149,15 @@
     List<RoomIdlessonId> RoomIdlessonIds = null;
     List<ColumnDefinition> Columns = null;
     string NameWarn;
+    string ClassCodeWarn;
     string BlockWarn;
+    string NumLessonsWarn;
 
     protected override async void OnInitialized() {
         await base.OnInitializedAsync();
         Columns = new List<ColumnDefinition> {
             new ColumnDefinition {Property = "Name", Title = "Name", SortDirection = SortDirection.Descending},
+            new ColumnDefinition {Property = "ClassCode", Title = "Class Code"},
             new ColumnDefinition {Property = "Year", Title = "Year"},
             new ColumnDefinition {Property = "Level", Title = "Level"},
             new ColumnDefinition {Property = "Block", Title = "Block(s)"},
@@ -291,12 +167,18 @@
         Lesson = await LessonService.GetLessonAsync(int.Parse(Id));
         Teachers = await TeacherService.GetAllTeachersAsync();
         Blocks = await BlockService.GetAllBlocksAsync();
-        LessonIdblockIds = LessonIdblockIdService.GetAllLessonIdblockIdsAsync().Result.Where(x=>x.LessonId == Lesson.Id).ToList();
+        RefreshLessonIdblockIds();
         RoomIdlessonIds = await RoomIdlessonIdService.GetAllRoomIdlessonIdsAsync();
         CopyLesson = new Lesson {Id = Lesson.Id, ClassCode = Lesson.ClassCode, Level = Lesson.Level,
             Name = Lesson.Name, NumLessons = Lesson.NumLessons, TeacherId = Lesson.TeacherId, Year = Lesson.Year};
         NameWarn = "";
+        ClassCodeWarn = "";
         BlockWarn = "";
+        NumLessonsWarn = "";
+    }
+
+    private async void RefreshLessonIdblockIds() {
+        LessonIdblockIds = await LessonIdblockIdService.GetAllLessonIdblockIdsAsync();
     }
 
     private void HandleName(ChangeEventArgs args) {
@@ -319,11 +201,85 @@
         if (saved) SaveBannerService.ShowBanner(
             "Lesson name updated successfully", SaveBannerType.Success);
     }
+    
+    private void HandleClassCode(ChangeEventArgs args) {
+        if (args.Value.ToString().Trim().Length == 0) {
+            ClassCodeWarn = "The lesson must have a class code!";
+            CopyLesson.ClassCode = Lesson.ClassCode;
+            return;
+        }
+        CopyLesson.ClassCode = args.Value.ToString();
+        ClassCodeWarn = "";
+        if (LessonService.GetAllLessonsAsync().Result.Any(x =>
+            x.Id != CopyLesson.Id && x.ClassCode == CopyLesson.ClassCode))
+            ClassCodeWarn = "INFO: This code is already in use";
+    }
 
-    private async void HandleBlockAsync(long id, string value) {
-        Console.WriteLine(id.ToString());
-        Console.WriteLine(value);
-        
+    private async void SubmitClassCode() {
+        bool saved = Lesson.ClassCode != CopyLesson.ClassCode;
+        Lesson.ClassCode = CopyLesson.ClassCode;
+        await LessonService.UpdateLessonAsync(Lesson);
+        if (saved) SaveBannerService.ShowBanner(
+            "Class code updated successfully", SaveBannerType.Success);
+    }
+
+    private async void SubmitYear() {
+        bool saved = Lesson.Year != CopyLesson.Year;
+        Lesson.Year = CopyLesson.Year;
+        await LessonService.UpdateLessonAsync(Lesson);
+        if (saved) SaveBannerService.ShowBanner(
+            "Year group updated successfully", SaveBannerType.Success);
+    }
+
+    private async void SubmitLevel() {
+        bool saved = Lesson.Level != CopyLesson.Level;
+        Lesson.Level = CopyLesson.Level;
+        await LessonService.UpdateLessonAsync(Lesson);
+        if (saved) SaveBannerService.ShowBanner(
+            "Lesson level updated successfully", SaveBannerType.Success);
+    }
+    
+    private async void HandleBlockAsync(long id, bool value) {
+        if (LessonIdblockIds.Count(x => x.LessonId == Lesson.Id) == 1 && value) {
+            BlockWarn = "There must be at least one block selected!";
+            StateHasChanged();
+            return;
+        }
+        BlockWarn = "";
+        if (!value) await LessonIdblockIdService.InsertLessonIdblockIdAsync(
+            new LessonIdblockId { BlockId = id, LessonId = Lesson.Id });
+        else await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(
+            LessonIdblockIds.FindAll(x=>x.LessonId == Lesson.Id && x.BlockId == id));
+        RefreshLessonIdblockIds();
+        if (LessonIdblockIds.Count(x => x.LessonId == Lesson.Id) >= 1 && !value)
+            BlockWarn = "INFO: This is normally only for lessons such as BTEC and PPS";
+        SaveBannerService.ShowBanner("Lesson blocks updated successfully", SaveBannerType.Success);
+    }
+
+    private void HandleNumLessons(ChangeEventArgs args) {
+        if (args.Value.ToString().Trim().Length == 0 || long.Parse(args.Value.ToString()) <= 0) {
+            NumLessonsWarn = "There must be at least one lesson per cycle!";
+            CopyLesson.NumLessons = Lesson.NumLessons;
+            return;
+        }
+        CopyLesson.NumLessons = long.Parse(args.Value.ToString());
+        NumLessonsWarn = "";
+    }
+
+    private async void SubmitNumLessons() {
+        bool saved = Lesson.NumLessons != CopyLesson.NumLessons;
+        Lesson.NumLessons = CopyLesson.NumLessons;
+        await LessonService.UpdateLessonAsync(Lesson);
+        if (saved) SaveBannerService.ShowBanner(
+            "Lessons per cycle updated successfully", SaveBannerType.Success);
+    }
+    
+    private async void SubmitTeacher() {
+        bool saved = Lesson.TeacherId != CopyLesson.TeacherId;
+        Lesson.TeacherId = CopyLesson.TeacherId;
+        await LessonService.UpdateLessonAsync(Lesson);
+        if (saved) SaveBannerService.ShowBanner(
+            "Teacher updated successfully", SaveBannerType.Success);
     }
     
     private async void Delete() {
@@ -335,7 +291,7 @@
         var choice = await Electron.Dialog.ShowMessageBoxAsync(options);
         if (choice.Response == 1) return;
         await LessonService.DeleteLessonAsync(Lesson);
-        await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIds);
+        await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIds.Where(x=>x.LessonId == Lesson.Id));
         await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds.Where(x=>x.LessonId == Lesson.Id));
         NavigationManager.NavigateTo("lessons");
     }

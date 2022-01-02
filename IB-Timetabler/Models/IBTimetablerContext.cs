@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 
 #nullable disable
@@ -22,12 +23,6 @@ namespace IB_Timetabler.Models {
         public virtual DbSet<SavedLessonIdperiodId> SavedLessonIdperiodIds { get; set; }
         public virtual DbSet<Teacher> Teachers { get; set; }
         
-        // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-        //     if (!optionsBuilder.IsConfigured) {
-        //         optionsBuilder.UseSqlite("Data Source = IB-Timetabler.db");
-        //     }
-        // }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             OnModelCreatingPartial(modelBuilder);
             modelBuilder.Entity<Block>(entity => {
@@ -139,6 +134,7 @@ namespace IB_Timetabler.Models {
                 new [] {"N0.41", "0"}, new [] {"A1.14", "1"}, new [] {"Gym 1", "0"}, new [] {"N2.18", "2"}, new [] {"N2.4", "2"}, new [] {"A1.13", "1"}, new [] {"N2.24", "2"}, new [] {"N2.25", "2"}, new [] {"Art 1", "0"},
                 new [] {"N2.8", "2"}, new [] {"N2.30", "2"}, new [] {"A1.16", "1"}, new [] {"A1.15", "1"}, new [] {"A1.12", "1"}, new [] {"N2.23", "2"}, new [] {"1.13", "1"}, new [] {"1.12", "1"}};
             
+            List<string> uniqueNames = new HashSet<string>(teacherNames).ToList();
             Lesson[] lessons = new Lesson[names.Length];
             for (int i = 0; i < names.Length; i++) {
                 lessons[i] = new Lesson {
@@ -147,14 +143,14 @@ namespace IB_Timetabler.Models {
                     Id = i + 1,
                     Level = levels[i],
                     NumLessons = numLessons[i],
-                    TeacherId = i + 1,
+                    TeacherId = uniqueNames.FindIndex(x=>x == teacherNames[i]) + 1,
                     Year = years[i]};
             }
-            Teacher[] teachers = new Teacher[teacherNames.Length];
-            for (int i = 0; i < teacherNames.Length; i++) {
-                teachers[i] = new Teacher {
-                    Name = teacherNames[i],
-                    Id = i + 1 };
+            List<Teacher> teachers = new List<Teacher>();
+            for (int i = 0; i < uniqueNames.Count; i++) {
+                teachers.Add(new Teacher {
+                    Name = uniqueNames[i],
+                    Id = i + 1 });
             }
             List<LessonIdblockId> lessonBlocks = new List<LessonIdblockId>();
             for (int i = 0; i < options.Length; i++) {
@@ -172,14 +168,16 @@ namespace IB_Timetabler.Models {
                     Id = i + 1 };
             }
             List<RoomIdlessonId> lessonRooms = new List<RoomIdlessonId>();
-            for (int i = 0; i < options.Length; i++) {
-                foreach (int opt in options[i]) {
+            for (int i = 1; i < names.Length; i++) {
+                for (int j = 0; j < roomNums.Length; j++) {
+                    if (roomNums[j][0][..3] == "Gym") continue;
                     lessonRooms.Add(new RoomIdlessonId {
-                        RoomId = opt,
-                        LessonId = i + 1 });
+                        RoomId = j + 1,
+                        LessonId = i
+                    });
                 }
             }
-            
+
             modelBuilder.Entity<Block>().HasData(blocks);
             modelBuilder.Entity<Lesson>().HasData(lessons);
             modelBuilder.Entity<Teacher>().HasData(teachers);

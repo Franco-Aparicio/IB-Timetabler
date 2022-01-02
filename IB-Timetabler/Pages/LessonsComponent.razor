@@ -167,15 +167,9 @@ else {
         while (Selected.Count > 0) {
             Lesson l = Lessons.Find(x => x.Id == Selected[0]);
             await lessonService.DeleteLessonAsync(l);
-            var blocks = LessonIdblockIds.Where(x => x.LessonId == l.Id);
-            await lessonIdblockIdService.DeleteLessonIdblockIdsAsync(blocks);
+            await lessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIds.Where(x => x.LessonId == l.Id));
             await RefreshLessonIdblockIds();
             await roomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds.Where(x=>x.LessonId == l.Id));
-            foreach (var block in blocks) {
-                if (LessonIdblockIds.All(x => x.BlockId != block.BlockId)) {
-                    await blockService.DeleteBlockAsync(Blocks.Find(x => x.Id == block.BlockId));
-                }
-            }
             Selected.RemoveAt(0);
         }
         await RefreshLessons();

@@ -3,14 +3,16 @@
 using IB_Timetabler.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace IB_Timetabler.Migrations {
     
     [DbContext(typeof(IBTimetablerContext))]
-    partial class IBTimetablerContextModelSnapshot : ModelSnapshot {
+    [Migration("20220102170251_Initial")]
+    partial class Initial {
         
-        protected override void BuildModel(ModelBuilder modelBuilder) {
+        protected override void BuildTargetModel(ModelBuilder modelBuilder) {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "5.0.12");
 

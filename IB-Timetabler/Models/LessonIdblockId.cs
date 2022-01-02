@@ -5,6 +5,7 @@
 namespace IB_Timetabler.Models {
     
     public partial class LessonIdblockId {
+        
         [Key]
         public long LessonId { get; set; }
         [Key]
