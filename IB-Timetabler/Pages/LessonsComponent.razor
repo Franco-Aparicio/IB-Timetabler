@@ -5,7 +5,7 @@
 @inject LessonIdblockIdService lessonIdblockIdService
 @inject RoomIdlessonIdService roomIdlessonIdService
 
-<TitleComponent Page="Lessons"></TitleComponent>
+<TitleComponent Page="Manage Lessons"></TitleComponent>
 
 <br/>
 <NavLink class="button is-success is-outlined" href="lessons/addLesson" style="text-decoration: none; margin-bottom: 15px">
@@ -33,7 +33,7 @@ else {
          <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 100%">
              <thead>
              <tr>
-                 <th @onclick="() => HandleSelectAllLesssons(checkAll)">
+                 <th @onclick="() => HandleSelectAllLesssons(checkAll)" style="width: 25px">
                      <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllLesssons(checkAll))" style="cursor: pointer;"/>
                  </th>
                  @foreach (ColumnDefinition column in Columns) {
@@ -95,7 +95,7 @@ else {
     protected override async void OnInitialized() {
         await base.OnInitializedAsync();
         Columns = new List<ColumnDefinition> {
-                new ColumnDefinition {Property = "Name", Title = "Name", SortDirection = SortDirection.Descending},
+                new ColumnDefinition {Property = "Name", Title = "Name", SortDirection = SortDirection.Ascending},
                 new ColumnDefinition {Property = "Year", Title = "Year"},
                 new ColumnDefinition {Property = "Level", Title = "Level"},
                 new ColumnDefinition {Property = "Block", Title = "Block(s)"},
@@ -196,7 +196,7 @@ else {
         if (!initial)
             switch (sortByColumn.SortDirection) {
                 case SortDirection.NotSet:
-                    sortByColumn.SortDirection = SortDirection.Descending;
+                    sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
                 case SortDirection.Ascending:
                     sortByColumn.SortDirection = SortDirection.Descending;
@@ -205,7 +205,7 @@ else {
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
                 default:
-                    sortByColumn.SortDirection = SortDirection.Descending;
+                    sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
             }
         switch (sortByColumn.Property) {
@@ -214,7 +214,7 @@ else {
                     int first = x.NumLessons.CompareTo(y.NumLessons);
                     return first != 0 ? first : x.Name.CompareTo(y.Name);
                 });
-                if (sortByColumn.SortDirection == SortDirection.Ascending) {
+                if (sortByColumn.SortDirection == SortDirection.Descending) {
                     Lessons.Sort((x, y) => {
                         int first = y.NumLessons.CompareTo(x.NumLessons);
                         return first != 0 ? first : x.Name.CompareTo(y.Name);
@@ -228,7 +228,7 @@ else {
                         .CompareTo(Teachers.Find(t => t.Id == y.TeacherId).Name);
                     return first != 0 ? first : x.Name.CompareTo(y.Name);
                 });
-                if (sortByColumn.SortDirection == SortDirection.Ascending) {
+                if (sortByColumn.SortDirection == SortDirection.Descending) {
                     Lessons.Sort((x, y) => {
                         int first = Teachers.Find(t => t.Id == y.TeacherId).Name
                             .CompareTo(Teachers.Find(t => t.Id == x.TeacherId).Name);
@@ -247,7 +247,7 @@ else {
                             .OrderBy(x=>x).ToList()[0]);
                     return first != 0 ? first : x.Name.CompareTo(y.Name);
                 });
-                if (sortByColumn.SortDirection == SortDirection.Ascending) {
+                if (sortByColumn.SortDirection == SortDirection.Descending) {
                     Lessons.Sort((x, y) => {
                         int first = LessonIdblockIds.Where(l=>l.LessonId == y.Id)
                             .Select(l=>Blocks.Find(b=>b.Id == l.BlockId).BlockNum)
@@ -266,7 +266,7 @@ else {
                         .CompareTo(y.GetType().GetProperty(sortByColumn.Property).GetValue(y).ToString());
                     return first != 0 ? first : x.Name.CompareTo(y.Name);
                 });
-                if (sortByColumn.SortDirection == SortDirection.Ascending) {
+                if (sortByColumn.SortDirection == SortDirection.Descending) {
                     Lessons.Sort((x, y) => {
                         int first = y.GetType().GetProperty(sortByColumn.Property).GetValue(y).ToString()
                             .CompareTo(x.GetType().GetProperty(sortByColumn.Property).GetValue(x).ToString());

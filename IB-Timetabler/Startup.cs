@@ -32,6 +32,7 @@ namespace IB_Timetabler {
             });
             services.AddScoped<LessonService>();
             services.AddScoped<TeacherService>();
+            services.AddScoped<RoomService>();
             services.AddScoped<BlockService>();
             services.AddScoped<LessonIdblockIdService>();
             services.AddScoped<RoomIdlessonIdService>();

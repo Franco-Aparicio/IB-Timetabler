@@ -7,6 +7,7 @@
 @inject BlockService BlockService
 @inject LessonIdblockIdService LessonIdblockIdService
 @inject RoomIdlessonIdService RoomIdlessonIdService
+@inject RoomService RoomService
 
 
 <TitleComponent Page="@($"Lesson: {Lesson.Name}")"></TitleComponent>
@@ -24,7 +25,7 @@
     <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 100%">
         <thead>
         <tr>
-            @foreach (ColumnDefinition column in Columns) {
+            @foreach (ColumnDefinition column in MainColumns) {
                 <th style="cursor: auto !important;">
                     @column.Title
                 </th>
@@ -33,7 +34,7 @@
         </thead>
         <tbody>
         <tr>
-            @foreach (var column in Columns) {
+            @foreach (var column in MainColumns) {
                 @switch (column.Title) {
                     case "Name": {
                         <td>
@@ -86,8 +87,8 @@
                             @foreach (Block b in Blocks) {
                                 <label for="@($"block-{@b.BlockNum.ToString()}")" style="display: inline-block;padding-right: 5px;padding-left: 5px; cursor: pointer;">
                                     <label for="@($"block-{@b.BlockNum.ToString()}")" style="cursor: pointer;display:inline-flex;font-size:1.2rem; margin-bottom: 2px; margin-top: 2px;">@b.BlockNum.ToString()</label>
-                                    <input class="checkbox" type="checkbox" @onclick="() => {HandleBlockAsync(b.Id,LessonIdblockIds.Where(x=>x.LessonId == Lesson.Id).Select(x=>x.BlockId).Contains(b.Id));}"
-                                           checked=@LessonIdblockIds.Where(x=>x.LessonId == Lesson.Id).Select(x=>x.BlockId).Contains(b.Id)
+                                    <input class="checkbox" type="checkbox" @onclick="() => {HandleBlockAsync(b.Id,LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id));}"
+                                           checked=@LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id)
                                            @onclick:preventDefault="true" id="@($"block-{@b.BlockNum.ToString()}")"
                                            style="align-items:center; margin-bottom: 2px; margin-top: 2px;"/>
                                 </label>
@@ -135,6 +136,43 @@
         </tbody>
     </table>
 </div>
+<br/>
+
+@if (true) {
+    bool checkAll = Selected.Count == Rooms.Count;
+    <div style="overflow-x: auto">
+        <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 50%; margin: auto">
+            <thead>
+            <tr>
+                <th @onclick="() => HandleSelectAllRooms(checkAll)" style="width: 25px">
+                    <input type="checkbox" checked=@checkAll @onclick="@(() => HandleSelectAllRooms(checkAll))" @onclick:preventDefault="true" style="cursor: pointer;"/>
+                </th>
+                @foreach (ColumnDefinition column in RoomColumns) {
+                    <th @onclick="@(() => SortData(column))">
+                        @column.Title
+                        <span style="float: right" class="@(SortClass(column))"></span>
+                    </th>
+                }
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (Room r in Rooms) {
+                bool check = Selected.Contains(r.Id);
+                <tr>
+                    <td @onclick="() => HandleSelectedRooms(r.Id, check)" style="cursor: pointer;">
+                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedRooms(r.Id, check))" @onclick:preventDefault="true" style="cursor: pointer;"/>
+                    </td>
+                    @foreach (var column in RoomColumns) {
+                        <td>
+                            @r.GetType().GetProperty(column.Property)?.GetValue(r)
+                        </td>
+                    }
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
 <br/><br/><br/><br/>
 @code {
 
@@ -147,7 +185,10 @@
     List<Block> Blocks = null;
     List<LessonIdblockId> LessonIdblockIds = null;
     List<RoomIdlessonId> RoomIdlessonIds = null;
-    List<ColumnDefinition> Columns = null;
+    List<Room> Rooms = null;
+    List<ColumnDefinition> MainColumns = null;
+    List<ColumnDefinition> RoomColumns = null;
+    List<long> Selected = null;
     string NameWarn;
     string ClassCodeWarn;
     string BlockWarn;
@@ -155,8 +196,8 @@
 
     protected override async void OnInitialized() {
         await base.OnInitializedAsync();
-        Columns = new List<ColumnDefinition> {
-            new ColumnDefinition {Property = "Name", Title = "Name", SortDirection = SortDirection.Descending},
+        MainColumns = new List<ColumnDefinition> {
+            new ColumnDefinition {Property = "Name", Title = "Name"},
             new ColumnDefinition {Property = "ClassCode", Title = "Class Code"},
             new ColumnDefinition {Property = "Year", Title = "Year"},
             new ColumnDefinition {Property = "Level", Title = "Level"},
@@ -168,19 +209,33 @@
         Teachers = await TeacherService.GetAllTeachersAsync();
         Blocks = await BlockService.GetAllBlocksAsync();
         RefreshLessonIdblockIds();
-        RoomIdlessonIds = await RoomIdlessonIdService.GetAllRoomIdlessonIdsAsync();
+        RefreshRoomIdlessonIds();
+        Rooms = await RoomService.GetAllRoomsAsync();
         CopyLesson = new Lesson {Id = Lesson.Id, ClassCode = Lesson.ClassCode, Level = Lesson.Level,
             Name = Lesson.Name, NumLessons = Lesson.NumLessons, TeacherId = Lesson.TeacherId, Year = Lesson.Year};
         NameWarn = "";
         ClassCodeWarn = "";
         BlockWarn = "";
         NumLessonsWarn = "";
+        RoomColumns = new List<ColumnDefinition> {
+            new ColumnDefinition {Property = "Number", Title = "Room Number"},
+            new ColumnDefinition {Property = "Floor", Title = "Floor", SortDirection = SortDirection.Ascending}
+        };
+        Selected = Rooms.Where(x=>RoomIdlessonIds.Select(y=>y.RoomId).Contains(x.Id))
+            .Select(x=>x.Id).ToList();
+        SortData();
     }
 
-    private async void RefreshLessonIdblockIds() {
-        LessonIdblockIds = await LessonIdblockIdService.GetAllLessonIdblockIdsAsync();
+    private void RefreshLessonIdblockIds() {
+        LessonIdblockIds = LessonIdblockIdService.GetAllLessonIdblockIdsAsync().Result
+            .Where(x=>x.LessonId == Lesson.Id).ToList();
     }
 
+    private void RefreshRoomIdlessonIds() {
+        RoomIdlessonIds = RoomIdlessonIdService.GetAllRoomIdlessonIdsAsync().Result
+            .Where(x=>x.LessonId == Lesson.Id).ToList();
+    }
+    
     private void HandleName(ChangeEventArgs args) {
         if (args.Value.ToString().Trim().Length == 0) {
             NameWarn = "The lesson must have a name!";
@@ -240,7 +295,7 @@
     }
     
     private async void HandleBlockAsync(long id, bool value) {
-        if (LessonIdblockIds.Count(x => x.LessonId == Lesson.Id) == 1 && value) {
+        if (LessonIdblockIds.Count == 1 && value) {
             BlockWarn = "There must be at least one block selected!";
             StateHasChanged();
             return;
@@ -249,9 +304,9 @@
         if (!value) await LessonIdblockIdService.InsertLessonIdblockIdAsync(
             new LessonIdblockId { BlockId = id, LessonId = Lesson.Id });
         else await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(
-            LessonIdblockIds.FindAll(x=>x.LessonId == Lesson.Id && x.BlockId == id));
+            LessonIdblockIds.FindAll(x=>x.BlockId == id));
         RefreshLessonIdblockIds();
-        if (LessonIdblockIds.Count(x => x.LessonId == Lesson.Id) >= 1 && !value)
+        if (LessonIdblockIds.Count > 1 && !value)
             BlockWarn = "INFO: This is normally only for lessons such as BTEC and PPS";
         SaveBannerService.ShowBanner("Lesson blocks updated successfully", SaveBannerType.Success);
     }
@@ -281,6 +336,46 @@
         if (saved) SaveBannerService.ShowBanner(
             "Teacher updated successfully", SaveBannerType.Success);
     }
+
+    private async void HandleSelectedRooms(long id, bool checkedValue) {
+        if (!checkedValue) {
+            if (Selected.Contains(id)) return;
+            Selected.Add(id);
+            await RoomIdlessonIdService.InsertRoomIdlessonIdAsync(new RoomIdlessonId {
+                RoomId = id, LessonId = Lesson.Id});
+        }
+        else {
+            if (!Selected.Contains(id)) return;
+            if (Selected.Count == 1) {
+                SaveBannerService.ShowBanner("There must be at least one available room selected",
+                    SaveBannerType.Warning);
+                return;
+            }
+            Selected.Remove(id);
+            await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds
+                .FindAll(x=>x.RoomId == id));
+        }
+        RefreshRoomIdlessonIds();
+        StateHasChanged();
+        SaveBannerService.ShowBanner("Available rooms updated successfully", SaveBannerType.Success);
+    }
+
+    private async void HandleSelectAllRooms(bool checkAll) {
+        if (checkAll) {
+            SaveBannerService.ShowBanner("Cannot deselect all! There must be at least one available room selected",
+                SaveBannerType.Warning);
+            return;
+        }
+        foreach (Room r in Rooms) {
+            if (Selected.Contains(r.Id)) continue;
+            Selected.Add(r.Id);
+            await RoomIdlessonIdService.InsertRoomIdlessonIdAsync(new RoomIdlessonId {
+                RoomId = r.Id, LessonId = Lesson.Id});
+        }
+        RefreshRoomIdlessonIds();
+        StateHasChanged();
+        SaveBannerService.ShowBanner("Available rooms updated successfully", SaveBannerType.Success);
+    }
     
     private async void Delete() {
         string message = $"Are you sure you want to delete {Lesson.Name}?";
@@ -291,8 +386,61 @@
         var choice = await Electron.Dialog.ShowMessageBoxAsync(options);
         if (choice.Response == 1) return;
         await LessonService.DeleteLessonAsync(Lesson);
-        await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIds.Where(x=>x.LessonId == Lesson.Id));
-        await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds.Where(x=>x.LessonId == Lesson.Id));
+        await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIds);
+        await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds);
+        SaveBannerService.ShowBanner("Lesson deleted successfully", SaveBannerType.Success);
         NavigationManager.NavigateTo("lessons");
+    }
+    
+    private string SortClass(ColumnDefinition column) {
+        return column.SortDirection != SortDirection.NotSet ? $"sort {column.SortDirection.ToString().ToLower()}" : "no-sort";
+    }
+    
+    private void SortData(ColumnDefinition sortByColumn = null) {
+        bool initial = sortByColumn is null;
+        if (sortByColumn is null) {
+            sortByColumn = RoomColumns.FirstOrDefault(x => x.SortDirection != SortDirection.NotSet);
+            if (sortByColumn is null) return;
+        }
+        foreach (ColumnDefinition column in RoomColumns) {
+            if (column.Property != sortByColumn.Property) column.SortDirection = SortDirection.NotSet;
+        }
+        if (!initial)
+            switch (sortByColumn.SortDirection) {
+                case SortDirection.NotSet:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+                case SortDirection.Ascending:
+                    sortByColumn.SortDirection = SortDirection.Descending;
+                    break;
+                case SortDirection.Descending:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+                default:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+            }
+        switch (sortByColumn.Property) {
+            case "Floor": {
+                Rooms.Sort((x, y) => {
+                    int first = x.Floor.CompareTo(y.Floor);
+                    return first != 0 ? first : x.Number.CompareTo(y.Number);
+                });
+                if (sortByColumn.SortDirection == SortDirection.Descending) {
+                    Rooms.Sort((x, y) => {
+                        int first = y.Floor.CompareTo(x.Floor);
+                        return first != 0 ? first : x.Number.CompareTo(y.Number);
+                    });
+                }
+                break;
+            }
+            case "Number": {
+                Rooms.Sort((x, y) => x.Number.CompareTo(y.Number));
+                if (sortByColumn.SortDirection == SortDirection.Descending) {
+                    Rooms.Sort((x, y) => y.Number.CompareTo(x.Number));
+                }
+                break;
+            }
+        }
     }
 }
