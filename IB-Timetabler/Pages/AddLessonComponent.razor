@@ -314,7 +314,7 @@
             Title = "Confirm Action",
             Buttons = new []{"Confirm", "Cancel"}
         };
-        var choice = await Electron.Dialog.ShowMessageBoxAsync(options);
+        var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
         if (choice.Response == 1) return;
         if (Lesson.Name == "" || Lesson.ClassCode == "" || Lesson.NumLessons <= 0
             || LessonIdblockIds.Count == 0 || RoomIdlessonIds.Count == 0) {

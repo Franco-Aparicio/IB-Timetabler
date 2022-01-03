@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace IB_Timetabler.Models {
     
@@ -14,6 +15,10 @@ namespace IB_Timetabler.Models {
 
         public async Task<List<Block>> GetAllBlocksAsync() {
             return await _ibTimetablerContext.Blocks.ToListAsync();
+        }
+        
+        public async Task<long> GetNextId() {
+            return await _ibTimetablerContext.Blocks.Select(x => x.Id).OrderBy(x => x).LastAsync() + 1;
         }
         
         public async Task<bool> InsertBlockAsync(Block block) {

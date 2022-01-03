@@ -1,15 +1,265 @@
 @page "/blocks"
+@inject BlockService BlockService
+@inject LessonService LessonService
+@inject RoomIdlessonIdService RoomIdlessonIdService
+@inject LessonIdblockIdService LessonIdblockIdService
+@inject SaveBannerService SaveBannerService
 
 <TitleComponent Page="Manage Option Blocks"></TitleComponent>
+<br/>
+<button class="button is-success is-outlined" @onclick="OpenAddBlockModal" style="margin-bottom: 15px">
+    <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
+    <span>Add Block</span>
+</button>
+@if (Selected.Count == 1) {
+    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
+        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
+        <span>Delete Selected Block</span>
+    </button>
+}
+else if (Selected.Count > 1) {
+    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
+        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
+        <span>Delete Selected Blocks</span>
+    </button>}
+<br/>
 
-<p>Current count: @currentCount.ToString()</p>
+<div class="modal @(ShowAddBlock ? "is-active" : null)">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Add Block</p>
+    </header>
+      <section class="modal-card-body">
+          <table class="table is-narrow has-text-centered" style="width: 75%; margin: auto">
+              <thead>
+              <tr>
+                  <th style="cursor: auto;">
+                      Option Block Number
+                  </th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                  <td>
+                      <input class="input" type="number" @oninput="HandleNewNum" placeholder="Room Number" value="@NewBlockNum" style="max-width: 100px;"/>
+                      <span style="font-size: 12px; color: red; display: block;">@NumWarn</span>
+                  </td>
+              </tr>
+              </tbody>
+          </table>
+      </section>
+      <footer class="modal-card-foot" style="padding: 5px !important;">
+          <div style="margin: auto">
+              <button class="button is-success is-small" @onclick="AddBlock" style="margin: 5px;">
+                  <span class="icon"><i class="fas fa-check"></i></span>
+                  <span>Add Block</span>
+              </button>
+              <button class="button is-dark is-outlined is-small" @onclick="CloseAddBlockModal" style="margin: 5px;">
+                  <span class="icon"><i class="fas fa-ban"></i></span>
+                  <span>Cancel</span>
+              </button>
+          </div>
+      </footer>
+  </div>
+</div>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+@if (true) {
+    bool checkAll = Selected.Count == AllBlocks.Count;
+    <div style="overflow-x: auto">
+        <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 50%; margin: auto">
+            <thead>
+            <tr>
+                <th @onclick="() => HandleSelectAllBlocks(checkAll)" style="width: 25px">
+                    <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllBlocks(checkAll))" style="cursor: pointer;"/>
+                </th>
+                @foreach (ColumnDefinition column in BlockColumns) {
+                    <th @onclick="@(() => SortData(column))">
+                        @column.Title
+                        <span style="float: right" class="@(SortClass(column))"></span>
+                    </th>
+                }
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (Block b in AllBlocks) {
+                bool check = Selected.Contains(b.Id);
+                <tr>
+                    <td @onclick="() => HandleSelectedBlocks(b.Id, check)" style="cursor: pointer;">
+                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedBlocks(b.Id, check))" style="cursor: pointer;"/>
+                    </td>
+                    @foreach (var column in BlockColumns) {
+                        <td>
+                            @b.GetType().GetProperty(column.Property)?.GetValue(b)
+                        </td>
+                    }
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
 
+<br/><br/><br/><br/>
 @code {
-    private int currentCount = 0;
+    
+    List<Block> AllBlocks = null;
+    List<LessonIdblockId> LessonIdblockIds = null;
+    List<ColumnDefinition> BlockColumns = null;
+    List<long> Selected = null;
+    bool ShowAddBlock = false;
+    long NewBlockNum;
+    string NumWarn;
 
-    private void IncrementCount() {
-        currentCount++;
+    protected override async void OnInitialized() {
+        await RefreshBlocks();
+        await RefreshLessonIdblockIds();
+        BlockColumns = new List<ColumnDefinition> {
+            new ColumnDefinition {Property = "BlockNum", Title = "Option Block Number", SortDirection = SortDirection.Ascending}
+        };
+        Selected = new List<long>();
+        NewBlockNum = AllBlocks.OrderBy(x=>x.BlockNum).Last().BlockNum + 1;
+        NumWarn = "";
+        SortData();
     }
+
+    private async Task RefreshBlocks() {
+        AllBlocks = await BlockService.GetAllBlocksAsync();
+    }
+
+    private async Task RefreshLessonIdblockIds() {
+        LessonIdblockIds = await LessonIdblockIdService.GetAllLessonIdblockIdsAsync();
+    }
+    
+    private void HandleSelectedBlocks(long id, bool checkedValue) {
+        if (!checkedValue) {
+            if (!Selected.Contains(id)) {
+                Selected.Add(id);
+            }
+        }
+        else {
+            if (Selected.Contains(id)) {
+                Selected.Remove(id);
+            }
+        }
+    }
+
+    private void HandleSelectAllBlocks(bool checkAll) {
+        if (!checkAll) {
+            foreach (Block b in AllBlocks) {
+                if (Selected.Contains(b.Id)) continue;
+                Selected.Add(b.Id);
+            }
+        }
+        else {
+            Selected.Clear();
+        }
+    }
+    
+    private void HandleNewNum(ChangeEventArgs args) {
+        try {
+            NewBlockNum = long.Parse(args.Value.ToString().Trim());
+            NumWarn = "";
+            if (NewBlockNum <= 0) 
+                NumWarn = "The option number must be a positive integer!";
+            else if (AllBlocks.Any(x => x.BlockNum == NewBlockNum)) 
+                NumWarn = "This option number is already in use!";
+        }
+        catch (FormatException) {
+            NewBlockNum = 0;
+            NumWarn = "The option number must be a positive integer!";
+        }
+    }
+
+    private void OpenAddBlockModal() {
+        ShowAddBlock = true;
+        NewBlockNum = AllBlocks.OrderBy(x=>x.BlockNum).Last().BlockNum + 1;
+    }
+
+    private void CloseAddBlockModal() {
+        ShowAddBlock = false;
+        NewBlockNum = AllBlocks.OrderBy(x=>x.BlockNum).Last().BlockNum + 1;
+        NumWarn = "";
+    }
+    
+    private async void AddBlock() {
+        if (NewBlockNum <= 0) {
+            SaveBannerService.ShowBanner("The option number must be a positive integer!", SaveBannerType.Error);
+            return;
+        }
+        if (AllBlocks.Any(x => x.BlockNum == NewBlockNum)) {
+            SaveBannerService.ShowBanner("This option number is already in use!", SaveBannerType.Error);
+            return;
+        }
+        await BlockService.InsertBlockAsync(new Block {Id = BlockService.GetNextId().Result, BlockNum = NewBlockNum});
+        await RefreshBlocks();
+        SortData();
+        CloseAddBlockModal();
+        SaveBannerService.ShowBanner("New block added successfully!", SaveBannerType.Success);
+    }
+    
+    private async void DeleteSelected() {
+        string message = Selected.Count > 1 ? $"Are you sure you want to delete {Selected.Count.ToString()} blocks?" :
+            $"Are you sure you want to delete block {AllBlocks.Find(x=>x.Id == Selected[0]).BlockNum.ToString()}?";
+        message += "\nWarning: Lessons left without a block will also be deleted!";
+        var options = new MessageBoxOptions(message) {
+            Title = "Confirm Action",
+            Buttons = new []{"Confirm", "Cancel"}
+        };
+        var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
+        if (choice.Response == 1) return;
+        List<long> lessons = new List<long>();
+        while (Selected.Count > 0) {
+            Block b = AllBlocks.Find(x => x.Id == Selected[0]);
+            await BlockService.DeleteBlockAsync(b);
+            var temp = LessonIdblockIds.Where(x => x.BlockId == b.Id).ToList();
+            lessons.AddRange(temp.Select(x=>x.LessonId));
+            await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(temp);
+            Selected.RemoveAt(0);
+        }
+        await RefreshBlocks();
+        await RefreshLessonIdblockIds();
+        foreach (long id in lessons) {
+            if (LessonIdblockIds.Any(x => x.LessonId == id)) continue;
+            await LessonService.DeleteLessonAsync(LessonService.GetLessonAsync(id).Result);
+            await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIdService
+                .GetAllRoomIdlessonIdsAsync().Result.Where(x=>x.LessonId == id));
+        }
+        SortData();
+        StateHasChanged();
+        SaveBannerService.ShowBanner("Block(s) deleted successfully", SaveBannerType.Success);
+    }
+    
+    private string SortClass(ColumnDefinition column) {
+        return column.SortDirection != SortDirection.NotSet ? $"sort {column.SortDirection.ToString().ToLower()}" : "no-sort";
+    }
+    
+    private void SortData(ColumnDefinition sortByColumn = null) {
+        bool initial = sortByColumn is null;
+        if (sortByColumn is null) {
+            sortByColumn = BlockColumns.FirstOrDefault(x => x.SortDirection != SortDirection.NotSet);
+            if (sortByColumn is null) return;
+        }
+        foreach (ColumnDefinition column in BlockColumns) {
+            if (column.Property != sortByColumn.Property) column.SortDirection = SortDirection.NotSet;
+        }
+        if (!initial)
+            switch (sortByColumn.SortDirection) {
+                case SortDirection.NotSet:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+                case SortDirection.Ascending:
+                    sortByColumn.SortDirection = SortDirection.Descending;
+                    break;
+                case SortDirection.Descending:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+                default:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+            }
+        AllBlocks.Sort((x, y)=>x.BlockNum.CompareTo(y.BlockNum));
+        if (sortByColumn.SortDirection == SortDirection.Descending) 
+            AllBlocks.Sort((x, y)=>y.BlockNum.CompareTo(x.BlockNum));
+        }
 }

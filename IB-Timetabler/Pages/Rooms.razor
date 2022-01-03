@@ -1,15 +1,278 @@
 @page "/rooms"
+@inject RoomService RoomService
+@inject LessonService LessonService
+@inject RoomIdlessonIdService RoomIdlessonIdService
+@inject LessonIdblockIdService LessonIdblockIdService
+@inject SaveBannerService SaveBannerService
 
 <TitleComponent Page="Manage Available Rooms"></TitleComponent>
+<br/>
+<button class="button is-success is-outlined" @onclick="() => { ShowAddRoom = true; }" style="margin-bottom: 15px">
+    <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
+    <span>Add Room</span>
+</button>
+@if (Selected.Count == 1) {
+    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
+        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
+        <span>Delete Selected Room</span>
+    </button>
+}
+else if (Selected.Count > 1) {
+    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
+        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
+        <span>Delete Selected Rooms</span>
+    </button>}
+<br/>
 
-<p>Current count: @currentCount.ToString()</p>
+<div class="modal @(ShowAddRoom ? "is-active" : null)">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Add Room</p>
+    </header>
+      <section class="modal-card-body">
+          <table class="table is-narrow has-text-centered" style="width: 75%; margin: auto">
+              <thead>
+              <tr>
+                  <th style="cursor: auto;">
+                      Room Number
+                  </th>
+                  <th style="cursor: auto;">
+                      Floor
+                  </th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                  <td>
+                      <input class="input" type="text" @oninput="HandleNewNum" placeholder="Room Number" value="@NewRoomNum" style="max-width: 150px;"/>
+                      <span style="font-size: 12px; color: dodgerblue; display: block;">@NumWarn</span>
+                  </td>
+                  <td>
+                      <input class="input" type="number" @bind-value="@NewRoomFloor" @bind-value:event="oninput" placeholder="Floor" style="max-width: 100px;"/>
+                  </td>
+              </tr>
+              </tbody>
+          </table>
+      </section>
+      <footer class="modal-card-foot" style="padding: 5px !important;">
+          <div style="margin: auto">
+              <button class="button is-success is-small" @onclick="AddRoom" style="margin: 5px;">
+                  <span class="icon"><i class="fas fa-check"></i></span>
+                  <span>Add Room</span>
+              </button>
+              <button class="button is-dark is-outlined is-small" @onclick="CloseAddRoomModal" style="margin: 5px;">
+                  <span class="icon"><i class="fas fa-ban"></i></span>
+                  <span>Cancel</span>
+              </button>
+          </div>
+      </footer>
+  </div>
+</div>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+@if (true) {
+    bool checkAll = Selected.Count == AllRooms.Count;
+    <div style="overflow-x: auto">
+        <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 50%; margin: auto">
+            <thead>
+            <tr>
+                <th @onclick="() => HandleSelectAllRooms(checkAll)" style="width: 25px">
+                    <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllRooms(checkAll))" style="cursor: pointer;"/>
+                </th>
+                @foreach (ColumnDefinition column in RoomColumns) {
+                    <th @onclick="@(() => SortData(column))">
+                        @column.Title
+                        <span style="float: right" class="@(SortClass(column))"></span>
+                    </th>
+                }
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (Room r in AllRooms) {
+                bool check = Selected.Contains(r.Id);
+                <tr>
+                    <td @onclick="() => HandleSelectedRooms(r.Id, check)" style="cursor: pointer;">
+                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedRooms(r.Id, check))" style="cursor: pointer;"/>
+                    </td>
+                    @foreach (var column in RoomColumns) {
+                        <td>
+                            @r.GetType().GetProperty(column.Property)?.GetValue(r)
+                        </td>
+                    }
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
 
+<br/><br/><br/><br/>
 @code {
-    private int currentCount = 0;
+    
+    List<RoomIdlessonId> RoomIdlessonIds = null;
+    List<Room> AllRooms = null;
+    List<ColumnDefinition> RoomColumns = null;
+    List<long> Selected = null;
+    bool ShowAddRoom = false;
+    string NewRoomNum;
+    string NumWarn;
+    int NewRoomFloor;
 
-    private void IncrementCount() {
-        currentCount++;
+    protected override async void OnInitialized() {
+        await RefreshRooms();
+        await RefreshRoomIdlessonIds();
+        RoomColumns = new List<ColumnDefinition> {
+            new ColumnDefinition {Property = "Number", Title = "Room Number"},
+            new ColumnDefinition {Property = "Floor", Title = "Floor", SortDirection = SortDirection.Ascending}
+        };
+        Selected = new List<long>();
+        NewRoomNum = "";
+        NumWarn = "";
+        NewRoomFloor = 0;
+        SortData();
+    }
+
+    private async Task RefreshRooms() {
+        AllRooms = await RoomService.GetAllRoomsAsync();
+    }
+
+    private async Task RefreshRoomIdlessonIds() {
+        RoomIdlessonIds = await RoomIdlessonIdService.GetAllRoomIdlessonIdsAsync();
+    }
+    
+    private void HandleSelectedRooms(long id, bool checkedValue) {
+        if (!checkedValue) {
+            if (!Selected.Contains(id)) {
+                Selected.Add(id);
+            }
+        }
+        else {
+            if (Selected.Contains(id)) {
+                Selected.Remove(id);
+            }
+        }
+    }
+
+    private void HandleSelectAllRooms(bool checkAll) {
+        if (!checkAll) {
+            foreach (Room r in AllRooms) {
+                if (Selected.Contains(r.Id)) continue;
+                Selected.Add(r.Id);
+            }
+        }
+        else {
+            Selected.Clear();
+        }
+    }
+    
+    private void HandleNewNum(ChangeEventArgs args) {
+        NewRoomNum = args.Value.ToString().Trim();
+        NumWarn = "";
+        if (AllRooms.Any(x => x.Number == NewRoomNum))
+            NumWarn = "INFO: This room number is already in use";
+    }
+
+    private void CloseAddRoomModal() {
+        ShowAddRoom = false;
+        NewRoomNum = "";
+        NumWarn = "";
+        NewRoomFloor = 0;
+    }
+    
+    private async void AddRoom() {
+        if (NewRoomNum.Length == 0) {
+            SaveBannerService.ShowBanner("The new room needs a number!", SaveBannerType.Error);
+            return;
+        }
+        await RoomService.InsertRoomAsync(new Room {Id = RoomService.GetNextId().Result,
+            Number = NewRoomNum, Floor = NewRoomFloor});
+        await RefreshRooms();
+        SortData();
+        CloseAddRoomModal();
+        SaveBannerService.ShowBanner("New room added successfully!", SaveBannerType.Success);
+    }
+    
+    private async void DeleteSelected() {
+        string message = Selected.Count > 1 ? $"Are you sure you want to delete {Selected.Count.ToString()} rooms?" :
+            $"Are you sure you want to delete room {AllRooms.Find(x=>x.Id == Selected[0]).Number}?";
+        message += "\nWarning: Lessons left without any available rooms will also be deleted!";
+        var options = new MessageBoxOptions(message) {
+            Title = "Confirm Action",
+            Buttons = new []{"Confirm", "Cancel"}
+        };
+        var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
+        if (choice.Response == 1) return;
+        List<long> lessons = new List<long>();
+        while (Selected.Count > 0) {
+            Room r = AllRooms.Find(x => x.Id == Selected[0]);
+            await RoomService.DeleteRoomAsync(r);
+            var temp = RoomIdlessonIds.Where(x => x.RoomId == r.Id).ToList();
+            lessons.AddRange(temp.Select(x=>x.LessonId));
+            await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(temp);
+            Selected.RemoveAt(0);
+        }
+        await RefreshRooms();
+        await RefreshRoomIdlessonIds();
+        foreach (long id in lessons) {
+            if (RoomIdlessonIds.Any(x => x.LessonId == id)) continue;
+            await LessonService.DeleteLessonAsync(LessonService.GetLessonAsync(id).Result);
+            await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIdService
+                .GetAllLessonIdblockIdsAsync().Result.Where(x=>x.LessonId == id));
+        }
+        SortData();
+        StateHasChanged();
+        SaveBannerService.ShowBanner("Room(s) deleted successfully", SaveBannerType.Success);
+    }
+    
+    private string SortClass(ColumnDefinition column) {
+        return column.SortDirection != SortDirection.NotSet ? $"sort {column.SortDirection.ToString().ToLower()}" : "no-sort";
+    }
+    
+    private void SortData(ColumnDefinition sortByColumn = null) {
+        bool initial = sortByColumn is null;
+        if (sortByColumn is null) {
+            sortByColumn = RoomColumns.FirstOrDefault(x => x.SortDirection != SortDirection.NotSet);
+            if (sortByColumn is null) return;
+        }
+        foreach (ColumnDefinition column in RoomColumns) {
+            if (column.Property != sortByColumn.Property) column.SortDirection = SortDirection.NotSet;
+        }
+        if (!initial)
+            switch (sortByColumn.SortDirection) {
+                case SortDirection.NotSet:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+                case SortDirection.Ascending:
+                    sortByColumn.SortDirection = SortDirection.Descending;
+                    break;
+                case SortDirection.Descending:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+                default:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+            }
+        switch (sortByColumn.Property) {
+            case "Floor": {
+                AllRooms.Sort((x, y) => {
+                    int first = x.Floor.CompareTo(y.Floor);
+                    return first != 0 ? first : x.Number.CompareTo(y.Number);
+                });
+                if (sortByColumn.SortDirection == SortDirection.Descending) {
+                    AllRooms.Sort((x, y) => {
+                        int first = y.Floor.CompareTo(x.Floor);
+                        return first != 0 ? first : x.Number.CompareTo(y.Number);
+                    });
+                }
+                break;
+            }
+            case "Number": {
+                AllRooms.Sort((x, y) => x.Number.CompareTo(y.Number));
+                if (sortByColumn.SortDirection == SortDirection.Descending) {
+                    AllRooms.Sort((x, y) => y.Number.CompareTo(x.Number));
+                }
+                break;
+            }
+        }
     }
 }

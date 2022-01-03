@@ -1,15 +1,260 @@
 @page "/teachers"
+@inject TeacherService TeacherService
+@inject LessonService LessonService
+@inject RoomIdlessonIdService RoomIdlessonIdService
+@inject LessonIdblockIdService LessonIdblockIdService
+@inject SaveBannerService SaveBannerService
 
 <TitleComponent Page="Manage Teachers"></TitleComponent>
+<br/>
+<button class="button is-success is-outlined" @onclick="OpenAddTeacherModal" style="margin-bottom: 15px">
+    <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
+    <span>Add Teacher</span>
+</button>
+@if (Selected.Count == 1) {
+    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
+        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
+        <span>Delete Selected Teacher</span>
+    </button>
+}
+else if (Selected.Count > 1) {
+    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
+        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
+        <span>Delete Selected Teachers</span>
+    </button>
+}
+<br/>
 
-<p>Current count: @currentCount.ToString()</p>
+<div class="modal @(ShowAddTeacher ? "is-active" : null)">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Add Teacher</p>
+    </header>
+      <section class="modal-card-body">
+          <table class="table is-narrow has-text-centered" style="width: 75%; margin: auto">
+              <thead>
+              <tr>
+                  <th style="cursor: auto;">
+                      Teacher Name
+                  </th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                  <td>
+                      <input class="input" type="text" @oninput="HandleNewName" placeholder="Teacher Name" value="@NewTeachName" style="max-width: 150px;"/>
+                      <span style="font-size: 12px; color: red; display: block;">@NameWarn</span>
+                  </td>
+              </tr>
+              </tbody>
+          </table>
+      </section>
+      <footer class="modal-card-foot" style="padding: 5px !important;">
+          <div style="margin: auto">
+              <button class="button is-success is-small" @onclick="AddTeacher" style="margin: 5px;">
+                  <span class="icon"><i class="fas fa-check"></i></span>
+                  <span>Add Teacher</span>
+              </button>
+              <button class="button is-dark is-outlined is-small" @onclick="CloseAddTeacherModal" style="margin: 5px;">
+                  <span class="icon"><i class="fas fa-ban"></i></span>
+                  <span>Cancel</span>
+              </button>
+          </div>
+      </footer>
+  </div>
+</div>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+@if (true) {
+    bool checkAll = Selected.Count == AllTeachers.Count;
+    <div style="overflow-x: auto">
+        <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 50%; margin: auto">
+            <thead>
+            <tr>
+                <th @onclick="() => HandleSelectAllTeachers(checkAll)" style="width: 25px">
+                    <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllTeachers(checkAll))" style="cursor: pointer;"/>
+                </th>
+                @foreach (ColumnDefinition column in TeacherColumns) {
+                    <th @onclick="@(() => SortData(column))">
+                        @column.Title
+                        <span style="float: right" class="@(SortClass(column))"></span>
+                    </th>
+                }
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (Teacher t in AllTeachers) {
+                bool check = Selected.Contains(t.Id);
+                <tr>
+                    <td @onclick="() => HandleSelectedTeachers(t.Id, check)" style="cursor: pointer;">
+                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedTeachers(t.Id, check))" style="cursor: pointer;"/>
+                    </td>
+                    @foreach (var column in TeacherColumns) {
+                        <td>
+                            @t.GetType().GetProperty(column.Property)?.GetValue(t)
+                        </td>
+                    }
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
 
+<br/><br/><br/><br/>
 @code {
-    private int currentCount = 0;
+    
+    List<Teacher> AllTeachers = null;
+    List<Lesson> Lessons = null;
+    List<ColumnDefinition> TeacherColumns = null;
+    List<long> Selected = null;
+    bool ShowAddTeacher = false;
+    string NewTeachName;
+    string NameWarn;
 
-    private void IncrementCount() {
-        currentCount++;
+    protected override async void OnInitialized() {
+        await RefreshTeachers();
+        await RefreshLessons();
+        TeacherColumns = new List<ColumnDefinition> {
+            new ColumnDefinition {Property = "Name", Title = "Name", SortDirection = SortDirection.Ascending}
+        };
+        Selected = new List<long>();
+        NewTeachName = "";
+        NameWarn = "";
+        SortData();
     }
+
+    private async Task RefreshTeachers() {
+        AllTeachers = await TeacherService.GetAllTeachersAsync();
+    }
+    
+    private async Task RefreshLessons() {
+        Lessons = await LessonService.GetAllLessonsAsync();
+    }
+    
+    private void HandleSelectedTeachers(long id, bool checkedValue) {
+        if (!checkedValue) {
+            if (!Selected.Contains(id)) {
+                Selected.Add(id);
+            }
+        }
+        else {
+            if (Selected.Contains(id)) {
+                Selected.Remove(id);
+            }
+        }
+    }
+
+    private void HandleSelectAllTeachers(bool checkAll) {
+        if (!checkAll) {
+            foreach (Teacher t in AllTeachers) {
+                if (Selected.Contains(t.Id)) continue;
+                Selected.Add(t.Id);
+            }
+        }
+        else {
+            Selected.Clear();
+        }
+    }
+    
+    private void HandleNewName(ChangeEventArgs args) {
+        NewTeachName = args.Value.ToString().Trim();
+        NameWarn = "";
+        if (NewTeachName.Length == 0) 
+            NameWarn = "The teacher must have a name!";
+        else if (AllTeachers.Any(x => x.Name == NewTeachName)) 
+            NameWarn = "This teacher already exists!";
+    }
+
+    private void OpenAddTeacherModal() {
+        ShowAddTeacher = true;
+        NewTeachName = "";
+    }
+
+    private void CloseAddTeacherModal() {
+        ShowAddTeacher = false;
+        NewTeachName = "";
+        NameWarn = "";
+    }
+    
+    private async void AddTeacher() {
+        if (NewTeachName.Length == 0) {
+            SaveBannerService.ShowBanner("The teacher must have a name!", SaveBannerType.Error);
+            return;
+        }
+        if (AllTeachers.Any(x => x.Name == NewTeachName)) {
+            SaveBannerService.ShowBanner("This teacher already exists!", SaveBannerType.Error);
+            return;
+        }
+        await TeacherService.InsertTeacherAsync(new Teacher {Id = TeacherService.GetNextId().Result,
+            Name = NewTeachName});
+        await RefreshTeachers();
+        SortData();
+        CloseAddTeacherModal();
+        SaveBannerService.ShowBanner("New teacher added successfully!", SaveBannerType.Success);
+    }
+    
+    private async void DeleteSelected() {
+        string message = Selected.Count > 1 ? $"Are you sure you want to delete {Selected.Count.ToString()} teachers?" :
+            $"Are you sure you want to delete {AllTeachers.Find(x=>x.Id == Selected[0]).Name}?";
+        message += "\nWarning: Lessons left without a teacher will also be deleted!";
+        var options = new MessageBoxOptions(message) {
+            Title = "Confirm Action",
+            Buttons = new []{"Confirm", "Cancel"}
+        };
+        var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
+        if (choice.Response == 1) return;
+        List<Lesson> lessons = new List<Lesson>();
+        while (Selected.Count > 0) {
+            Teacher t = AllTeachers.Find(x => x.Id == Selected[0]);
+            await TeacherService.DeleteTeacherAsync(t);
+            lessons.AddRange(Lessons.Where(x => x.TeacherId == t.Id));
+            Selected.RemoveAt(0);
+        }
+        await RefreshTeachers();
+        await RefreshLessons();
+        foreach (Lesson l in lessons) {
+            await LessonService.DeleteLessonAsync(l);
+            await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIdService
+                .GetAllRoomIdlessonIdsAsync().Result.Where(x=>x.LessonId == l.Id));
+            await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIdService
+                .GetAllLessonIdblockIdsAsync().Result.Where(x=>x.LessonId == l.Id));
+        }
+        SortData();
+        StateHasChanged();
+        SaveBannerService.ShowBanner("Teacher(s) deleted successfully", SaveBannerType.Success);
+    }
+    
+    private string SortClass(ColumnDefinition column) {
+        return column.SortDirection != SortDirection.NotSet ? $"sort {column.SortDirection.ToString().ToLower()}" : "no-sort";
+    }
+    
+    private void SortData(ColumnDefinition sortByColumn = null) {
+        bool initial = sortByColumn is null;
+        if (sortByColumn is null) {
+            sortByColumn = TeacherColumns.FirstOrDefault(x => x.SortDirection != SortDirection.NotSet);
+            if (sortByColumn is null) return;
+        }
+        foreach (ColumnDefinition column in TeacherColumns) {
+            if (column.Property != sortByColumn.Property) column.SortDirection = SortDirection.NotSet;
+        }
+        if (!initial)
+            switch (sortByColumn.SortDirection) {
+                case SortDirection.NotSet:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+                case SortDirection.Ascending:
+                    sortByColumn.SortDirection = SortDirection.Descending;
+                    break;
+                case SortDirection.Descending:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+                default:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+            }
+        AllTeachers.Sort((x, y)=>x.Name.CompareTo(y.Name));
+        if (sortByColumn.SortDirection == SortDirection.Descending) 
+            AllTeachers.Sort((x, y)=>y.Name.CompareTo(x.Name));
+        }
 }

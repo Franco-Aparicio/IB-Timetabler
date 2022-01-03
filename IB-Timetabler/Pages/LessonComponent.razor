@@ -17,7 +17,8 @@
     <span>Back to Lessons</span>
 </NavLink>
 <button class="button is-danger" @onclick="Delete" style="margin-left: 15px;">
-    Delete Lesson
+    <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
+    <span>Delete Lesson</span>
 </button>
 <br/><br/>
 
@@ -160,7 +161,7 @@
                 bool check = Selected.Contains(r.Id);
                 <tr>
                     <td @onclick="() => HandleSelectedRooms(r.Id, check)" style="cursor: pointer;">
-                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedRooms(r.Id, check))" @onclick:preventDefault="true" style="cursor: pointer;"/>
+                        <input type="checkbox" checked=@check @onclick="@(() => HandleSelectedRooms(r.Id, check))" @onclick:preventDefault="true" style="cursor: pointer;"/>
                     </td>
                     @foreach (var column in RoomColumns) {
                         <td>
@@ -208,8 +209,8 @@
         Lesson = await LessonService.GetLessonAsync(int.Parse(Id));
         Teachers = await TeacherService.GetAllTeachersAsync();
         Blocks = await BlockService.GetAllBlocksAsync();
-        RefreshLessonIdblockIds();
-        RefreshRoomIdlessonIds();
+        await RefreshLessonIdblockIds();
+        await RefreshRoomIdlessonIds();
         Rooms = await RoomService.GetAllRoomsAsync();
         CopyLesson = new Lesson {Id = Lesson.Id, ClassCode = Lesson.ClassCode, Level = Lesson.Level,
             Name = Lesson.Name, NumLessons = Lesson.NumLessons, TeacherId = Lesson.TeacherId, Year = Lesson.Year};
@@ -226,12 +227,12 @@
         SortData();
     }
 
-    private void RefreshLessonIdblockIds() {
+    private async Task RefreshLessonIdblockIds() {
         LessonIdblockIds = LessonIdblockIdService.GetAllLessonIdblockIdsAsync().Result
             .Where(x=>x.LessonId == Lesson.Id).ToList();
     }
 
-    private void RefreshRoomIdlessonIds() {
+    private async Task RefreshRoomIdlessonIds() {
         RoomIdlessonIds = RoomIdlessonIdService.GetAllRoomIdlessonIdsAsync().Result
             .Where(x=>x.LessonId == Lesson.Id).ToList();
     }
@@ -305,7 +306,7 @@
             new LessonIdblockId { BlockId = id, LessonId = Lesson.Id });
         else await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(
             LessonIdblockIds.FindAll(x=>x.BlockId == id));
-        RefreshLessonIdblockIds();
+        await RefreshLessonIdblockIds();
         if (LessonIdblockIds.Count > 1 && !value)
             BlockWarn = "INFO: This is normally only for lessons such as BTEC and PPS";
         SaveBannerService.ShowBanner("Lesson blocks updated successfully", SaveBannerType.Success);
@@ -355,7 +356,7 @@
             await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds
                 .FindAll(x=>x.RoomId == id));
         }
-        RefreshRoomIdlessonIds();
+        await RefreshRoomIdlessonIds();
         StateHasChanged();
         SaveBannerService.ShowBanner("Available rooms updated successfully", SaveBannerType.Success);
     }
@@ -372,7 +373,7 @@
             await RoomIdlessonIdService.InsertRoomIdlessonIdAsync(new RoomIdlessonId {
                 RoomId = r.Id, LessonId = Lesson.Id});
         }
-        RefreshRoomIdlessonIds();
+        await RefreshRoomIdlessonIds();
         StateHasChanged();
         SaveBannerService.ShowBanner("Available rooms updated successfully", SaveBannerType.Success);
     }
@@ -383,7 +384,7 @@
             Title = "Confirm Action",
             Buttons = new []{"Confirm", "Cancel"}
         };
-        var choice = await Electron.Dialog.ShowMessageBoxAsync(options);
+        var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
         if (choice.Response == 1) return;
         await LessonService.DeleteLessonAsync(Lesson);
         await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIds);

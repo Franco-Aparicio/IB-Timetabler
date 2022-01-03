@@ -1,9 +1,10 @@
 @page "/lessons/"
-@inject LessonService lessonService
-@inject TeacherService teacherService
-@inject BlockService blockService
-@inject LessonIdblockIdService lessonIdblockIdService
-@inject RoomIdlessonIdService roomIdlessonIdService
+@inject LessonService LessonService
+@inject TeacherService TeacherService
+@inject BlockService BlockService
+@inject LessonIdblockIdService LessonIdblockIdService
+@inject RoomIdlessonIdService RoomIdlessonIdService
+@inject SaveBannerService SaveBannerService
 
 <TitleComponent Page="Manage Lessons"></TitleComponent>
 
@@ -13,10 +14,16 @@
     <span>Add Lesson</span>
 </NavLink>
 @if (Selected.Count == 1) {
-    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">Delete Selected Lesson</button>
+    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
+        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
+        <span>Delete Selected Lesson</span>
+    </button>
 }
 else if (Selected.Count > 1) {
-    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">Delete Selected Lessons</button>
+    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
+        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
+        <span>Delete Selected Lessons</span>
+    </button>
 }
 
 <br/>
@@ -112,23 +119,23 @@ else {
     }
 
     private async Task RefreshLessons() {
-        Lessons = await lessonService.GetAllLessonsAsync();
+        Lessons = await LessonService.GetAllLessonsAsync();
     }
 
     private async Task RefreshTeachers() {
-        Teachers = await teacherService.GetAllTeachersAsync();
+        Teachers = await TeacherService.GetAllTeachersAsync();
     }
 
     private async Task RefreshBlocks() {
-        Blocks = await blockService.GetAllBlocksAsync();
+        Blocks = await BlockService.GetAllBlocksAsync();
     }
     
     private async Task RefreshLessonIdblockIds() {
-        LessonIdblockIds = await lessonIdblockIdService.GetAllLessonIdblockIdsAsync();
+        LessonIdblockIds = await LessonIdblockIdService.GetAllLessonIdblockIdsAsync();
     }
     
     private async Task RefreshRoomIdlessonIds() {
-        RoomIdlessonIds = await roomIdlessonIdService.GetAllRoomIdlessonIdsAsync();
+        RoomIdlessonIds = await RoomIdlessonIdService.GetAllRoomIdlessonIdsAsync();
     }
 
     private void HandleSelectedLesssons(long id, bool checkedValue) {
@@ -157,19 +164,20 @@ else {
     }
 
     private async void DeleteSelected() {
-        string message = Selected.Count > 1 ? $"Are you sure you want to delete {Selected.Count.ToString()} lessons?" : $"Are you sure you want to delete {Selected.Count.ToString()} lesson?";
+        string message = Selected.Count > 1 ? $"Are you sure you want to delete {Selected.Count.ToString()} lessons?" :
+            $"Are you sure you want to delete {Lessons.Find(x=>x.Id == Selected[0]).Name}?";
         var options = new MessageBoxOptions(message) {
             Title = "Confirm Action",
             Buttons = new []{"Confirm", "Cancel"}
         };
-        var choice = await Electron.Dialog.ShowMessageBoxAsync(options);
+        var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
         if (choice.Response == 1) return;
         while (Selected.Count > 0) {
             Lesson l = Lessons.Find(x => x.Id == Selected[0]);
-            await lessonService.DeleteLessonAsync(l);
-            await lessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIds.Where(x => x.LessonId == l.Id));
+            await LessonService.DeleteLessonAsync(l);
+            await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIds.Where(x => x.LessonId == l.Id));
             await RefreshLessonIdblockIds();
-            await roomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds.Where(x=>x.LessonId == l.Id));
+            await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds.Where(x=>x.LessonId == l.Id));
             Selected.RemoveAt(0);
         }
         await RefreshLessons();
@@ -178,6 +186,7 @@ else {
         await RefreshRoomIdlessonIds();
         SortData();
         StateHasChanged();
+        SaveBannerService.ShowBanner("Lesson(s) deleted successfully", SaveBannerType.Success);
     }
     
     private string SortClass(ColumnDefinition column) {
