@@ -209,8 +209,8 @@
         Lesson = await LessonService.GetLessonAsync(int.Parse(Id));
         Teachers = await TeacherService.GetAllTeachersAsync();
         Blocks = await BlockService.GetAllBlocksAsync();
-        await RefreshLessonIdblockIds();
-        await RefreshRoomIdlessonIds();
+        RefreshLessonIdblockIds();
+        RefreshRoomIdlessonIds();
         Rooms = await RoomService.GetAllRoomsAsync();
         CopyLesson = new Lesson {Id = Lesson.Id, ClassCode = Lesson.ClassCode, Level = Lesson.Level,
             Name = Lesson.Name, NumLessons = Lesson.NumLessons, TeacherId = Lesson.TeacherId, Year = Lesson.Year};
@@ -227,12 +227,12 @@
         SortData();
     }
 
-    private async Task RefreshLessonIdblockIds() {
+    private void RefreshLessonIdblockIds() {
         LessonIdblockIds = LessonIdblockIdService.GetAllLessonIdblockIdsAsync().Result
             .Where(x=>x.LessonId == Lesson.Id).ToList();
     }
 
-    private async Task RefreshRoomIdlessonIds() {
+    private void RefreshRoomIdlessonIds() {
         RoomIdlessonIds = RoomIdlessonIdService.GetAllRoomIdlessonIdsAsync().Result
             .Where(x=>x.LessonId == Lesson.Id).ToList();
     }
@@ -306,7 +306,7 @@
             new LessonIdblockId { BlockId = id, LessonId = Lesson.Id });
         else await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(
             LessonIdblockIds.FindAll(x=>x.BlockId == id));
-        await RefreshLessonIdblockIds();
+        RefreshLessonIdblockIds();
         if (LessonIdblockIds.Count > 1 && !value)
             BlockWarn = "INFO: This is normally only for lessons such as BTEC and PPS";
         SaveBannerService.ShowBanner("Lesson blocks updated successfully", SaveBannerType.Success);
@@ -356,7 +356,7 @@
             await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds
                 .FindAll(x=>x.RoomId == id));
         }
-        await RefreshRoomIdlessonIds();
+        RefreshRoomIdlessonIds();
         StateHasChanged();
         SaveBannerService.ShowBanner("Available rooms updated successfully", SaveBannerType.Success);
     }
@@ -373,7 +373,7 @@
             await RoomIdlessonIdService.InsertRoomIdlessonIdAsync(new RoomIdlessonId {
                 RoomId = r.Id, LessonId = Lesson.Id});
         }
-        await RefreshRoomIdlessonIds();
+        RefreshRoomIdlessonIds();
         StateHasChanged();
         SaveBannerService.ShowBanner("Available rooms updated successfully", SaveBannerType.Success);
     }

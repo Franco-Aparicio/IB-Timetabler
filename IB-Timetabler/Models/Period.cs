@@ -11,5 +11,11 @@ namespace IB_Timetabler.Models {
         public long Week { get; set; }
         public long Day { get; set; }
         public long TimePeriod { get; set; }
+        private string[] Days = new[] {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+        
+        public override string ToString() {
+            string w = Week == 0 ? "A" : "B";
+            return $"Week: {w}, {Days[Day]}, Period: {TimePeriod.ToString()}";
+        }
     }
 }

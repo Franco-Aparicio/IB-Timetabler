@@ -1,0 +1,354 @@
+@page "/periods"
+@inject PeriodService PeriodService
+@inject SaveService SaveService
+@inject SavedLessonService SavedLessonService
+@inject SavedLessonIdperiodIdService SavedLessonIdperiodIdService
+@inject SaveBannerService SaveBannerService
+
+<TitleComponent Page="Manage Available Periods"></TitleComponent>
+<br/>
+<button class="button is-success is-outlined" @onclick="OpenAddPeriodModal" style="margin-bottom: 15px">
+    <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
+    <span>Add Period</span>
+</button>
+@if (Selected.Count == 1) {
+    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
+        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
+        <span>Delete Selected Period</span>
+    </button>
+}
+else if (Selected.Count > 1) {
+    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
+        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
+        <span>Delete Selected Periods</span>
+    </button>}
+<br/>
+
+<div class="modal @(ShowAddPeriod ? "is-active" : null)">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Add Period</p>
+    </header>
+      <section class="modal-card-body">
+          <table class="table is-narrow has-text-centered" style="width: 75%; margin: auto">
+              <thead>
+              <tr>
+                  <th style="cursor: auto;">
+                      Week
+                  </th>
+                  <th style="cursor: auto;">
+                      Day
+                  </th>
+                  <th style="cursor: auto;">
+                      Period
+                  </th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                  <td>
+                      <div class="select" style="width: 100%; min-width: 75px;">
+                          <select @bind-value="@NewPeriodWeek" @bind-value:event="onchange" style="width: 100%; min-width: 75px;">
+                              <option value="0">A</option>
+                              <option value="1">B</option>
+                          </select>
+                      </div>
+                  </td>
+                  <td>
+                      <div class="select" style="width: 100%; min-width: 75px;">
+                          <select @bind-value="@NewPeriodDay" @bind-value:event="onchange" style="width: 100%; min-width: 75px;">
+                              @for (int i = 0; i < Days.Length; i++) {
+                                  <option value="@i.ToString()">@Days[i]</option>
+                              }
+                          </select>
+                      </div>
+                  </td>
+                  <td>
+                      <input class="input" type="number" @oninput="HandleNewPeriod" placeholder="Period" value="@NewPeriod" style="max-width: 100px;"/>
+                      <span style="font-size: 12px; color: red; display: block;">@PeriodWarn</span>
+                  </td>
+              </tr>
+              </tbody>
+          </table>
+      </section>
+      <footer class="modal-card-foot" style="padding: 5px !important;">
+          <div style="margin: auto">
+              <button class="button is-success is-small" @onclick="AddPeriod" style="margin: 5px;">
+                  <span class="icon"><i class="fas fa-check"></i></span>
+                  <span>Add Period</span>
+              </button>
+              <button class="button is-dark is-outlined is-small" @onclick="CloseAddPeriodModal" style="margin: 5px;">
+                  <span class="icon"><i class="fas fa-ban"></i></span>
+                  <span>Cancel</span>
+              </button>
+          </div>
+      </footer>
+  </div>
+</div>
+
+@if (true) {
+    bool checkAll = Selected.Count == AllPeriods.Count;
+    <div style="overflow-x: auto">
+        <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 50%; margin: auto">
+            <thead>
+            <tr>
+                <th @onclick="() => HandleSelectAllPeriods(checkAll)" style="width: 25px">
+                    <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllPeriods(checkAll))" style="cursor: pointer;"/>
+                </th>
+                @foreach (ColumnDefinition column in PeriodColumns) {
+                    <th @onclick="@(() => SortData(column))">
+                        @column.Title
+                        <span style="float: right" class="@(SortClass(column))"></span>
+                    </th>
+                }
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (Period p in AllPeriods) {
+                bool check = Selected.Contains(p.Id);
+                <tr>
+                    <td @onclick="() => HandleSelectedPeriods(p.Id, check)" style="cursor: pointer;">
+                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedPeriods(p.Id, check))" style="cursor: pointer;"/>
+                    </td>
+                    @foreach (var column in PeriodColumns) {
+                        @if (column.Title == "Week") {
+                            <td>
+                                @(p.Week == 0 ? "A" : "B")
+                            </td>
+                        }
+                        else if (column.Title == "Day") {
+                            <td>
+                                @Days[p.Day]
+                            </td>
+                        }
+                        else {
+                            <td>
+                                @p.GetType().GetProperty(column.Property)?.GetValue(p)
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+
+<br/><br/><br/><br/>
+@code {
+    
+    List<Period> AllPeriods = null;
+    List<SavedLessonIdperiodId> SavedLessonIdperiodIds = null;
+    List<ColumnDefinition> PeriodColumns = null;
+    List<long> Selected = null;
+    string[] Days = new[] {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+    bool ShowAddPeriod = false;
+    long NewPeriodWeek;
+    long NewPeriodDay;
+    long NewPeriod;
+    string PeriodWarn;
+
+    protected override async void OnInitialized() {
+        await RefreshPeriods();
+        await RefreshSavedLessonIdperiodIds();
+        PeriodColumns = new List<ColumnDefinition> {
+            new ColumnDefinition {Property = "Week", Title = "Week", SortDirection = SortDirection.Ascending},
+            new ColumnDefinition {Property = "Day", Title = "Day"},
+            new ColumnDefinition {Property = "TimePeriod", Title = "Period"}
+        };
+        Selected = new List<long>();
+        NewPeriodWeek = 0;
+        NewPeriodDay = 0;
+        NewPeriod = 0;
+        PeriodWarn = "";
+        SortData();
+    }
+
+    private async Task RefreshPeriods() {
+        AllPeriods = await PeriodService.GetAllPeriodsAsync();
+    }
+
+    private async Task RefreshSavedLessonIdperiodIds() {
+        SavedLessonIdperiodIds = await SavedLessonIdperiodIdService.GetAllSavedLessonIdperiodIdsAsync();
+    }
+    
+    private void HandleSelectedPeriods(long id, bool checkedValue) {
+        if (!checkedValue) {
+            if (!Selected.Contains(id)) {
+                Selected.Add(id);
+            }
+        }
+        else {
+            if (Selected.Contains(id)) {
+                Selected.Remove(id);
+            }
+        }
+    }
+
+    private void HandleSelectAllPeriods(bool checkAll) {
+        if (!checkAll) {
+            foreach (Period p in AllPeriods) {
+                if (Selected.Contains(p.Id)) continue;
+                Selected.Add(p.Id);
+            }
+        }
+        else {
+            Selected.Clear();
+        }
+    }
+    
+    private void HandleNewPeriod(ChangeEventArgs args) {
+        try {
+            NewPeriod = long.Parse(args.Value.ToString().Trim());
+            PeriodWarn = "";
+            if (NewPeriod <= 0) 
+                PeriodWarn = "The period must be a positive integer!";
+            else if (AllPeriods.Any(x => x.Week == NewPeriodWeek && x.Day == NewPeriodDay
+                                         && x.TimePeriod == NewPeriod)) 
+                PeriodWarn = "This period already exists!";
+        }
+        catch (FormatException) {
+            NewPeriod = 0;
+            PeriodWarn = "The period must be a positive integer!";
+        }
+    }
+
+    private void OpenAddPeriodModal() {
+        ShowAddPeriod = true;
+        NewPeriod = 0;
+    }
+
+    private void CloseAddPeriodModal() {
+        ShowAddPeriod = false;
+        NewPeriodWeek = 0;
+        NewPeriodDay = 0;
+        NewPeriod = 0;
+        PeriodWarn = "";
+    }
+    
+    private async void AddPeriod() {
+        if (NewPeriod <= 0) {
+            SaveBannerService.ShowBanner("The period must be a positive integer!", SaveBannerType.Error);
+            return;
+        }
+        if (AllPeriods.Any(x => x.Week == NewPeriodWeek && x.Day == NewPeriodDay
+                                && x.TimePeriod == NewPeriod)) {
+            SaveBannerService.ShowBanner("This period already exists!", SaveBannerType.Error);
+            return;
+        }
+        await PeriodService.InsertPeriodAsync(new Period {Id = PeriodService.GetNextId().Result,
+            Week = NewPeriodWeek, Day = NewPeriodDay, TimePeriod = NewPeriod});
+        await RefreshPeriods();
+        SortData();
+        CloseAddPeriodModal();
+        SaveBannerService.ShowBanner("New period added successfully!", SaveBannerType.Success);
+    }
+    
+    private async void DeleteSelected() {
+        string message = Selected.Count > 1 ? $"Are you sure you want to delete {Selected.Count.ToString()} periods?" :
+            $"Are you sure you want to delete {AllPeriods.Find(x=>x.Id == Selected[0])}?";
+        message += "\nWarning: Periods will also be deleted from saved timetables!";
+        var options = new MessageBoxOptions(message) {
+            Title = "Confirm Action",
+            Buttons = new []{"Confirm", "Cancel"}
+        };
+        var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
+        if (choice.Response == 1) return;
+        List<long> lessons = new List<long>();
+        while (Selected.Count > 0) {
+            Period p = AllPeriods.Find(x => x.Id == Selected[0]);
+            await PeriodService.DeletePeriodAsync(p);
+            var temp = SavedLessonIdperiodIds.Where(x => x.PeriodId == p.Id).ToList();
+            lessons.AddRange(temp.Select(x=>x.SavedLessonId));
+            await SavedLessonIdperiodIdService.DeleteSavedLessonIdperiodIdsAsync(temp);
+            Selected.RemoveAt(0);
+        }
+        await RefreshPeriods();
+        await RefreshSavedLessonIdperiodIds();
+        foreach (long id in lessons) {
+            if (SavedLessonIdperiodIds.Any(x => x.SavedLessonId == id)) continue;
+            await SavedLessonService.DeleteSavedLessonAsync(SavedLessonService.GetSavedLessonAsync(id).Result);
+        }
+        SortData();
+        StateHasChanged();
+        SaveBannerService.ShowBanner("Period(s) deleted successfully", SaveBannerType.Success);
+    }
+    
+    private string SortClass(ColumnDefinition column) {
+        return column.SortDirection != SortDirection.NotSet ? $"sort {column.SortDirection.ToString().ToLower()}" : "no-sort";
+    }
+    
+    private void SortData(ColumnDefinition sortByColumn = null) {
+        bool initial = sortByColumn is null;
+        if (sortByColumn is null) {
+            sortByColumn = PeriodColumns.FirstOrDefault(x => x.SortDirection != SortDirection.NotSet);
+            if (sortByColumn is null) return;
+        }
+        foreach (ColumnDefinition column in PeriodColumns) {
+            if (column.Property != sortByColumn.Property) column.SortDirection = SortDirection.NotSet;
+        }
+        if (!initial)
+            switch (sortByColumn.SortDirection) {
+                case SortDirection.NotSet:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+                case SortDirection.Ascending:
+                    sortByColumn.SortDirection = SortDirection.Descending;
+                    break;
+                case SortDirection.Descending:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+                default:
+                    sortByColumn.SortDirection = SortDirection.Ascending;
+                    break;
+            }
+        switch (sortByColumn.Property) {
+            case "Week": {
+                AllPeriods.Sort((x, y) => {
+                    int first = x.Week.CompareTo(y.Week);
+                    int second = x.Day.CompareTo(y.Day);
+                    return first != 0 ? first : second != 0 ? second : x.TimePeriod.CompareTo(y.TimePeriod);
+                });
+                if (sortByColumn.SortDirection == SortDirection.Descending) {
+                    AllPeriods.Sort((x, y) => {
+                        int first = y.Week.CompareTo(x.Week);
+                        int second = x.Day.CompareTo(y.Day);
+                        return first != 0 ? first : second != 0 ? second : x.TimePeriod.CompareTo(y.TimePeriod);
+                    });
+                }
+                break;
+            }
+            case "Day": {
+                AllPeriods.Sort((x, y) => {
+                    int first = x.Day.CompareTo(y.Day);
+                    int second = x.TimePeriod.CompareTo(y.TimePeriod);
+                    return first != 0 ? first : second != 0 ? second : x.Week.CompareTo(y.Week);
+                });
+                if (sortByColumn.SortDirection == SortDirection.Descending) {
+                    AllPeriods.Sort((x, y) => {
+                        int first = y.Day.CompareTo(x.Day);
+                        int second = x.TimePeriod.CompareTo(y.TimePeriod);
+                        return first != 0 ? first : second != 0 ? second : x.Week.CompareTo(y.Week);
+                    });
+                }
+                break;
+            }
+            case "TimePeriod": {
+                AllPeriods.Sort((x, y) => {
+                    int first = x.TimePeriod.CompareTo(y.TimePeriod);
+                    int second = x.Day.CompareTo(y.Day);
+                    return first != 0 ? first : second != 0 ? second : x.Week.CompareTo(y.Week);
+                });
+                if (sortByColumn.SortDirection == SortDirection.Descending) {
+                    AllPeriods.Sort((x, y) => {
+                        int first = y.TimePeriod.CompareTo(x.TimePeriod);
+                        int second = x.Day.CompareTo(y.Day);
+                        return first != 0 ? first : second != 0 ? second : x.Week.CompareTo(y.Week);
+                    });
+                }
+                break;
+            }
+        }
+    }
+}

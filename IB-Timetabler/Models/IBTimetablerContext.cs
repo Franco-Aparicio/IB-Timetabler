@@ -70,11 +70,11 @@ namespace IB_Timetabler.Models {
             });
             
             modelBuilder.Entity<SavedLesson>(entity => {
-                entity.HasKey(x => new {x.Lesson, x.SaveId});
-                entity.Property(e => e.Lesson).IsRequired();
-                entity.Property(e => e.Room).IsRequired();
-                entity.Property(e => e.SaveId).HasColumnName("SaveID");
-                entity.Property(e => e.Teacher).IsRequired();
+                entity.HasKey(x => new {x.Id});
+                entity.Property(e => e.Id).IsRequired().HasColumnName("ID");
+                entity.Property(e => e.LessonId).IsRequired().HasColumnName("LessonID");
+                entity.Property(e => e.RoomId).IsRequired().HasColumnName("RoomID");
+                entity.Property(e => e.SaveId).IsRequired().HasColumnName("SaveID");
             });
             
             modelBuilder.Entity<SavedLessonIdperiodId>(entity => {
@@ -178,12 +178,22 @@ namespace IB_Timetabler.Models {
                 }
             }
 
+            List<Period> periods = new List<Period>();
+            for (int i = 0; i < 2; i++) {
+                for (int j = 0; j < 5; j++) {
+                    for (int k = 1; k <= 7; k++) {
+                        periods.Add(new Period {Id = k + j * 7 + i * 35, Week = i, Day = j, TimePeriod = k});
+                    }
+                }
+            }
+            
             modelBuilder.Entity<Block>().HasData(blocks);
             modelBuilder.Entity<Lesson>().HasData(lessons);
             modelBuilder.Entity<Teacher>().HasData(teachers);
             modelBuilder.Entity<LessonIdblockId>().HasData(lessonBlocks);
             modelBuilder.Entity<Room>().HasData(rooms);
             modelBuilder.Entity<RoomIdlessonId>().HasData(lessonRooms);
+            modelBuilder.Entity<Period>().HasData(periods);
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

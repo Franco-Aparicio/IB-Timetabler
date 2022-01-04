@@ -1002,6 +1002,42 @@ namespace IB_Timetabler.Migrations {
                 b.HasKey("Id");
 
                 b.ToTable("Periods");
+
+                b.HasData(new {Id = 1L, Week = 0L, Day = 0L, TimePeriod = 1L}, new {Id = 2L, Week = 0L, Day = 0L, TimePeriod = 2L},
+                    new {Id = 3L, Week = 0L, Day = 0L, TimePeriod = 3L}, new {Id = 4L, Week = 0L, Day = 0L, TimePeriod = 4L},
+                    new {Id = 5L, Week = 0L, Day = 0L, TimePeriod = 5L}, new {Id = 6L, Week = 0L, Day = 0L, TimePeriod = 6L},
+                    new {Id = 7L, Week = 0L, Day = 0L, TimePeriod = 7L}, new {Id = 8L, Week = 0L, Day = 1L, TimePeriod = 1L},
+                    new {Id = 9L, Week = 0L, Day = 1L, TimePeriod = 2L}, new {Id = 10L, Week = 0L, Day = 1L, TimePeriod = 3L},
+                    new {Id = 11L, Week = 0L, Day = 1L, TimePeriod = 4L}, new {Id = 12L, Week = 0L, Day = 1L, TimePeriod = 5L},
+                    new {Id = 13L, Week = 0L, Day = 1L, TimePeriod = 6L}, new {Id = 14L, Week = 0L, Day = 1L, TimePeriod = 7L},
+                    new {Id = 15L, Week = 0L, Day = 2L, TimePeriod = 1L}, new {Id = 16L, Week = 0L, Day = 2L, TimePeriod = 2L},
+                    new {Id = 17L, Week = 0L, Day = 2L, TimePeriod = 3L}, new {Id = 18L, Week = 0L, Day = 2L, TimePeriod = 4L},
+                    new {Id = 19L, Week = 0L, Day = 2L, TimePeriod = 5L}, new {Id = 20L, Week = 0L, Day = 2L, TimePeriod = 6L},
+                    new {Id = 21L, Week = 0L, Day = 2L, TimePeriod = 7L}, new {Id = 22L, Week = 0L, Day = 3L, TimePeriod = 1L},
+                    new {Id = 23L, Week = 0L, Day = 3L, TimePeriod = 2L}, new {Id = 24L, Week = 0L, Day = 3L, TimePeriod = 3L},
+                    new {Id = 25L, Week = 0L, Day = 3L, TimePeriod = 4L}, new {Id = 26L, Week = 0L, Day = 3L, TimePeriod = 5L},
+                    new {Id = 27L, Week = 0L, Day = 3L, TimePeriod = 6L}, new {Id = 28L, Week = 0L, Day = 3L, TimePeriod = 7L},
+                    new {Id = 29L, Week = 0L, Day = 4L, TimePeriod = 1L}, new {Id = 30L, Week = 0L, Day = 4L, TimePeriod = 2L},
+                    new {Id = 31L, Week = 0L, Day = 4L, TimePeriod = 3L}, new {Id = 32L, Week = 0L, Day = 4L, TimePeriod = 4L},
+                    new {Id = 33L, Week = 0L, Day = 4L, TimePeriod = 5L}, new {Id = 34L, Week = 0L, Day = 4L, TimePeriod = 6L},
+                    new {Id = 35L, Week = 0L, Day = 4L, TimePeriod = 7L}, new {Id = 36L, Week = 1L, Day = 0L, TimePeriod = 1L},
+                    new {Id = 37L, Week = 1L, Day = 0L, TimePeriod = 2L}, new {Id = 38L, Week = 1L, Day = 0L, TimePeriod = 3L},
+                    new {Id = 39L, Week = 1L, Day = 0L, TimePeriod = 4L}, new {Id = 40L, Week = 1L, Day = 0L, TimePeriod = 5L},
+                    new {Id = 41L, Week = 1L, Day = 0L, TimePeriod = 6L}, new {Id = 42L, Week = 1L, Day = 0L, TimePeriod = 7L},
+                    new {Id = 43L, Week = 1L, Day = 1L, TimePeriod = 1L}, new {Id = 44L, Week = 1L, Day = 1L, TimePeriod = 2L},
+                    new {Id = 45L, Week = 1L, Day = 1L, TimePeriod = 3L}, new {Id = 46L, Week = 1L, Day = 1L, TimePeriod = 4L},
+                    new {Id = 47L, Week = 1L, Day = 1L, TimePeriod = 5L}, new {Id = 48L, Week = 1L, Day = 1L, TimePeriod = 6L},
+                    new {Id = 49L, Week = 1L, Day = 1L, TimePeriod = 7L}, new {Id = 50L, Week = 1L, Day = 2L, TimePeriod = 1L},
+                    new {Id = 51L, Week = 1L, Day = 2L, TimePeriod = 2L}, new {Id = 52L, Week = 1L, Day = 2L, TimePeriod = 3L},
+                    new {Id = 53L, Week = 1L, Day = 2L, TimePeriod = 4L}, new {Id = 54L, Week = 1L, Day = 2L, TimePeriod = 5L},
+                    new {Id = 55L, Week = 1L, Day = 2L, TimePeriod = 6L}, new {Id = 56L, Week = 1L, Day = 2L, TimePeriod = 7L},
+                    new {Id = 57L, Week = 1L, Day = 3L, TimePeriod = 1L}, new {Id = 58L, Week = 1L, Day = 3L, TimePeriod = 2L},
+                    new {Id = 59L, Week = 1L, Day = 3L, TimePeriod = 3L}, new {Id = 60L, Week = 1L, Day = 3L, TimePeriod = 4L},
+                    new {Id = 61L, Week = 1L, Day = 3L, TimePeriod = 5L}, new {Id = 62L, Week = 1L, Day = 3L, TimePeriod = 6L},
+                    new {Id = 63L, Week = 1L, Day = 3L, TimePeriod = 7L}, new {Id = 64L, Week = 1L, Day = 4L, TimePeriod = 1L},
+                    new {Id = 65L, Week = 1L, Day = 4L, TimePeriod = 2L}, new {Id = 66L, Week = 1L, Day = 4L, TimePeriod = 3L},
+                    new {Id = 67L, Week = 1L, Day = 4L, TimePeriod = 4L}, new {Id = 68L, Week = 1L, Day = 4L, TimePeriod = 5L},
+                    new {Id = 69L, Week = 1L, Day = 4L, TimePeriod = 6L}, new {Id = 70L, Week = 1L, Day = 4L, TimePeriod = 7L});
             });
 
             modelBuilder.Entity("IB_Timetabler.Models.Room", b => {
@@ -3221,15 +3257,15 @@ namespace IB_Timetabler.Migrations {
             });
 
             modelBuilder.Entity("IB_Timetabler.Models.SavedLesson", b => {
-                b.Property<string>("Lesson").HasColumnType("TEXT");
+                b.Property<long>("Id").HasColumnType("INTEGER").HasColumnName("ID");
+                
+                b.Property<long>("LessonId").IsRequired().HasColumnType("INTEGER").HasColumnName("LessonID");
 
-                b.Property<long>("SaveId").HasColumnType("INTEGER").HasColumnName("SaveID");
+                b.Property<long>("SaveId").IsRequired().HasColumnType("INTEGER").HasColumnName("SaveID");
 
-                b.Property<string>("Room").IsRequired().HasColumnType("TEXT");
+                b.Property<long>("RoomId").IsRequired().HasColumnType("INTEGER").HasColumnName("RoomID");
 
-                b.Property<string>("Teacher").IsRequired().HasColumnType("TEXT");
-
-                b.HasKey("Lesson", "SaveId");
+                b.HasKey("Id");
 
                 b.ToTable("SavedLessons");
             });

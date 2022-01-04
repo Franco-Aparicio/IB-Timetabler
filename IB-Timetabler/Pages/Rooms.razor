@@ -267,9 +267,15 @@ else if (Selected.Count > 1) {
                 break;
             }
             case "Number": {
-                AllRooms.Sort((x, y) => x.Number.CompareTo(y.Number));
+                AllRooms.Sort((x, y) => {
+                    int first = x.Number.CompareTo(y.Number);
+                    return first != 0 ? first : x.Floor.CompareTo(y.Floor);
+                });
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
-                    AllRooms.Sort((x, y) => y.Number.CompareTo(x.Number));
+                    AllRooms.Sort((x, y) => {
+                        int first = y.Number.CompareTo(x.Number);
+                        return first != 0 ? first : x.Floor.CompareTo(y.Floor);
+                    });
                 }
                 break;
             }

@@ -61,11 +61,11 @@ namespace IB_Timetabler.Migrations {
 
             migrationBuilder.CreateTable(name: "SavedLessons",
                 columns: table => new {
+                    ID = table.Column<long>(type: "INTEGER", nullable: false),
                     SaveID = table.Column<long>(type: "INTEGER", nullable: false),
-                    Lesson = table.Column<string>(type: "TEXT", nullable: false),
-                    Teacher = table.Column<string>(type: "TEXT", nullable: false),
-                    Room = table.Column<string>(type: "TEXT", nullable: false)
-                }, constraints: table => { table.PrimaryKey("PK_SavedLessons", x => new { x.Lesson, x.SaveID }); });
+                    LessonID = table.Column<long>(type: "INTEGER", nullable: false),
+                    RoomID = table.Column<long>(type: "INTEGER", nullable: false)
+                }, constraints: table => { table.PrimaryKey("PK_SavedLessons", x => new { x.ID }); });
 
             migrationBuilder.CreateTable(name: "Saves",
                 columns: table => new {
@@ -872,6 +872,286 @@ namespace IB_Timetabler.Migrations {
                 columns: new[] { "ID", "ClassCode", "Level", "Name", "NumLessons", "TeacherID", "Year" },
                 values: new object[] { 70L, "23 HL Psy", "HL", "23 HL Psy", 4L, 32L, 12L });
 
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 1L, 0L, 0L, 1L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 2L, 0L, 0L, 2L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 3L, 0L, 0L, 3L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 4L, 0L, 0L, 4L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 5L, 0L, 0L, 5L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 6L, 0L, 0L, 6L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 7L, 0L, 0L, 7L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 8L, 0L, 1L, 1L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 9L, 0L, 1L, 2L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 10L, 0L, 1L, 3L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 11L, 0L, 1L, 4L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 12L, 0L, 1L, 5L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 13L, 0L, 1L, 6L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 14L, 0L, 1L, 7L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 15L, 0L, 2L, 1L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 16L, 0L, 2L, 2L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 17L, 0L, 2L, 3L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 18L, 0L, 2L, 4L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 19L, 0L, 2L, 5L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 20L, 0L, 2L, 6L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 21L, 0L, 2L, 7L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 22L, 0L, 3L, 1L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 23L, 0L, 3L, 2L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 24L, 0L, 3L, 3L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 25L, 0L, 3L, 4L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 26L, 0L, 3L, 5L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 27L, 0L, 3L, 6L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 28L, 0L, 3L, 7L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 29L, 0L, 4L, 1L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 30L, 0L, 4L, 2L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 31L, 0L, 4L, 3L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 32L, 0L, 4L, 4L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 33L, 0L, 4L, 5L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 34L, 0L, 4L, 6L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 35L, 0L, 4L, 7L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 36L, 1L, 0L, 1L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 37L, 1L, 0L, 2L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 38L, 1L, 0L, 3L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 39L, 1L, 0L, 4L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 40L, 1L, 0L, 5L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 41L, 1L, 0L, 6L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 42L, 1L, 0L, 7L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 43L, 1L, 1L, 1L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 44L, 1L, 1L, 2L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 45L, 1L, 1L, 3L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 46L, 1L, 1L, 4L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 47L, 1L, 1L, 5L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 48L, 1L, 1L, 6L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 49L, 1L, 1L, 7L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 50L, 1L, 2L, 1L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 51L, 1L, 2L, 2L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 52L, 1L, 2L, 3L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 53L, 1L, 2L, 4L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 54L, 1L, 2L, 5L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 55L, 1L, 2L, 6L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 56L, 1L, 2L, 7L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 57L, 1L, 3L, 1L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 58L, 1L, 3L, 2L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 59L, 1L, 3L, 3L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 60L, 1L, 3L, 4L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 61L, 1L, 3L, 5L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 62L, 1L, 3L, 6L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 63L, 1L, 3L, 7L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 64L, 1L, 4L, 1L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 65L, 1L, 4L, 2L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 66L, 1L, 4L, 3L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 67L, 1L, 4L, 4L });
+
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 68L, 1L, 4L, 5L });
+            
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 69L, 1L, 4L, 6L });
+                
+            migrationBuilder.InsertData(table: "Periods",
+                columns: new[] { "ID", "Week", "Day", "TimePeriod" },
+                values: new object[] { 70L, 1L, 4L, 7L });
+            
             migrationBuilder.InsertData(table: "RoomIDLessonID", columns: new[] { "LessonID", "RoomID" },
                 values: new object[] { 72L, 28L });
 
