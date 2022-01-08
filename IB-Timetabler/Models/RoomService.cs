@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -18,7 +19,12 @@ namespace IB_Timetabler.Models {
         }
         
         public async Task<long> GetNextId() {
-            return await _ibTimetablerContext.Rooms.Select(x => x.Id).OrderBy(x => x).LastAsync() + 1;
+            try {
+                return await _ibTimetablerContext.Rooms.Select(x => x.Id).OrderBy(x => x).LastAsync() + 1;
+            }
+            catch (InvalidOperationException) {
+                return 1;
+            }
         }
         
         public async Task<bool> InsertRoomAsync(Room room) {

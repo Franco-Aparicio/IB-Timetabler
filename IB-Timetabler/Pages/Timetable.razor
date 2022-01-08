@@ -1,18 +1,123 @@
 ﻿@page "/timetable"
+@using System.Threading
+@inject SchedulerService SchedulerService
+@inject SaveService SaveService
+@inject SavedLessonService SavedLessonService
+@inject SavedLessonIdperiodIdService SavedLessonIdperiodIdService
+@inject LessonService LessonService
 @inject SaveBannerService SaveBannerService
-@using System
-@using System.Collections.Generic
-@using System.Linq;
 
 <TitleComponent Page="Timetable"></TitleComponent>
 
 <br/>
-<button class="button is-info is-large"  style="margin-bottom: 15px">
-    <span class="icon" style="margin-right: 7px"><i class="fas fa-calculator"></i></span>
-    <span>Generate Timetable</span>
-</button>
+@if (LoadedSaveId == 0) {
+    <div>There are no saved timetables</div>
+    <button class="button is-info @(Generating ? "is-loading" : null)" @onclick="GetNewTimetable" style="font-size: 22px; width: 250px; height: 75px; margin: auto calc(50% - 125px)">
+        <span class="icon" style=""><i class="fas fa-calculator"></i></span>
+        <span style="margin-right: -7px;">Generate Timetable</span>
+    </button>
+}
+else {
+    <button class="button is-info @(Generating ? "is-loading" : null)" @onclick="GetNewTimetable" style="margin-bottom: 15px">
+        <span class="icon" style="margin-right: 7px"><i class="fas fa-calculator"></i></span>
+        <span>Generate Timetable</span>
+    </button>
+}
+@if (Lessons is not null && Lessons.Count == 0) {
+    <div>
+        <br/>
+        <div style="font-size: 19px;">
+            No timetable could be generated before the timeout limit of 5 minutes.
+        </div>
+        <div style="font-size: 15px">
+            Try less lessons per cycle or rearranging the teachers and rooms first
+            then manually making adjustments after.
+        </div>
+    </div>
+}
+@if (LoadedSaveId != 0) {
+    <div>
+        We have a timetable
+    </div>
+}
+
 
 @code{
+
+    List<Save> Saves;
+    List<Lesson> Lessons;
+    List<SavedLessonIdperiodId> AllSavedLessonIdperiodIds;
+    List<SavedLessonIdperiodId> SavedLessonIdperiodIds;
+    long LoadedSaveId;
+    bool Generating;
+
+    protected override async void OnInitialized() {
+        await RefreshSaves();
+        await RefreshSavedLessonIdperiodIds();
+        Lessons = null;
+        Generating = false;
+        LoadedSaveId = 0;
+        if (Saves.Count > 0) 
+            LoadTimetable(Saves[0].Id);
+    }
+
+    private async Task RefreshSaves() {
+        Saves = await SaveService.GetAllSavesAsync();
+    }
     
+    private async Task RefreshSavedLessonIdperiodIds() {
+        AllSavedLessonIdperiodIds = await SavedLessonIdperiodIdService.GetAllSavedLessonIdperiodIdsAsync();
+    }
     
+    private async void GetNewTimetable() {
+        Task task = new Task(() => SaveTimetable(SchedulerService.GenerateTimetable()));
+        Generating = true;
+        task.Start();
+        await task;
+        Generating = false;
+        StateHasChanged();
+    }
+
+    // private async Task<List<LessonVar>> GenerateTimetable(CancellationToken token) {
+    //     // SaveTimetable(SchedulerService.GenerateTimetable());
+    //     return await Task.Run(SchedulerService.GenerateTimetable, token);
+    // }
+    
+    // private void GenerateTimetable() {
+    //     SaveTimetable(SchedulerService.GenerateTimetable());
+    // }
+
+    private void LoadTimetable(long id) {
+        LoadedSaveId = id;
+        Save s = Saves.Find(x => x.Id == id);
+        var temp = SavedLessonService.GetAllSavedLessonsAsync().Result.Where(x => x.SaveId == id);
+        Lessons = temp.Select(x => LessonService.GetLessonAsync(x.LessonId).Result).ToList();
+        SavedLessonIdperiodIds = AllSavedLessonIdperiodIds.Where(x=>
+            temp.Select(y=>y.Id).Contains(x.SavedLessonId)).ToList();
+    }
+    
+    private async void SaveTimetable(List<LessonVar> lessons) {
+        if (lessons.Count == 0) {
+            Lessons = new List<Lesson>();
+            return;
+        }
+        await RefreshSaves();
+        int count = Saves.Count(x => x.Name.Contains("Unnamed"));
+        string makeUniqueName = count == 0 ? "" : $"({count.ToString()})";
+        long sId = await SaveService.GetNextId();
+        await SaveService.InsertSaveAsync(new Save { Id = sId, Name = "Unnamed" + makeUniqueName });
+        foreach (LessonVar l in lessons) {
+            long savedLessonId = await SavedLessonService.GetNextId();
+            await SavedLessonService.InsertSavedLessonAsync(new SavedLesson {
+                Id = savedLessonId,
+                SaveId = sId, LessonId = l.Id, RoomId = l.RoomId});
+            foreach (PeriodVar p in l.Periods) {
+                await SavedLessonIdperiodIdService.InsertSavedLessonIdperiodIdAsync(
+                    new SavedLessonIdperiodId { PeriodId = p.Id, SavedLessonId = savedLessonId });
+            }
+        }
+        await RefreshSaves();
+        await RefreshSavedLessonIdperiodIds();
+        LoadTimetable(sId);
+    }
 }

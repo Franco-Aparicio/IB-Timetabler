@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,7 +19,12 @@ namespace IB_Timetabler.Models {
         }
 
         public async Task<long> GetNextId() {
-            return await _ibTimetablerContext.Lessons.Select(x => x.Id).OrderBy(x => x).LastAsync() + 1;
+            try {
+                return await _ibTimetablerContext.Lessons.Select(x => x.Id).OrderBy(x => x).LastAsync() + 1;
+            }
+            catch (InvalidOperationException) {
+                return 1;
+            }
         }
         
         public async Task<bool> InsertLessonAsync(Lesson lesson) {

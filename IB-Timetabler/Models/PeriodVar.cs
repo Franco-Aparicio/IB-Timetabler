@@ -6,6 +6,22 @@ namespace IB_Timetabler.Models {
         
         public int RemovedAtLevel { get; set; }
 
+        public PeriodVar(long id, long week, long day, long timePeriod) {
+            Id = id;
+            Week = week;
+            Day = day;
+            TimePeriod = timePeriod;
+            RemovedAtLevel = 0;
+        }
+        
+        public PeriodVar(Period p) {
+            Id = p.Id;
+            Week = p.Week;
+            Day = p.Day;
+            TimePeriod = p.TimePeriod;
+            RemovedAtLevel = 0;
+        }
+
         private bool Equals(PeriodVar other) {
             return Week == other.Week && Day == other.Day && TimePeriod == other.TimePeriod;
         }

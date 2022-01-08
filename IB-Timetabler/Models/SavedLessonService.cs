@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace IB_Timetabler.Models {
     
@@ -16,6 +18,15 @@ namespace IB_Timetabler.Models {
             return await _ibTimetablerContext.SavedLessons.ToListAsync();
         }
 
+        public async Task<long> GetNextId() {
+            try {
+                return await _ibTimetablerContext.SavedLessons.Select(x => x.Id).OrderBy(x => x).LastAsync() + 1;
+            }
+            catch (InvalidOperationException) {
+                return 1;
+            }
+        }
+        
         public async Task<bool> InsertSavedLessonAsync(SavedLesson savedLesson) {
             await _ibTimetablerContext.SavedLessons.AddAsync(savedLesson);
             await _ibTimetablerContext.SaveChangesAsync();

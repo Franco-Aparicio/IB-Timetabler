@@ -80,13 +80,13 @@ namespace TimetableGenerator {
                 g.Classes = classes.Where(x =>
                     (x.Block == g.Block) &&
                     (x.Group == g.GroupNum)).ToList();
-                try {
+                // try {
                     g.Periods = g.Classes[0].Periods.ToArray();
-                }
-                catch (ArgumentOutOfRangeException) {
-                    groups.RemoveAt(group);
-                    group--;
-                }
+                // }
+                // catch (ArgumentOutOfRangeException) {
+                //     groups.RemoveAt(group);
+                //     group--;
+                // }
             }
             return groups;
         }
@@ -95,7 +95,9 @@ namespace TimetableGenerator {
             Random r = new Random();
             List<Lesson> classes = new List<Lesson>();
             foreach (Group g in groups) {
-                List<int> indexes = solution.FindAll(x => int.Parse(x.Split(',')[0].ToString()) == g.Block && int.Parse(x.Split(',')[1].ToString()) == g.GroupNum).Select(x=>int.Parse(x.Split(',')[2].ToString())).ToList();
+                List<int> indexes = solution.FindAll(x => int.Parse(x.Split(',')[0].ToString()) == g.Block
+                                    && int.Parse(x.Split(',')[1].ToString()) == g.GroupNum).Select(
+                                    x=>int.Parse(x.Split(',')[2].ToString())).ToList();
                 List<Period> periods = new List<Period>();
                 foreach (int index in indexes) {
                     // Period p = g.Periods[index];
@@ -117,7 +119,8 @@ namespace TimetableGenerator {
             }
             foreach (Lesson l in classes) {
                 if (specials.FindIndex(x => x.Name == l.Name) != -1) {
-                    l.Periods = l.Periods.OrderBy(x => r.Next()).Take((int)Math.Ceiling((double) l.NumLessons / (double) 2)).OrderBy(x=>x.Week).ThenBy(x=>x.Day).ThenBy(x=>x.TimePeriod).ToList();
+                    l.Periods = l.Periods.OrderBy(x => r.Next()).Take((int)Math.Ceiling((double) l.NumLessons / (double) 2)
+                    ).OrderBy(x=>x.Week).ThenBy(x=>x.Day).ThenBy(x=>x.TimePeriod).ToList();
                 }
                 int length = l.Periods.Count;
                 for (int period = 0; period < (length < l.NumLessons/2 ? length: l.NumLessons/2); period++) {

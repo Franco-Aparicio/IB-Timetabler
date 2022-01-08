@@ -41,6 +41,7 @@ namespace IB_Timetabler {
             services.AddScoped<SavedLessonService>();
             services.AddScoped<SavedLessonIdperiodIdService>();
             services.AddScoped<SaveBannerService>();
+            services.AddScoped<SchedulerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
