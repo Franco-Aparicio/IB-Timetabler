@@ -78,15 +78,6 @@ else {
         StateHasChanged();
     }
 
-    // private async Task<List<LessonVar>> GenerateTimetable(CancellationToken token) {
-    //     // SaveTimetable(SchedulerService.GenerateTimetable());
-    //     return await Task.Run(SchedulerService.GenerateTimetable, token);
-    // }
-    
-    // private void GenerateTimetable() {
-    //     SaveTimetable(SchedulerService.GenerateTimetable());
-    // }
-
     private void LoadTimetable(long id) {
         LoadedSaveId = id;
         Save s = Saves.Find(x => x.Id == id);
