@@ -1,5 +1,4 @@
 ﻿@page "/timetable"
-@using System.Threading
 @inject SchedulerService SchedulerService
 @inject SaveService SaveService
 @inject SavedLessonService SavedLessonService
@@ -22,6 +21,18 @@ else {
         <span class="icon" style="margin-right: 7px"><i class="fas fa-calculator"></i></span>
         <span>Generate Timetable</span>
     </button>
+    <div class="tabs is-fullwidth is-boxed" style="@(LoadingTab ? "cursor: progress" : "auto")">
+        <ul style="cursor: inherit">
+            @foreach (Save s in Saves) {
+                <li class="@(s.Id == LoadedSaveId ? "is-active" : null)" @onclick="@(() => {LoadTimetable(s.Id); LoadingTab = true;})"
+                    style="cursor: inherit">
+                    <a style="@(LoadingTab ? "cursor: progress" : "pointer")">
+                        <span>@s.Name</span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
 }
 @if (Lessons is not null && Lessons.Count == 0) {
     <div>
@@ -44,21 +55,24 @@ else {
 
 @code{
 
-    List<Save> Saves;
+    List<Save> Saves; 
     List<Lesson> Lessons;
     List<SavedLessonIdperiodId> AllSavedLessonIdperiodIds;
     List<SavedLessonIdperiodId> SavedLessonIdperiodIds;
     long LoadedSaveId;
     bool Generating;
+    bool LoadingTab;
 
     protected override async void OnInitialized() {
         await RefreshSaves();
         await RefreshSavedLessonIdperiodIds();
         Lessons = null;
         Generating = false;
+        LoadingTab = false;
         LoadedSaveId = 0;
-        if (Saves.Count > 0) 
-            LoadTimetable(Saves[0].Id);
+        if (Saves.Count <= 0) return;
+        LoadedSaveId = Saves[0].Id;
+        LoadTimetable(Saves[0].Id);
     }
 
     private async Task RefreshSaves() {
@@ -78,10 +92,20 @@ else {
         StateHasChanged();
     }
 
-    private void LoadTimetable(long id) {
+    private async void LoadTimetable(long id) {
+        Task task = new Task(() => LoadSaveId(id));
+        LoadingTab = true;
+        task.Start();
+        await task;
+        LoadingTab = false;
         LoadedSaveId = id;
+        StateHasChanged();
+    }
+    
+    private async void LoadSaveId(long id) {
         Save s = Saves.Find(x => x.Id == id);
-        var temp = SavedLessonService.GetAllSavedLessonsAsync().Result.Where(x => x.SaveId == id);
+        var temp = await SavedLessonService.GetAllSavedLessonsAsync();
+        temp = temp.Where(x => x.SaveId == id).ToList();
         Lessons = temp.Select(x => LessonService.GetLessonAsync(x.LessonId).Result).ToList();
         SavedLessonIdperiodIds = AllSavedLessonIdperiodIds.Where(x=>
             temp.Select(y=>y.Id).Contains(x.SavedLessonId)).ToList();

@@ -1,0 +1,41 @@
+﻿<div class="timetable-week">
+    <h3>Week @Week</h3>
+    
+    <table>
+        <thead>
+        <tr>
+            @foreach (var p in Container.Periods) {
+                <th>
+                    @p.Days[p.Day]
+                </th>
+            }
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            @foreach (var content in ChildContents) {
+                <td>
+                    <CascadingValue Value="this">
+                        @content
+                    </CascadingValue>
+                </td>
+            }
+        </tr>
+        </tbody>
+    </table>
+    @* <CascadingValue Value="this"> *@
+    @*     @ChildContent *@
+    @* </CascadingValue> *@
+</div>
+
+@code {
+    
+    [CascadingParameter]
+    public TimetableComponent Container { get; set; }
+    [Parameter]
+    public List<RenderFragment> ChildContents { get; set; }
+    [Parameter]
+    public string Week { get; set; }
+    // [Parameter]
+    // public List<Period> Periods { get; set; }
+}

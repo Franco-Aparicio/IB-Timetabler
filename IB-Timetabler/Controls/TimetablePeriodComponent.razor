@@ -1,0 +1,44 @@
+﻿@inject LessonService LessonService
+@inject PeriodService PeriodService
+
+<div class="timetable-period">
+    <h3>@PeriodNum</h3>
+
+    <ul class="period-dropzone @DropClass"
+        @ondragover:preventDefault="true"
+        ondragstart="Event.dataTransfer.setData('', EventTarget.id);"
+        @ondrop="HandleDrop"
+        @ondragenter="HandleDragEnter"
+        @ondragleave="HandleDragLeave">
+
+        @foreach (var saved in SavedLessonIdperiodIds) {
+            <TimetableLessonComponent SavedLessonId="saved.SavedLessonId"/>
+        }
+    </ul>
+</div>
+
+@code {
+    
+    [CascadingParameter]
+    TimetableDayComponent DayContainer { get; set; }
+    [Parameter]
+    public string PeriodNum { get; set; }
+
+    List<SavedLessonIdperiodId> SavedLessonIdperiodIds = new List<SavedLessonIdperiodId>();
+    string DropClass = "";
+
+    protected override void OnParametersSet() {
+        SavedLessonIdperiodIds.Clear();
+        SavedLessonIdperiodIds = DayContainer.WeekContainer.Container.SavedLessonIdperiodIds;
+        var Periods = DayContainer.WeekContainer.Container.Periods;
+        var Lessons = DayContainer.WeekContainer.Container.Lessons;
+        
+    }
+    
+    private void HandleDragEnter() {}
+    
+    private void HandleDragLeave() {}
+    
+    private void HandleDrop() {}
+
+}

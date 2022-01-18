@@ -1,0 +1,17 @@
+﻿<div class="timetable-day">
+    <h3>Day @Day</h3>
+    
+    <CascadingValue Value="this">
+        @ChildContent
+    </CascadingValue>
+</div>
+
+@code {
+    
+    [CascadingParameter]
+    public TimetableWeekComponent WeekContainer { get; set; }
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+    [Parameter]
+    public string Day { get; set; }
+}
