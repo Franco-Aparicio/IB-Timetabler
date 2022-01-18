@@ -1,10 +1,8 @@
-﻿<div class="timetable-day">
-    <h3>Day @Day</h3>
-    
-    <CascadingValue Value="this">
-        @ChildContent
-    </CascadingValue>
-</div>
+﻿@inject PeriodService PeriodService
+
+<CascadingValue Value="this">
+    @ChildContent
+</CascadingValue>
 
 @code {
     
@@ -13,5 +11,12 @@
     [Parameter]
     public RenderFragment ChildContent { get; set; }
     [Parameter]
-    public string Day { get; set; }
+    public long Day { get; set; }
+    public List<SavedLessonIdperiodId> SavedLessonIdperiodIds = new List<SavedLessonIdperiodId>();
+    
+    protected override void OnParametersSet() {
+        SavedLessonIdperiodIds.Clear();
+        SavedLessonIdperiodIds.AddRange(WeekContainer.SavedLessonIdperiodIds.Where(
+            x=>PeriodService.GetPeriodByIdAsync(x.PeriodId).Result.Day == Day));
+    }
 }

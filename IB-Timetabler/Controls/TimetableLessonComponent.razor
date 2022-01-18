@@ -1,0 +1,26 @@
+@inject LessonService LessonService
+@inject SavedLessonService SavedLessonService
+@inject TeacherService TeacherService
+
+<div class="draggable" draggable="true" title="@Lesson.Name"
+     @ondragstart="() => HandleDragStart(SavedLessonIdperiodId)">
+    <p class="timetable-lesson-description">@TeacherService.GetTeacherAsync(Lesson.TeacherId).Result.Name</p>
+</div>
+
+@code {
+    
+    [CascadingParameter]
+    TimetablePeriodComponent PeriodContainer { get; set; }
+    [Parameter]
+    public SavedLessonIdperiodId SavedLessonIdperiodId { get; set; }
+    Lesson Lesson = null;
+
+    protected override async void OnParametersSet() {
+        Lesson = await LessonService.GetLessonAsync(SavedLessonService
+            .GetSavedLessonAsync(SavedLessonIdperiodId.SavedLessonId).Result.LessonId);
+    }
+
+    private void HandleDragStart(SavedLessonIdperiodId selectedLessonIdperiodId) {
+        PeriodContainer.DayContainer.WeekContainer.Payload = selectedLessonIdperiodId;
+    }
+}

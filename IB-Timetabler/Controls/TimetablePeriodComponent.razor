@@ -1,44 +1,48 @@
-﻿@inject LessonService LessonService
-@inject PeriodService PeriodService
+﻿@inject PeriodService PeriodService
 
-<div class="timetable-period">
-    <h3>@PeriodNum</h3>
-
-    <ul class="period-dropzone @DropClass"
-        @ondragover:preventDefault="true"
-        ondragstart="Event.dataTransfer.setData('', EventTarget.id);"
-        @ondrop="HandleDrop"
-        @ondragenter="HandleDragEnter"
-        @ondragleave="HandleDragLeave">
-
-        @foreach (var saved in SavedLessonIdperiodIds) {
-            <TimetableLessonComponent SavedLessonId="saved.SavedLessonId"/>
-        }
-    </ul>
-</div>
+<td class="period-dropzone @DropClass"
+            @ondragover:preventDefault="true"
+            ondragstart="Event.dataTransfer.setData('', EventTarget.id);"
+            @ondrop="HandleDrop"
+            @ondragenter="HandleDragEnter"
+            @ondragleave="HandleDragLeave">
+    @foreach (var savedLessonIdperiodId in SavedLessonIdperiodIds) {
+        <TimetableLessonComponent SavedLessonIdperiodId="savedLessonIdperiodId"/>
+    }
+</td>
 
 @code {
     
     [CascadingParameter]
-    TimetableDayComponent DayContainer { get; set; }
+    public TimetableDayComponent DayContainer { get; set; }
     [Parameter]
-    public string PeriodNum { get; set; }
-
+    public long PeriodNum { get; set; }
     List<SavedLessonIdperiodId> SavedLessonIdperiodIds = new List<SavedLessonIdperiodId>();
     string DropClass = "";
 
     protected override void OnParametersSet() {
         SavedLessonIdperiodIds.Clear();
-        SavedLessonIdperiodIds = DayContainer.WeekContainer.Container.SavedLessonIdperiodIds;
-        var Periods = DayContainer.WeekContainer.Container.Periods;
-        var Lessons = DayContainer.WeekContainer.Container.Lessons;
-        
+        SavedLessonIdperiodIds.AddRange(DayContainer.SavedLessonIdperiodIds.Where(
+            x=>PeriodService.GetPeriodByIdAsync(x.PeriodId).Result.TimePeriod == PeriodNum));
     }
-    
-    private void HandleDragEnter() {}
-    
-    private void HandleDragLeave() {}
-    
-    private void HandleDrop() {}
+
+   private void HandleDragEnter() {
+       if (PeriodNum == DayContainer.WeekContainer.Payload.PeriodId) return;
+       if (DayContainer.WeekContainer.Week != PeriodService.GetPeriodByIdAsync(DayContainer.WeekContainer.
+           Payload.PeriodId).Result.Week)
+           DropClass = "no-drop";
+       else
+           DropClass = "can-drop";
+    }
+
+    private void HandleDragLeave() {
+        DropClass = "";
+    }
+
+    private async Task HandleDrop() {
+        DropClass = "";
+        await DayContainer.WeekContainer.UpdateTimetableAsync(PeriodService.GetPeriodAsync(DayContainer.WeekContainer.Week,
+            DayContainer.Day, PeriodNum).Id);
+    }
 
 }

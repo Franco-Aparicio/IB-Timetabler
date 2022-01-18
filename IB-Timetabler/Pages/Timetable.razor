@@ -5,6 +5,7 @@
 @inject SavedLessonIdperiodIdService SavedLessonIdperiodIdService
 @inject LessonService LessonService
 @inject SaveBannerService SaveBannerService
+@inject PeriodService PeriodService
 
 <TitleComponent Page="Timetable"></TitleComponent>
 
@@ -47,9 +48,19 @@ else {
     </div>
 }
 @if (LoadedSaveId != 0) {
-    <div>
-        We have a timetable
-    </div>
+    @for (int week = 0; week < 2; week++) {
+        <TimetableWeekComponent SavedLessonIdperiodIds="SavedLessonIdperiodIds.Where(
+        x=>PeriodService.GetPeriodByIdAsync(x.PeriodId).Result.Week == week).ToList()"
+                                Update="HandleUpdate" Week="week">
+            @for (int day = 0; day < 6; day++) {
+                <TimetableDayComponent Day="day">
+                    @foreach (var period in PeriodService.GetAllPeriodsAsync().Result) {
+                        <TimetablePeriodComponent PeriodNum="period.TimePeriod"/>
+                    }
+                </TimetableDayComponent>
+            }
+        </TimetableWeekComponent>
+        }
 }
 
 
@@ -81,6 +92,11 @@ else {
     
     private async Task RefreshSavedLessonIdperiodIds() {
         AllSavedLessonIdperiodIds = await SavedLessonIdperiodIdService.GetAllSavedLessonIdperiodIdsAsync();
+    }
+
+    private void HandleUpdate(SavedLessonIdperiodId[] update) {
+        Console.WriteLine($"Removed {update[0].SavedLessonId.ToString()} from {update[0].PeriodId.ToString()}");
+        Console.WriteLine($"Added {update[1].SavedLessonId.ToString()} to {update[1].PeriodId.ToString()}");
     }
     
     private async void GetNewTimetable() {

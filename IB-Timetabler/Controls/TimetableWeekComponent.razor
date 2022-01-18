@@ -1,41 +1,47 @@
 ﻿<div class="timetable-week">
-    <h3>Week @Week</h3>
+    <h3>Week @(Week == 0 ? "A" : "B")</h3>
     
     <table>
         <thead>
         <tr>
-            @foreach (var p in Container.Periods) {
+            @foreach (var day in Days) {
                 <th>
-                    @p.Days[p.Day]
+                    @day;
                 </th>
             }
         </tr>
         </thead>
         <tbody>
         <tr>
-            @foreach (var content in ChildContents) {
-                <td>
-                    <CascadingValue Value="this">
-                        @content
-                    </CascadingValue>
-                </td>
-            }
+            <CascadingValue Value="this">
+                @ChildContent
+            </CascadingValue>
         </tr>
         </tbody>
     </table>
-    @* <CascadingValue Value="this"> *@
-    @*     @ChildContent *@
-    @* </CascadingValue> *@
 </div>
 
 @code {
     
-    [CascadingParameter]
-    public TimetableComponent Container { get; set; }
     [Parameter]
-    public List<RenderFragment> ChildContents { get; set; }
+    public RenderFragment ChildContent { get; set; }
     [Parameter]
-    public string Week { get; set; }
-    // [Parameter]
-    // public List<Period> Periods { get; set; }
+    public List<SavedLessonIdperiodId> SavedLessonIdperiodIds { get; set; }
+    [Parameter]
+    public EventCallback<SavedLessonIdperiodId[]> Update { get; set; }
+    [Parameter]
+    public long Week { get; set; }
+    public SavedLessonIdperiodId Payload { get; set; }
+    private string[] Days = new[] {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+    
+    public async Task UpdateTimetableAsync(long newPeriodId) {
+        var changed = SavedLessonIdperiodIds.SingleOrDefault(x =>
+            x.SavedLessonId == Payload.SavedLessonId && x.PeriodId == Payload.PeriodId);
+        if (changed is null) return;
+        SavedLessonIdperiodIds.Remove(changed);
+        SavedLessonIdperiodIds.Add(new SavedLessonIdperiodId {
+            SavedLessonId = Payload.SavedLessonId,
+            PeriodId = newPeriodId});
+        await Update.InvokeAsync(new [] {changed, Payload});
+    }
 }
