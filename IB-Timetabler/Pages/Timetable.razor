@@ -25,7 +25,7 @@ else {
     <div class="tabs is-fullwidth is-boxed" style="@(LoadingTab ? "cursor: progress" : "auto")">
         <ul style="cursor: inherit">
             @foreach (Save s in Saves) {
-                <li class="@(s.Id == LoadedSaveId ? "is-active" : null)" @onclick="@(() => {LoadTimetable(s.Id); LoadingTab = true;})"
+                <li class="@(s.Id == LoadedSaveId ? "is-active" : null)" @onclick="@(() => {SetTimetable(s.Id); LoadingTab = true;})"
                     style="cursor: inherit">
                     <a style="@(LoadingTab ? "cursor: progress" : "pointer")">
                         <span>@s.Name</span>
@@ -47,29 +47,37 @@ else {
         </div>
     </div>
 }
-@if (LoadedSaveId != 0) {
-    @for (int week = 0; week < 2; week++) {
-        <TimetableWeekComponent SavedLessonIdperiodIds="SavedLessonIdperiodIds.Where(
-        x=>PeriodService.GetPeriodByIdAsync(x.PeriodId).Result.Week == week).ToList()"
-                                Update="HandleUpdate" Week="week">
-            @for (int day = 0; day < 6; day++) {
-                <TimetableDayComponent Day="day">
-                    @foreach (var period in PeriodService.GetAllPeriodsAsync().Result) {
-                        <TimetablePeriodComponent PeriodNum="period.TimePeriod"/>
-                    }
-                </TimetableDayComponent>
-            }
-        </TimetableWeekComponent>
-        }
+@if (LoadedSaveId != 0 && Lessons is not null && SavedLessonIdperiodIds is not null) {
+@*     for (int week = 0; week < 2; week++) { *@
+@*         <TimetableWeekComponent SavedLessonIdperiodIds="SavedLessonIdperiodIds.Where(x => Periods.Find(y => y.Id == x.PeriodId)?.Week == week).ToList()" Update="HandleUpdate" Week="week"> *@
+@*             @for (int day = 0; day < 5; day++) { *@
+@*                 <TimetableDayComponent Day="day"> *@
+@*                     @foreach (var period in Periods.Where(x=>x.Week == week && x.Day == day)) { *@
+@*                         <TimetablePeriodComponent PeriodNum="period.TimePeriod"/> *@
+@*                     } *@
+@*                 </TimetableDayComponent> *@
+@*             } *@
+@*         </TimetableWeekComponent> *@
+@*     } *@
+@*     <p>@SavedLessonIdperiodIds.Count.ToString()</p> *@
+    <TimetableContainerComponent Lessons="Lessons" Periods="Periods" SavedLessonIdperiodIds="SavedLessonIdperiodIds" Update="HandleUpdate"/>
+@*     <TimetableContainerComponent Lessons="Lessons" Periods="Periods" LessonService="LessonService" *@
+@*                                  SavedLessonService="SavedLessonService" PeriodService="PeriodService" *@
+@*                                  TeacherService="TeacherService" *@
+@*                                  SavedLessonIdperiodIds="SavedLessonIdperiodIds" Update="HandleUpdate"/> *@
+}
+else if (LoadedSaveId != 0 && Lessons is null) {
+    <button class="button is-loading is-large border-0 has-text-centered" style="margin: auto"></button>
 }
 
 
 @code{
 
     List<Save> Saves; 
-    List<Lesson> Lessons;
+    List<Lesson> Lessons = null;
+    List<Period> Periods;
     List<SavedLessonIdperiodId> AllSavedLessonIdperiodIds;
-    List<SavedLessonIdperiodId> SavedLessonIdperiodIds;
+    List<SavedLessonIdperiodId> SavedLessonIdperiodIds = null;
     long LoadedSaveId;
     bool Generating;
     bool LoadingTab;
@@ -78,12 +86,13 @@ else {
         await RefreshSaves();
         await RefreshSavedLessonIdperiodIds();
         Lessons = null;
+        Periods = await PeriodService.GetAllPeriodsAsync();
         Generating = false;
         LoadingTab = false;
         LoadedSaveId = 0;
         if (Saves.Count <= 0) return;
         LoadedSaveId = Saves[0].Id;
-        LoadTimetable(Saves[0].Id);
+        SetTimetable(Saves[0].Id);
     }
 
     private async Task RefreshSaves() {
@@ -108,7 +117,13 @@ else {
         StateHasChanged();
     }
 
-    private async void LoadTimetable(long id) {
+    private async void SetTimetable(long id) {
+        Lessons = null;
+        SavedLessonIdperiodIds = null;
+        await LoadTimetable(id);
+    }
+
+    private async Task LoadTimetable(long id) {
         Task task = new Task(() => LoadSaveId(id));
         LoadingTab = true;
         task.Start();
@@ -149,6 +164,6 @@ else {
         }
         await RefreshSaves();
         await RefreshSavedLessonIdperiodIds();
-        LoadTimetable(sId);
+        SetTimetable(sId);
     }
 }

@@ -75,3 +75,39 @@ thead th {
     opacity: 0;
     transition: visibility 0s 1.5s, opacity 1.5s linear;
 }
+
+.timetable {
+    width: 100%;
+    overflow-x: scroll;
+    margin-bottom: 50px;
+}
+
+.period-dropzone {
+    padding: 30px;
+    border: 1px dashed #75868a;
+    list-style: none;
+}
+
+.draggable {
+    margin-bottom: 10px;
+    padding: 2px 10px;
+    border: 1px solid #018db6;
+    cursor: grab;
+    background: #018db6;
+    color: #ffffff;
+    border-radius: 5px;
+    width: 100%;
+    height: auto;
+}
+
+.draggable:active {
+    cursor: grabbing;
+}
+
+.draggable-title {
+    font-size: 16px;
+}
+
+.timetable-lesson-description {
+    font-size: 14px;
+}

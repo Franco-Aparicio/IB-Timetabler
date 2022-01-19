@@ -1,0 +1,69 @@
+@inject PeriodService PeriodService
+
+@for (int week = 0; week < 2; week++) {
+    <div class="timetable">
+        <h3>Week @(week == 0 ? "A" : "B")</h3>
+
+        <table class="table is-bordered">
+            <thead>
+            <tr class="has-text-centered">
+                <th style="cursor: auto">Period</th>
+                @foreach (var day in Days) {
+                    <th style="cursor: auto">
+                        @day
+                    </th>
+                }
+            </tr>
+            </thead>
+            <tbody>
+            @for (long periodNum = 1; periodNum <= Periods.Where(x=>x.Week == week)
+                .Max(x=>x.TimePeriod); periodNum++) {
+                <tr>
+                    <td class="has-text-centered">@periodNum.ToString()</td>
+                    @for (int day = 0; day < 5; day++) {
+                        var period = PeriodService.GetPeriodAsync(week, day, periodNum).Result;
+                        <td class="period-dropzone"
+                            ondragover="event.preventDefault();"
+                            ondragstart="event.dataTransfer.setData('', event.target.id);"
+                            @ondrop="() => HandleDrop(period)">
+                            @foreach (var savedLessonIdperiodId in SavedLessonIdperiodIds.Where(x => x.PeriodId == period.Id)) {
+                                <TimetableLessonComponent Container="this" SavedLessonIdperiodId="savedLessonIdperiodId"/>
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    
+    [Parameter]
+    public List<SavedLessonIdperiodId> SavedLessonIdperiodIds { get; set; }
+    [Parameter]
+    public List<Period> Periods { get; set; }
+    [Parameter]
+    public List<Lesson> Lessons { get; set; }
+    [Parameter]
+    public EventCallback<SavedLessonIdperiodId[]> Update { get; set; }
+    public SavedLessonIdperiodId Payload { get; set; }
+    private string[] Days = new[] {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+
+    private async Task HandleDrop(Period droppedPeriod) {
+        if (droppedPeriod.Week != PeriodService.GetPeriodByIdAsync(Payload.PeriodId).Result.Week) return;
+        await UpdateTimetableAsync(droppedPeriod.Id);
+    }
+    
+    private async Task UpdateTimetableAsync(long newPeriodId) {
+        var changed = SavedLessonIdperiodIds.SingleOrDefault(x =>
+            x.SavedLessonId == Payload.SavedLessonId && x.PeriodId == Payload.PeriodId);
+        if (changed is null) return;
+        SavedLessonIdperiodIds.Remove(changed);
+        SavedLessonIdperiodId newSavedLessonIdperiodId = new SavedLessonIdperiodId {
+            SavedLessonId = Payload.SavedLessonId, PeriodId = newPeriodId};
+        SavedLessonIdperiodIds.Add(newSavedLessonIdperiodId);
+        await Update.InvokeAsync(new [] {changed, newSavedLessonIdperiodId});
+    }
+}

@@ -4,23 +4,26 @@
 
 <div class="draggable" draggable="true" title="@Lesson.Name"
      @ondragstart="() => HandleDragStart(SavedLessonIdperiodId)">
-    <p class="timetable-lesson-description">@TeacherService.GetTeacherAsync(Lesson.TeacherId).Result.Name</p>
+    <p class="draggable-title">@Lesson.Name</p>
+    <p class="timetable-lesson-description">Teacher: @Teacher.Name</p>
 </div>
 
 @code {
     
-    [CascadingParameter]
-    TimetablePeriodComponent PeriodContainer { get; set; }
+    [Parameter]
+    public TimetableContainerComponent Container { get; set; }
     [Parameter]
     public SavedLessonIdperiodId SavedLessonIdperiodId { get; set; }
     Lesson Lesson = null;
+    Teacher Teacher = null;
 
     protected override async void OnParametersSet() {
         Lesson = await LessonService.GetLessonAsync(SavedLessonService
             .GetSavedLessonAsync(SavedLessonIdperiodId.SavedLessonId).Result.LessonId);
+        Teacher = await TeacherService.GetTeacherAsync(Lesson.TeacherId);
     }
 
     private void HandleDragStart(SavedLessonIdperiodId selectedLessonIdperiodId) {
-        PeriodContainer.DayContainer.WeekContainer.Payload = selectedLessonIdperiodId;
+        Container.Payload = selectedLessonIdperiodId;
     }
 }
