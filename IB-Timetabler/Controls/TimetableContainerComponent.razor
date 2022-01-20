@@ -49,11 +49,12 @@
     [Parameter]
     public EventCallback<SavedLessonIdperiodId[]> Update { get; set; }
     public SavedLessonIdperiodId Payload { get; set; }
-    private string[] Days = new[] {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+    private string[] Days = new[] {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}; 
 
     private async Task HandleDrop(Period droppedPeriod) {
-        if (droppedPeriod.Week != PeriodService.GetPeriodByIdAsync(Payload.PeriodId).Result.Week) return;
+        if (droppedPeriod.Id == Payload.PeriodId) return;
         await UpdateTimetableAsync(droppedPeriod.Id);
+        
     }
     
     private async Task UpdateTimetableAsync(long newPeriodId) {

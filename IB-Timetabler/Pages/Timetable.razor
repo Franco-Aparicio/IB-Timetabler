@@ -4,8 +4,8 @@
 @inject SavedLessonService SavedLessonService
 @inject SavedLessonIdperiodIdService SavedLessonIdperiodIdService
 @inject LessonService LessonService
-@inject SaveBannerService SaveBannerService
 @inject PeriodService PeriodService
+@inject SaveBannerService SaveBannerService
 
 <TitleComponent Page="Timetable"></TitleComponent>
 
@@ -48,23 +48,7 @@ else {
     </div>
 }
 @if (LoadedSaveId != 0 && Lessons is not null && SavedLessonIdperiodIds is not null) {
-@*     for (int week = 0; week < 2; week++) { *@
-@*         <TimetableWeekComponent SavedLessonIdperiodIds="SavedLessonIdperiodIds.Where(x => Periods.Find(y => y.Id == x.PeriodId)?.Week == week).ToList()" Update="HandleUpdate" Week="week"> *@
-@*             @for (int day = 0; day < 5; day++) { *@
-@*                 <TimetableDayComponent Day="day"> *@
-@*                     @foreach (var period in Periods.Where(x=>x.Week == week && x.Day == day)) { *@
-@*                         <TimetablePeriodComponent PeriodNum="period.TimePeriod"/> *@
-@*                     } *@
-@*                 </TimetableDayComponent> *@
-@*             } *@
-@*         </TimetableWeekComponent> *@
-@*     } *@
-@*     <p>@SavedLessonIdperiodIds.Count.ToString()</p> *@
     <TimetableContainerComponent Lessons="Lessons" Periods="Periods" SavedLessonIdperiodIds="SavedLessonIdperiodIds" Update="HandleUpdate"/>
-@*     <TimetableContainerComponent Lessons="Lessons" Periods="Periods" LessonService="LessonService" *@
-@*                                  SavedLessonService="SavedLessonService" PeriodService="PeriodService" *@
-@*                                  TeacherService="TeacherService" *@
-@*                                  SavedLessonIdperiodIds="SavedLessonIdperiodIds" Update="HandleUpdate"/> *@
 }
 else if (LoadedSaveId != 0 && Lessons is null) {
     <button class="button is-loading is-large border-0 has-text-centered" style="margin: auto"></button>
@@ -106,6 +90,9 @@ else if (LoadedSaveId != 0 && Lessons is null) {
     private void HandleUpdate(SavedLessonIdperiodId[] update) {
         Console.WriteLine($"Removed {update[0].SavedLessonId.ToString()} from {update[0].PeriodId.ToString()}");
         Console.WriteLine($"Added {update[1].SavedLessonId.ToString()} to {update[1].PeriodId.ToString()}");
+        StateHasChanged();
+        SaveBannerService.ShowBanner($"Successfully updated timetable {Saves.Find(x=>x.Id == LoadedSaveId)?.Name}",
+            SaveBannerType.Success);
     }
     
     private async void GetNewTimetable() {
@@ -115,6 +102,7 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         await task;
         Generating = false;
         StateHasChanged();
+        SaveBannerService.ShowBanner("New timetable generated successfully", SaveBannerType.Success);
     }
 
     private async void SetTimetable(long id) {
