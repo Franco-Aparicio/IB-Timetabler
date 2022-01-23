@@ -83,9 +83,7 @@ thead th {
 }
 
 .period-dropzone {
-    padding: 30px;
-    border: 1px dashed #75868a;
-    list-style: none;
+    background: #fafafa
 }
 
 .draggable {

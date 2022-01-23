@@ -22,7 +22,7 @@
                     <td class="has-text-centered">@periodNum.ToString()</td>
                     @for (int day = 0; day < 5; day++) {
                         var period = PeriodService.GetPeriodAsync(week, day, periodNum).Result;
-                        <td class="period-dropzone"
+                        <td class="@(period == HoveredPeriod ? "period-dropzone" : null)"
                             ondragover="event.preventDefault();"
                             ondragstart="event.dataTransfer.setData('', event.target.id);"
                             @ondrop="() => HandleDrop(period)">
@@ -48,13 +48,25 @@
     public List<Lesson> Lessons { get; set; }
     [Parameter]
     public EventCallback<SavedLessonIdperiodId[]> Update { get; set; }
+    private Period HoveredPeriod = null;
     public SavedLessonIdperiodId Payload { get; set; }
     private string[] Days = new[] {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}; 
 
     private async Task HandleDrop(Period droppedPeriod) {
+        HoveredPeriod = null;
         if (droppedPeriod.Id == Payload.PeriodId) return;
         await UpdateTimetableAsync(droppedPeriod.Id);
-        
+    }
+
+    private void HandleDragEnter(Period period) {
+        if (period.Id == Payload.PeriodId) return;
+        HoveredPeriod = period;
+        StateHasChanged();
+    }
+
+    private void HandleDragLeave() {
+        HoveredPeriod = null;
+        StateHasChanged();
     }
     
     private async Task UpdateTimetableAsync(long newPeriodId) {
