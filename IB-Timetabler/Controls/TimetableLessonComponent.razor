@@ -1,7 +1,3 @@
-@inject LessonService LessonService
-@inject SavedLessonService SavedLessonService
-@inject TeacherService TeacherService
-
 <div class="draggable" draggable="true" title="@Lesson.Name"
      @ondragstart="() => HandleDragStart(SavedLessonIdperiodId)">
     <p class="draggable-title">@Lesson.Name</p>
@@ -17,10 +13,11 @@
     Lesson Lesson = null;
     Teacher Teacher = null;
 
-    protected override async void OnParametersSet() {
-        Lesson = await LessonService.GetLessonAsync(SavedLessonService
-            .GetSavedLessonAsync(SavedLessonIdperiodId.SavedLessonId).Result.LessonId);
-        Teacher = await TeacherService.GetTeacherAsync(Lesson.TeacherId);
+    protected override void OnParametersSet() {
+        Lesson = Container.Lessons.FirstOrDefault(x => x.Id ==
+            Container.SavedLessons.FirstOrDefault(y=>y.Id == 
+                SavedLessonIdperiodId.SavedLessonId)?.LessonId);
+        Teacher = Container.Teachers.FirstOrDefault(x=>x.Id == Lesson.TeacherId);
     }
 
     private void HandleDragStart(SavedLessonIdperiodId selectedLessonIdperiodId) {

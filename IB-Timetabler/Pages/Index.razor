@@ -1,14 +1,14 @@
 @page "/"
 @inject SaveBannerService SaveBannerService
 
-<TitleComponent Page="IB Timetabler"></TitleComponent>
-<br/><br/>
-
-<div class="icon is-large"><i class="fas fa-long-arrow-alt-left"></i></div>
-<span>Use the navigation bar on the left to visit different pages, manage details, and generate valid timetables!</span>
-
-<a target="_blank" href="/">Test</a>
-@* <button class="btn btn-info" @onclick="@(() => SaveBannerService.ShowBanner("I'm an INFO message", SaveBannerType.Info))">Info Toast</button> *@
-@* <button class="btn btn-success" @onclick="@(() => SaveBannerService.ShowBanner("I'm a SUCCESS message", SaveBannerType.Success))">Success Toast</button> *@
-@* <button class="btn btn-warning" @onclick="@(() => SaveBannerService.ShowBanner("I'm a WARNING message", SaveBannerType.Warning))">Warning Toast</button> *@
-@* <button class="btn btn-danger" @onclick="@(() => SaveBannerService.ShowBanner("I'm an ERROR message", SaveBannerType.Error))">Error Toast</button> *@
+<div>
+    <h1 style="text-align: center">About IB Timetabler</h1>
+    <p style="text-align: center">This application allows you to manage details about availble lessons,
+    periods, blocks, teachers, and rooms and generate a timetable from the given data.</p>
+    <div style="text-align: center; padding-bottom: 25px">
+        Use the navigation bar on the left to begin managing your lessons and generating timetables.
+    </div>
+    <div class="icon is-large">
+        <img src="assets/arrow.gif" alt="Left arrow" style="transform: rotate(-90deg);" draggable="false"/>
+    </div>
+</div>

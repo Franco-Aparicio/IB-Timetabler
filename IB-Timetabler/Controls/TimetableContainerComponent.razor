@@ -1,5 +1,3 @@
-@inject PeriodService PeriodService
-
 @for (int week = 0; week < 2; week++) {
     <div class="timetable">
         <h3>Week @(week == 0 ? "A" : "B")</h3>
@@ -21,7 +19,7 @@
                 <tr>
                     <td class="has-text-centered">@periodNum.ToString()</td>
                     @for (int day = 0; day < 5; day++) {
-                        var period = PeriodService.GetPeriodAsync(week, day, periodNum).Result;
+                        var period = GetPeriod(week, day, periodNum);
                         <td class="@(period == HoveredPeriod ? "period-dropzone" : null)"
                             ondragover="event.preventDefault();"
                             ondragstart="event.dataTransfer.setData('', event.target.id);"
@@ -43,9 +41,13 @@
     [Parameter]
     public List<SavedLessonIdperiodId> SavedLessonIdperiodIds { get; set; }
     [Parameter]
+    public List<SavedLesson> SavedLessons { get; set; }
+    [Parameter]
     public List<Period> Periods { get; set; }
     [Parameter]
     public List<Lesson> Lessons { get; set; }
+    [Parameter]
+    public List<Teacher> Teachers { get; set; }
     [Parameter]
     public EventCallback<SavedLessonIdperiodId[]> Update { get; set; }
     private Period HoveredPeriod = null;
@@ -67,6 +69,10 @@
     private void HandleDragLeave() {
         HoveredPeriod = null;
         StateHasChanged();
+    }
+
+    private Period GetPeriod(long week, long day, long period) {
+        return Periods.FirstOrDefault(x=>x.Week == week && x.Day == day && x.TimePeriod == period);
     }
     
     private async Task UpdateTimetableAsync(long newPeriodId) {

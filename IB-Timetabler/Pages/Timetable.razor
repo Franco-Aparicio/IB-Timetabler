@@ -5,9 +5,10 @@
 @inject SavedLessonIdperiodIdService SavedLessonIdperiodIdService
 @inject LessonService LessonService
 @inject PeriodService PeriodService
+@inject TeacherService TeacherService
 @inject SaveBannerService SaveBannerService
 
-<TitleComponent Page="Timetable"></TitleComponent>
+<TitleComponent Page="Timetable"/>
 
 <br/>
 @if (LoadedSaveId == 0) {
@@ -48,7 +49,9 @@ else {
     </div>
 }
 @if (LoadedSaveId != 0 && Lessons is not null && SavedLessonIdperiodIds is not null) {
-    <TimetableContainerComponent Lessons="Lessons" Periods="Periods" SavedLessonIdperiodIds="SavedLessonIdperiodIds" Update="HandleUpdate"/>
+    <TimetableContainerComponent Lessons="Lessons" Periods="Periods" Teachers="TeacherService.GetAllTeachersAsync().Result"
+         SavedLessons="SavedLessons" SavedLessonIdperiodIds="SavedLessonIdperiodIds"
+         Update="HandleUpdate"/>
 }
 else if (LoadedSaveId != 0 && Lessons is null) {
     <button class="button is-loading is-large border-0 has-text-centered" style="margin: auto"></button>
@@ -62,6 +65,7 @@ else if (LoadedSaveId != 0 && Lessons is null) {
     List<Period> Periods;
     List<SavedLessonIdperiodId> AllSavedLessonIdperiodIds;
     List<SavedLessonIdperiodId> SavedLessonIdperiodIds = null;
+    List<SavedLesson> SavedLessons;
     long LoadedSaveId;
     bool Generating;
     bool LoadingTab;
@@ -69,7 +73,9 @@ else if (LoadedSaveId != 0 && Lessons is null) {
     protected override async void OnInitialized() {
         await RefreshSaves();
         await RefreshSavedLessonIdperiodIds();
+        await RefreshSavedLessons();
         Lessons = null;
+        SavedLessonIdperiodIds = null;
         Periods = await PeriodService.GetAllPeriodsAsync();
         Generating = false;
         LoadingTab = false;
@@ -87,9 +93,13 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         AllSavedLessonIdperiodIds = await SavedLessonIdperiodIdService.GetAllSavedLessonIdperiodIdsAsync();
     }
 
-    private void HandleUpdate(SavedLessonIdperiodId[] update) {
-        Console.WriteLine($"Removed {update[0].SavedLessonId.ToString()} from {update[0].PeriodId.ToString()}");
-        Console.WriteLine($"Added {update[1].SavedLessonId.ToString()} to {update[1].PeriodId.ToString()}");
+    private async Task RefreshSavedLessons() {
+        SavedLessons = await SavedLessonService.GetAllSavedLessonsAsync();
+    }
+
+    private async Task HandleUpdate(SavedLessonIdperiodId[] update) {
+        await SavedLessonIdperiodIdService.DeleteSavedLessonIdperiodIdsAsync(update.Take(1));
+        await SavedLessonIdperiodIdService.InsertSavedLessonIdperiodIdAsync(update[1]);
         StateHasChanged();
         SaveBannerService.ShowBanner($"Successfully updated timetable {Saves.Find(x=>x.Id == LoadedSaveId)?.Name}",
             SaveBannerType.Success);
@@ -121,13 +131,11 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         StateHasChanged();
     }
     
-    private async void LoadSaveId(long id) {
-        Save s = Saves.Find(x => x.Id == id);
-        var temp = await SavedLessonService.GetAllSavedLessonsAsync();
-        temp = temp.Where(x => x.SaveId == id).ToList();
+    private void LoadSaveId(long id) {
+        var temp = SavedLessons.Where(x => x.SaveId == id).ToList();
         Lessons = temp.Select(x => LessonService.GetLessonAsync(x.LessonId).Result).ToList();
-        SavedLessonIdperiodIds = AllSavedLessonIdperiodIds.Where(x=>
-            temp.Select(y=>y.Id).Contains(x.SavedLessonId)).ToList();
+        SavedLessonIdperiodIds = AllSavedLessonIdperiodIds.Where(x =>
+            temp.Select(y => y.Id).Contains(x.SavedLessonId)).ToList();
     }
     
     private async void SaveTimetable(List<LessonVar> lessons) {
