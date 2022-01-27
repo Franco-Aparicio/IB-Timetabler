@@ -26,6 +26,10 @@ else {
         <span class="icon" style="margin-right: 7px"><i class="fas fa-calculator"></i></span>
         <span>Generate Timetable</span>
     </button>
+    <button class="button is-danger" @onclick="DeleteSave" style="margin-left: 15px;">
+        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
+        <span>Delete Saved Timetable</span>
+    </button> 
     <button class="button is-outlined is-success" @onclick="SavePDF" style="margin: 0 0 15px 15px">
         <span class="icon" style="margin-right: 7px"><i class="oi oi-data-transfer-download"></i></span>
         <span>Save as PDF</span>
@@ -61,7 +65,8 @@ else {
                     <tbody>
                     <tr>
                         <td>
-                            <input class="input" type="text" @oninput="HandleRename" placeholder="Timetable Name" value="@NewSaveName" style="max-width: 150px;"/>
+                            <input class="input" type="text" @oninput="HandleRename" placeholder="@Saves.Find(x => x.Id == LoadedSaveId)?.Name"
+                                   value="@NewSaveName" style="max-width: 150px;"/>
                             <span style="font-size: 12px; color: red; display: block;">@NameWarn</span>
                         </td>
                     </tr>
@@ -139,8 +144,8 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         LoadedSaveId = Saves[0].Id;
         SetTimetable(Saves[0].Id);
         if (SaveSuccess is null) return;
-        string message = SaveSuccess.ToLower() == "true" ? "Timetable successfully saved as PDF file." :
-            "Failed to create timetable PDF file.";
+        string message = SaveSuccess.ToLower() == "true" ? "Timetable successfully saved as PDF file" :
+            "Failed to create timetable PDF file";
         SaveBannerType type = SaveSuccess.ToLower() == "true" ? SaveBannerType.Success : SaveBannerType.Error;
         SaveBannerService.ShowBanner(message, type);
     }
@@ -172,9 +177,9 @@ else if (LoadedSaveId != 0 && Lessons is null) {
     }
 
     private void HandleRename(ChangeEventArgs args) {
-        NewSaveName = args.Value.ToString().Trim();
+        NewSaveName = args.Value?.ToString()?.Trim();
         NameWarn = "";
-        if (NewSaveName.Length == 0)
+        if (NewSaveName?.Length == 0)
             NameWarn = "The save must have a name!";
     }
 
@@ -192,7 +197,7 @@ else if (LoadedSaveId != 0 && Lessons is null) {
     private async Task HandleUpdate(List<dynamic> update) {
         if (update[0].GetType().ToString().ToLower() == "ib_timetabler.models.savedlesson") {
             await SavedLessonService.UpdateSavedLessonAsync((SavedLesson) update[0]);
-            SaveBannerService.ShowBanner("Successfully updated saved room.", SaveBannerType.Success);
+            SaveBannerService.ShowBanner("Successfully updated saved room", SaveBannerType.Success);
             return;
         }
         await SavedLessonIdperiodIdService.DeleteSavedLessonIdperiodIdsAsync(update.Take(1).Select(x=>(SavedLessonIdperiodId) x));
@@ -209,7 +214,12 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         await task;
         Generating = false;
         StateHasChanged();
-        SaveBannerService.ShowBanner("New timetable generated successfully", SaveBannerType.Success);
+        if (Lessons.Count > 0) {
+            SaveBannerService.ShowBanner("New timetable generated successfully", SaveBannerType.Success);
+        }
+        else {
+            SaveBannerService.ShowBanner("Failed to generate timetable before timeout", SaveBannerType.Error);
+        }
     }
 
     private async void SetTimetable(long id) {
@@ -262,5 +272,29 @@ else if (LoadedSaveId != 0 && Lessons is null) {
 
     private void SavePDF() {
         NavigationManager.NavigateTo($"timetable/timetablePDF/{LoadedSaveId.ToString()}");
+    }
+    //
+    private async void DeleteSave() {
+        Save save = Saves.Find(x => x.Id == LoadedSaveId);
+        string message = $"Are you sure you want to delete {save?.Name}?";
+        var options = new MessageBoxOptions(message) {
+            Title = "Confirm Action",
+            Buttons = new []{"Confirm", "Cancel"}
+        };
+        var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
+        if (choice.Response == 1) return;
+        await SaveService.DeleteSaveAsync(save);
+        var temp = SavedLessons.Where(x => x.SaveId == LoadedSaveId).ToList();
+        await SavedLessonService.DeleteSavedLessonsAsync(temp);
+        await SavedLessonIdperiodIdService.DeleteSavedLessonIdperiodIdsAsync(SavedLessonIdperiodIds.Where(
+            x => temp.Select(y => y.Id).Contains(x.SavedLessonId)).ToList());
+        await RefreshSaves();
+        await RefreshSavedLessons();
+        await RefreshSavedLessonIdperiodIds();
+        LoadedSaveId = Saves.Count > 0 ? Saves[0].Id : 0;
+        Lessons = null;
+        SavedLessonIdperiodIds = null;
+        if (LoadedSaveId != 0) SetTimetable(LoadedSaveId);
+        SaveBannerService.ShowBanner($"Successfully deleted {save?.Name}", SaveBannerType.Success);
     }
 }
