@@ -207,35 +207,33 @@ else if (LoadedSaveId != 0 && Lessons is null) {
             SaveBannerType.Success);
     }
     
-    private async void GetNewTimetable() {
+    private async Task GetNewTimetable() {
         Task task = new Task(() => SaveTimetable(SchedulerService.GenerateTimetable()));
         Generating = true;
         task.Start();
         await task;
         Generating = false;
         StateHasChanged();
-        if (Lessons.Count > 0) {
+        if (Lessons.Count > 0) 
             SaveBannerService.ShowBanner("New timetable generated successfully", SaveBannerType.Success);
-        }
-        else {
+        else 
             SaveBannerService.ShowBanner("Failed to generate timetable before timeout", SaveBannerType.Error);
-        }
     }
 
     private async void SetTimetable(long id) {
         Lessons = null;
         SavedLessonIdperiodIds = null;
         await LoadTimetable(id);
+        StateHasChanged();
     }
 
     private async Task LoadTimetable(long id) {
+        LoadedSaveId = id;
         Task task = new Task(() => LoadSaveId(id));
         LoadingTab = true;
         task.Start();
         await task;
         LoadingTab = false;
-        LoadedSaveId = id;
-        StateHasChanged();
     }
     
     private void LoadSaveId(long id) {
@@ -267,14 +265,16 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         }
         await RefreshSaves();
         await RefreshSavedLessonIdperiodIds();
-        SetTimetable(sId);
+        await RefreshSavedLessons();
+        LoadedSaveId = sId;
+        LoadSaveId(sId);
     }
 
     private void SavePDF() {
         NavigationManager.NavigateTo($"timetable/timetablePDF/{LoadedSaveId.ToString()}");
     }
-    //
-    private async void DeleteSave() {
+    
+    private async Task DeleteSave() {
         Save save = Saves.Find(x => x.Id == LoadedSaveId);
         string message = $"Are you sure you want to delete {save?.Name}?";
         var options = new MessageBoxOptions(message) {
