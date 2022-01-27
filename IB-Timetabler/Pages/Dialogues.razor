@@ -1,4 +1,6 @@
 @page "/dialogues"
+@inject NavigationManager NavigationManager
+@inject SaveBannerService SaveBannerService
 
 <TitleComponent Page="Diologues"/>
 <br/>
@@ -21,6 +23,11 @@
         <button class="btn btn-primary" @onclick="OpenFileDialogueAsync">Show Open File Dialogue</button>
         <p>@selectedFile</p>
     </div>
+    <div class="col-4">
+        <h4>Save PDF</h4>
+        @* <button class="btn btn-primary" @onclick="async () => await SavePDF()">Save PDF</button> *@
+        <button class="btn btn-primary" @onclick="TestSaveOtherPage">Save PDF</button>
+    </div>
 </div>
 
 @code {
@@ -33,6 +40,35 @@
     //     
     // }
 
+    private void TestSaveOtherPage() {
+        NavigationManager.NavigateTo("timetable/timetablePDF/1");
+    }
+    
+    private async Task SavePDF() {
+        if (HybridSupport.IsElectronActive) {
+            BrowserWindow mainWindow = Electron.WindowManager.BrowserWindows.First();
+            var saveOptions = new SaveDialogOptions {
+                Title = "Save a PDF-File",
+                DefaultPath = await Electron.App.GetPathAsync(PathName.Documents),
+                Filters = new FileFilter[] {
+                    new FileFilter { Name = "PDF", Extensions = new string[] { "pdf" } }
+                }
+            };
+            var path = await Electron.Dialog.ShowSaveDialogAsync(mainWindow, saveOptions);
+            if (await mainWindow.WebContents.PrintToPDFAsync(path, new PrintToPDFOptions {
+                Landscape = false,
+                PageSize = "A4",
+                PrintBackground = true})) {
+                path += path.Length <= 4 || path.Substring(path.Length - 4) != ".pdf" ? ".pdf" : ""; 
+                await Electron.Shell.OpenExternalAsync("file://" + path);
+                SaveBannerService.ShowBanner("Timetable successfully saved as PDF file.", SaveBannerType.Success);
+            }
+            else {
+                SaveBannerService.ShowBanner("Failed to create timetable PDF file.", SaveBannerType.Error);
+            }
+        }
+    }
+    
     async void ShowMessageBox() {
         var options = new MessageBoxOptions("Hello World!") {
             Title = "Hello",

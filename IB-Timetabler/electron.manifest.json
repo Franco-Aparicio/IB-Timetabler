@@ -1,7 +1,7 @@
 {
   "executable": "IB-Timetabler",
   "splashscreen": {
-    "imageFile": ""
+    "imageFile": "wwwroot/assets/app-icon/png/128.png"
   },
   "name": "IB-Timetabler",
   "author": "Franco Aparicio",

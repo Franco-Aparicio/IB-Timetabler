@@ -1,4 +1,6 @@
 ﻿@page "/timetable"
+@page "/timetable/{SaveSuccess}"
+@inject NavigationManager NavigationManager
 @inject SchedulerService SchedulerService
 @inject SaveService SaveService
 @inject SavedLessonService SavedLessonService
@@ -6,6 +8,7 @@
 @inject LessonService LessonService
 @inject PeriodService PeriodService
 @inject TeacherService TeacherService
+@inject RoomService RoomService
 @inject SaveBannerService SaveBannerService
 
 <TitleComponent Page="Timetable"/>
@@ -23,17 +26,61 @@ else {
         <span class="icon" style="margin-right: 7px"><i class="fas fa-calculator"></i></span>
         <span>Generate Timetable</span>
     </button>
+    <button class="button is-outlined is-success" @onclick="SavePDF" style="margin: 0 0 15px 15px">
+        <span class="icon" style="margin-right: 7px"><i class="oi oi-data-transfer-download"></i></span>
+        <span>Save as PDF</span>
+    </button>
+    <button class="button" style="float: right;" @onclick="OpenRenameSave">Rename Saved Timetable</button>
     <div class="tabs is-fullwidth is-boxed" style="@(LoadingTab ? "cursor: progress" : "auto")">
         <ul style="cursor: inherit">
             @foreach (Save s in Saves) {
                 <li class="@(s.Id == LoadedSaveId ? "is-active" : null)" @onclick="@(() => {SetTimetable(s.Id); LoadingTab = true;})"
                     style="cursor: inherit">
                     <a style="@(LoadingTab ? "cursor: progress" : "pointer")">
-                        <span>@s.Name</span>
+                        <div>@s.Name</div>
                     </a>
                 </li>
             }
         </ul>
+    </div>
+    <div class="modal @(ShowRename ? "is-active" : null)">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Rename Selected Timetable</p>
+            </header>
+            <section class="modal-card-body">
+                <table class="table is-narrow has-text-centered" style="width: 75%; margin: auto">
+                    <thead>
+                    <tr>
+                        <th style="cursor: auto;">
+                            Saved Timetable Name
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>
+                            <input class="input" type="text" @oninput="HandleRename" placeholder="Timetable Name" value="@NewSaveName" style="max-width: 150px;"/>
+                            <span style="font-size: 12px; color: red; display: block;">@NameWarn</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </section>
+            <footer class="modal-card-foot" style="padding: 5px !important;">
+                <div style="margin: auto">
+                    <button class="button is-success is-small" @onclick="RenameCurrentSave" style="margin: 5px;">
+                        <span class="icon"><i class="fas fa-check"></i></span>
+                        <span>Rename</span>
+                    </button>
+                    <button class="button is-dark is-outlined is-small" @onclick="CloseRenameSave" style="margin: 5px;">
+                        <span class="icon"><i class="fas fa-ban"></i></span>
+                        <span>Cancel</span>
+                    </button>
+                </div>
+            </footer>
+        </div>
     </div>
 }
 @if (Lessons is not null && Lessons.Count == 0) {
@@ -51,7 +98,7 @@ else {
 @if (LoadedSaveId != 0 && Lessons is not null && SavedLessonIdperiodIds is not null) {
     <TimetableContainerComponent Lessons="Lessons" Periods="Periods" Teachers="TeacherService.GetAllTeachersAsync().Result"
          SavedLessons="SavedLessons" SavedLessonIdperiodIds="SavedLessonIdperiodIds"
-         Update="HandleUpdate"/>
+         Rooms="RoomService.GetAllRoomsAsync().Result" Update="HandleUpdate"/>
 }
 else if (LoadedSaveId != 0 && Lessons is null) {
     <button class="button is-loading is-large border-0 has-text-centered" style="margin: auto"></button>
@@ -60,6 +107,9 @@ else if (LoadedSaveId != 0 && Lessons is null) {
 
 @code{
 
+    [Parameter]
+    public string SaveSuccess { get; set; } = null;
+    
     List<Save> Saves; 
     List<Lesson> Lessons = null;
     List<Period> Periods;
@@ -69,6 +119,9 @@ else if (LoadedSaveId != 0 && Lessons is null) {
     long LoadedSaveId;
     bool Generating;
     bool LoadingTab;
+    bool ShowRename = false;
+    string NewSaveName;
+    string NameWarn;
 
     protected override async void OnInitialized() {
         await RefreshSaves();
@@ -80,9 +133,16 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         Generating = false;
         LoadingTab = false;
         LoadedSaveId = 0;
+        NewSaveName = "";
+        NameWarn = "";
         if (Saves.Count <= 0) return;
         LoadedSaveId = Saves[0].Id;
         SetTimetable(Saves[0].Id);
+        if (SaveSuccess is null) return;
+        string message = SaveSuccess.ToLower() == "true" ? "Timetable successfully saved as PDF file." :
+            "Failed to create timetable PDF file.";
+        SaveBannerType type = SaveSuccess.ToLower() == "true" ? SaveBannerType.Success : SaveBannerType.Error;
+        SaveBannerService.ShowBanner(message, type);
     }
 
     private async Task RefreshSaves() {
@@ -97,9 +157,46 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         SavedLessons = await SavedLessonService.GetAllSavedLessonsAsync();
     }
 
-    private async Task HandleUpdate(SavedLessonIdperiodId[] update) {
-        await SavedLessonIdperiodIdService.DeleteSavedLessonIdperiodIdsAsync(update.Take(1));
-        await SavedLessonIdperiodIdService.InsertSavedLessonIdperiodIdAsync(update[1]);
+    private async void RenameCurrentSave() {
+        if (NewSaveName.Length == 0) {
+            SaveBannerService.ShowBanner("The save must have a name!", SaveBannerType.Error);
+            return;
+        }
+        int count = Saves.Count(x => x.Name.Contains(NewSaveName));
+        string makeUniqueName = count == 0 ? "" : $"({count.ToString()})";
+        Save save = await SaveService.GetSaveAsync(LoadedSaveId);
+        save.Name = NewSaveName + makeUniqueName;
+        await SaveService.UpdateSaveAsync(save);
+        CloseRenameSave();
+        SaveBannerService.ShowBanner($"Successfully renamed timetable to {save.Name}", SaveBannerType.Success);
+    }
+
+    private void HandleRename(ChangeEventArgs args) {
+        NewSaveName = args.Value.ToString().Trim();
+        NameWarn = "";
+        if (NewSaveName.Length == 0)
+            NameWarn = "The save must have a name!";
+    }
+
+    private void OpenRenameSave() {
+        ShowRename = true;
+        NewSaveName = "";
+    }
+    
+    private void CloseRenameSave() {
+        ShowRename = false;
+        NewSaveName = "";
+        NameWarn = "";
+    }
+
+    private async Task HandleUpdate(List<dynamic> update) {
+        if (update[0].GetType().ToString().ToLower() == "ib_timetabler.models.savedlesson") {
+            await SavedLessonService.UpdateSavedLessonAsync((SavedLesson) update[0]);
+            SaveBannerService.ShowBanner("Successfully updated saved room.", SaveBannerType.Success);
+            return;
+        }
+        await SavedLessonIdperiodIdService.DeleteSavedLessonIdperiodIdsAsync(update.Take(1).Select(x=>(SavedLessonIdperiodId) x));
+        await SavedLessonIdperiodIdService.InsertSavedLessonIdperiodIdAsync((SavedLessonIdperiodId) update[1]);
         StateHasChanged();
         SaveBannerService.ShowBanner($"Successfully updated timetable {Saves.Find(x=>x.Id == LoadedSaveId)?.Name}",
             SaveBannerType.Success);
@@ -161,5 +258,9 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         await RefreshSaves();
         await RefreshSavedLessonIdperiodIds();
         SetTimetable(sId);
+    }
+
+    private void SavePDF() {
+        NavigationManager.NavigateTo($"timetable/timetablePDF/{LoadedSaveId.ToString()}");
     }
 }

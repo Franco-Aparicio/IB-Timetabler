@@ -37,6 +37,12 @@ namespace IB_Timetabler.Models {
             return await _ibTimetablerContext.SavedLessons.FirstOrDefaultAsync(x => x.Id.Equals(id));
         }
         
+        public async Task<bool> UpdateSavedLessonAsync(SavedLesson savedLesson) {
+            _ibTimetablerContext.SavedLessons.Update(savedLesson);
+            await _ibTimetablerContext.SaveChangesAsync();
+            return true;
+        }
+        
         public async Task<bool> DeleteSavedLessonAsync(SavedLesson savedLesson) {
             _ibTimetablerContext.Remove(savedLesson);
             await _ibTimetablerContext.SaveChangesAsync();

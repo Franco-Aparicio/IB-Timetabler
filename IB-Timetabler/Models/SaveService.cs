@@ -37,6 +37,12 @@ namespace IB_Timetabler.Models {
             return true;
         }
 
+        public async Task<bool> UpdateSaveAsync(Save save) {
+            _ibTimetablerContext.Saves.Update(save);
+            await _ibTimetablerContext.SaveChangesAsync();
+            return true;
+        }
+        
         public async Task<Save> GetSaveAsync(long id) {
             return await _ibTimetablerContext.Saves.FirstOrDefaultAsync(x => x.Id.Equals(id));
         }

@@ -2,6 +2,13 @@
      @ondragstart="() => HandleDragStart(SavedLessonIdperiodId)">
     <p class="draggable-title">@Lesson.Name</p>
     <p class="timetable-lesson-description">Teacher: @Teacher.Name</p>
+    <div class="select" style="width: 100%; min-width: 75px;">
+        <select @bind-value="SavedLesson.RoomId" @bind-value:event="oninput" @onchange="RoomUpdate" style="width: 100%; min-width: 75px;">
+            @foreach (var room in Container.Rooms.OrderBy(x=>x.Floor).ThenBy(x=>x.Number)) {
+                <option value="@room.Id.ToString()">@room.Number</option>
+            }
+        </select>
+    </div>
 </div>
 
 @code {
@@ -10,17 +17,22 @@
     public TimetableContainerComponent Container { get; set; }
     [Parameter]
     public SavedLessonIdperiodId SavedLessonIdperiodId { get; set; }
+    SavedLesson SavedLesson;
     Lesson Lesson = null;
     Teacher Teacher = null;
 
     protected override void OnParametersSet() {
-        Lesson = Container.Lessons.FirstOrDefault(x => x.Id ==
-            Container.SavedLessons.FirstOrDefault(y=>y.Id == 
-                SavedLessonIdperiodId.SavedLessonId)?.LessonId);
+        SavedLesson = Container.SavedLessons.FirstOrDefault(y => y.Id ==
+            SavedLessonIdperiodId.SavedLessonId);
+        Lesson = Container.Lessons.FirstOrDefault(x => x.Id == SavedLesson?.LessonId);
         Teacher = Container.Teachers.FirstOrDefault(x=>x.Id == Lesson.TeacherId);
     }
 
     private void HandleDragStart(SavedLessonIdperiodId selectedLessonIdperiodId) {
         Container.Payload = selectedLessonIdperiodId;
+    }
+
+    private async void RoomUpdate() {
+        await Container.UpdateTimetableAsync(new [] {0, SavedLesson.Id});
     }
 }

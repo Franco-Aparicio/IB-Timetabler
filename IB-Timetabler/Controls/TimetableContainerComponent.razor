@@ -17,7 +17,7 @@
             @for (long periodNum = 1; periodNum <= Periods.Where(x=>x.Week == week)
                 .Max(x=>x.TimePeriod); periodNum++) {
                 <tr>
-                    <td class="has-text-centered">@periodNum.ToString()</td>
+                    <td class="has-text-centered" style="vertical-align: middle">@periodNum.ToString()</td>
                     @for (int day = 0; day < 5; day++) {
                         var period = GetPeriod(week, day, periodNum);
                         <td class="@(period == HoveredPeriod ? "period-dropzone" : null)"
@@ -49,7 +49,9 @@
     [Parameter]
     public List<Teacher> Teachers { get; set; }
     [Parameter]
-    public EventCallback<SavedLessonIdperiodId[]> Update { get; set; }
+    public List<Room> Rooms { get; set; }
+    [Parameter]
+    public EventCallback<List<dynamic>> Update { get; set; }
     private Period HoveredPeriod = null;
     public SavedLessonIdperiodId Payload { get; set; }
     private string[] Days = new[] {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}; 
@@ -57,7 +59,7 @@
     private async Task HandleDrop(Period droppedPeriod) {
         HoveredPeriod = null;
         if (droppedPeriod.Id == Payload.PeriodId) return;
-        await UpdateTimetableAsync(droppedPeriod.Id);
+        await UpdateTimetableAsync(new [] {droppedPeriod.Id});
     }
 
     private void HandleDragEnter(Period period) {
@@ -75,14 +77,19 @@
         return Periods.FirstOrDefault(x=>x.Week == week && x.Day == day && x.TimePeriod == period);
     }
     
-    private async Task UpdateTimetableAsync(long newPeriodId) {
+    public async Task UpdateTimetableAsync(long[] update) {
+        if (update[0] == 0) {
+            await Update.InvokeAsync(SavedLessons.Where(x=>x.Id == update[1]).Select(
+                x=>(dynamic) x).ToList());
+            return;
+        } 
         var changed = SavedLessonIdperiodIds.SingleOrDefault(x =>
             x.SavedLessonId == Payload.SavedLessonId && x.PeriodId == Payload.PeriodId);
         if (changed is null) return;
         SavedLessonIdperiodIds.Remove(changed);
         SavedLessonIdperiodId newSavedLessonIdperiodId = new SavedLessonIdperiodId {
-            SavedLessonId = Payload.SavedLessonId, PeriodId = newPeriodId};
+            SavedLessonId = Payload.SavedLessonId, PeriodId = update[0]};
         SavedLessonIdperiodIds.Add(newSavedLessonIdperiodId);
-        await Update.InvokeAsync(new [] {changed, newSavedLessonIdperiodId});
+        await Update.InvokeAsync(new List<dynamic> {changed, newSavedLessonIdperiodId});
     }
 }

@@ -1,0 +1,116 @@
+@page "/timetable/timetablePDF/{SaveId}"
+@layout EmptyLayout
+@inject NavigationManager NavigationManager
+@inject SaveService SaveService
+@inject SavedLessonService SavedLessonService
+@inject SavedLessonIdperiodIdService SavedLessonIdperiodIdService
+@inject LessonService LessonService
+@inject PeriodService PeriodService
+@inject TeacherService TeacherService
+@inject RoomService RoomService
+
+<div class="px-4" style="justify-content: flex-end; display: flex; align-items: center;">
+    <DateTimeComponent/>
+</div>
+<h2 style="text-align: center">@($"Timetable: {Save.Name}")</h2>
+
+@for (int week = 0; week < 2; week++) {
+    <div>
+        <h3>Week @(week == 0 ? "A" : "B")</h3>
+
+        <table class="table is-striped is-bordered has-text-centered" style="width: 100%">
+            <thead>
+            <tr class="has-text-centered">
+                <th style="cursor: auto">Period</th>
+                @foreach (var day in Days) {
+                    <th style="cursor: auto">
+                        @day
+                    </th>
+                }
+            </tr>
+            </thead>
+            <tbody>
+            @for (long periodNum = 1; periodNum <= Periods.Where(x=>x.Week == week)
+                .Max(x=>x.TimePeriod); periodNum++) {
+                <tr>
+                    <td class="has-text-centered" style="vertical-align: middle">@periodNum.ToString()</td>
+                    @for (int day = 0; day < 5; day++) {
+                        var period = GetPeriod(week, day, periodNum);
+                        <td>
+                            @foreach (var savedLessonIdperiodId in SavedLessonIdperiodIds.Where(x =>
+                                x.PeriodId == period.Id)) {
+                                Lesson lesson = Lessons.FirstOrDefault(x => x.Id == SavedLessons.FirstOrDefault(
+                                    y => y.Id == savedLessonIdperiodId.SavedLessonId)?.LessonId);
+                                <div style="border-bottom: 1px solid #dbdbdb; padding: 5px 0; font-size: 14px;">
+                                    <p style="margin: auto">@lesson?.Name</p>
+                                    <p style="margin: auto">Teacher: @Teachers.FirstOrDefault(x=>x.Id == lesson?.TeacherId)?.Name</p>
+                                    <p style="margin: auto">@Rooms.FirstOrDefault(x => x.Id == SavedLessons.FirstOrDefault(
+                                        y => y.Id == savedLessonIdperiodId.SavedLessonId)?.RoomId)?.Number</p>
+                                </div>
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    
+    [Parameter]
+    public string SaveId { get; set; }
+
+    private Save Save;
+    private List<SavedLessonIdperiodId> SavedLessonIdperiodIds;
+    private List<SavedLesson> SavedLessons;
+    private List<Period> Periods;
+    private List<Lesson> Lessons;
+    private List<Teacher> Teachers;
+    private List<Room> Rooms;
+    private string[] Days = new[] {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}; 
+
+    protected override async void OnParametersSet() {
+        Save = await SaveService.GetSaveAsync(long.Parse(SaveId));
+        SavedLessons = await SavedLessonService.GetAllSavedLessonsAsync();
+        SavedLessons = SavedLessons.Where(x => x.SaveId == Save.Id).ToList();
+        Lessons = SavedLessons.Select(x => LessonService.GetLessonAsync(x.LessonId).Result).ToList();
+        SavedLessonIdperiodIds = await SavedLessonIdperiodIdService.GetAllSavedLessonIdperiodIdsAsync();
+        SavedLessonIdperiodIds = SavedLessonIdperiodIds.Where(x =>
+            SavedLessons.Select(y => y.Id).Contains(x.SavedLessonId)).ToList();
+        Periods = await PeriodService.GetAllPeriodsAsync();
+        Teachers = await TeacherService.GetAllTeachersAsync();
+        Rooms = await RoomService.GetAllRoomsAsync();
+        bool success = await SavePDF();
+        NavigationManager.NavigateTo($"timetable/{success.ToString()}");
+    }
+
+    private Period GetPeriod(long week, long day, long period) {
+        return Periods.FirstOrDefault(x=>x.Week == week && x.Day == day && x.TimePeriod == period);
+    }
+    
+    private async Task<bool> SavePDF() {
+        bool success = false;
+        if (HybridSupport.IsElectronActive) {
+            BrowserWindow mainWindow = Electron.WindowManager.BrowserWindows.First();
+            var saveOptions = new SaveDialogOptions {
+                Title = "Save a PDF-File",
+                DefaultPath = await Electron.App.GetPathAsync(PathName.Documents),
+                Filters = new FileFilter[] {
+                    new FileFilter { Name = "PDF", Extensions = new string[] { "pdf" } }
+                }
+            };
+            var path = await Electron.Dialog.ShowSaveDialogAsync(mainWindow, saveOptions);
+            path += path.Length <= 4 || path.Substring(path.Length - 4) != ".pdf" ? ".pdf" : "";
+            if (path != ".pdf" && await mainWindow.WebContents.PrintToPDFAsync(path, new PrintToPDFOptions {
+                Landscape = false,
+                PageSize = "A4",
+                PrintBackground = true})) { 
+                await Electron.Shell.OpenExternalAsync("file://" + path);
+                success = true;
+            }
+        }
+        return success;
+    }
+}

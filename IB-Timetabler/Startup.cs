@@ -83,7 +83,7 @@ namespace IB_Timetabler {
                 Height = 1000,
                 MinWidth = 500,
                 MinHeight = 300
-                // Icon = $"{System.IO.Directory.GetCurrentDirectory()}/Assets/favicon_32x32.png"
+                // Icon = "Assets/favicon_32x32.png"
             };
             var window = await Electron.WindowManager.CreateWindowAsync(windowOptions);
 
