@@ -17,7 +17,8 @@
       "icon": "../../../Assets/256.png"
     },
     "mac": {
-      "icon": "../../../Assets/256.png"
+      "icon": "../../../Assets/512.png",
+      "category": "public.app-category.utility"
     },
     "linux": {
       "icon": "../../../Assets/256.png"
