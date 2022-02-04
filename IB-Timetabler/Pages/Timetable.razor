@@ -208,6 +208,14 @@ else if (LoadedSaveId != 0 && Lessons is null) {
     }
     
     private async Task GetNewTimetable() {
+        await RefreshSaves();
+        await RefreshSavedLessonIdperiodIds();
+        await RefreshSavedLessons();
+        Lessons = null;
+        SavedLessonIdperiodIds = null;
+        Periods = await PeriodService.GetAllPeriodsAsync();
+        Generating = false;
+        LoadingTab = false;
         Task task = new Task(() => SaveTimetable(SchedulerService.GenerateTimetable()));
         Generating = true;
         task.Start();
