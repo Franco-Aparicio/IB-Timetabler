@@ -1,3 +1,5 @@
+@inject SaveBannerService SaveBannerService
+
 @for (int week = 0; week < 2; week++) {
     <div class="timetable">
         <h3>Week @(week == 0 ? "A" : "B")</h3>
@@ -59,6 +61,12 @@
     private async Task HandleDrop(Period droppedPeriod) {
         HoveredPeriod = null;
         if (droppedPeriod.Id == Payload.PeriodId) return;
+        if (SavedLessonIdperiodIds.Where(x => x.PeriodId == droppedPeriod.Id).Any(
+                x => x.SavedLessonId == Payload.SavedLessonId)) {
+            SaveBannerService.ShowBanner("A lesson cannot be scheduled at the same time " +
+                                         "as another period of the same lesson!", SaveBannerType.Error);
+            return;
+        }
         await UpdateTimetableAsync(new [] {droppedPeriod.Id});
     }
 
