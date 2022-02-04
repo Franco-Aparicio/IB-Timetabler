@@ -14,13 +14,13 @@
     "buildVersion": "1.0.0",
     "compression": "maximum",
     "win": {
-      "icon": "Assets/favicon.ico"
+      "icon": "../../../Assets/256.png"
     },
     "mac": {
-      "icon": "Assets/favicon.icns"
+      "icon": "../../../Assets/256.png"
     },
     "linux": {
-      "icon": "Assets/favicon_32x32.png"
+      "icon": "../../../Assets/256.png"
     },
     "directories": {
       "output": "../../../bin/Desktop",
