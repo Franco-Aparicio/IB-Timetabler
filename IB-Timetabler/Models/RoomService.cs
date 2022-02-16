@@ -27,20 +27,14 @@ namespace IB_Timetabler.Models {
             }
         }
         
-        public async Task<bool> InsertRoomAsync(Room room) {
+        public async Task InsertRoomAsync(Room room) {
             await _ibTimetablerContext.Rooms.AddAsync(room);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
-        }
-        
-        public async Task<Room> GetRoomAsync(long id) {
-            return await _ibTimetablerContext.Rooms.FirstOrDefaultAsync(x=>x.Id.Equals(id));
         }
 
-        public async Task<bool> DeleteRoomAsync(Room room) {
+        public async Task DeleteRoomAsync(Room room) {
             _ibTimetablerContext.Remove(room);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
         }
     }
 }

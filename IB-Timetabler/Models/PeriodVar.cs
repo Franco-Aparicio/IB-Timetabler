@@ -5,14 +5,6 @@ namespace IB_Timetabler.Models {
     public class PeriodVar : Period {
         
         public int RemovedAtLevel { get; set; }
-
-        public PeriodVar(long id, long week, long day, long timePeriod) {
-            Id = id;
-            Week = week;
-            Day = day;
-            TimePeriod = timePeriod;
-            RemovedAtLevel = 0;
-        }
         
         public PeriodVar(Period p) {
             Id = p.Id;

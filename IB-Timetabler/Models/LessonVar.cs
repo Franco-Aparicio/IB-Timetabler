@@ -5,7 +5,7 @@ namespace IB_Timetabler.Models {
     public class LessonVar : Lesson {
         
         public List<PeriodVar> Periods { get; set; }
-        public long RoomId { get; set; }
+        public long RoomId { get; }
 
         public LessonVar(long id, string name, long year, string level, string classCode, long numLessons,
             long teacherId, List<PeriodVar> periods, long roomId) {

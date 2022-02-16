@@ -16,21 +16,14 @@ namespace IB_Timetabler.Models {
             return await _ibTimetablerContext.SavedLessonIdperiodIds.ToListAsync();
         }
         
-        public async Task<bool> InsertSavedLessonIdperiodIdAsync(SavedLessonIdperiodId savedLessonIdperiodId) {
+        public async Task InsertSavedLessonIdperiodIdAsync(SavedLessonIdperiodId savedLessonIdperiodId) {
             await _ibTimetablerContext.SavedLessonIdperiodIds.AddAsync(savedLessonIdperiodId);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<SavedLessonIdperiodId> GetSavedLessonIdperiodIdAsync(long lessonId, long periodId) {
-            return await _ibTimetablerContext.SavedLessonIdperiodIds.FirstOrDefaultAsync(x =>
-                x.SavedLessonId.Equals(lessonId) && x.PeriodId.Equals(periodId));
         }
         
-        public async Task<bool> DeleteSavedLessonIdperiodIdsAsync(IEnumerable<SavedLessonIdperiodId> savedLessonIdperiodId) {
+        public async Task DeleteSavedLessonIdperiodIdsAsync(IEnumerable<SavedLessonIdperiodId> savedLessonIdperiodId) {
             _ibTimetablerContext.RemoveRange(savedLessonIdperiodId);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
         }
     }
 }

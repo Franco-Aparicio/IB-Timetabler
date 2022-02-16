@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace IB_Timetabler.Models {
     
     public class SchedulerService {
-
         
         private readonly IBTimetablerContext _ibTimetablerContext;
         private List<LessonVar> Lessons;
@@ -25,7 +22,6 @@ namespace IB_Timetabler.Models {
             Scheduler scheduler = new Scheduler();
             if (scheduler.Schedule(Groups)) {
                 Lessons = SolutionToLessons(scheduler.Solution, Groups, Specials);
-                // PrintSolution(Lessons);
             }
             else {
                 Lessons.Clear();
@@ -119,16 +115,6 @@ namespace IB_Timetabler.Models {
                 }
             }
             return lessons;
-        }
-        
-        private void PrintSolution(List<LessonVar> classes) {
-            foreach (LessonVar l in classes) {
-                Console.Write($"Class: {l.Name, -15}  Needed: {l.NumLessons.ToString(), -2}  Assigned: {l.Periods.Count.ToString(), -2}");
-                foreach (PeriodVar p in l.Periods) {
-                    Console.Write($"{p, -40}");
-                }
-                Console.WriteLine();
-            }
         }
     }
 }

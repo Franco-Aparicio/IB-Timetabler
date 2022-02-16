@@ -1,5 +1,3 @@
-using System.Reflection.Metadata;
-
 namespace IB_Timetabler.Models {
     
     public class ColumnDefinition {

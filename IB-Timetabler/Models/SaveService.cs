@@ -18,10 +18,6 @@ namespace IB_Timetabler.Models {
             return await _ibTimetablerContext.Saves.ToListAsync();
         }
         
-        public async Task<List<long>> GetAllIds() {
-            return await _ibTimetablerContext.Saves.Select(x => x.Id).ToListAsync();
-        }
-        
         public async Task<long> GetNextId() {
             try {
                 return await _ibTimetablerContext.Saves.Select(x => x.Id).OrderBy(x => x).LastAsync() + 1;
@@ -31,26 +27,23 @@ namespace IB_Timetabler.Models {
             }
         }
         
-        public async Task<bool> InsertSaveAsync(Save save) {
+        public async Task InsertSaveAsync(Save save) {
             await _ibTimetablerContext.Saves.AddAsync(save);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
         }
 
-        public async Task<bool> UpdateSaveAsync(Save save) {
+        public async Task UpdateSaveAsync(Save save) {
             _ibTimetablerContext.Saves.Update(save);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
         }
         
         public async Task<Save> GetSaveAsync(long id) {
             return await _ibTimetablerContext.Saves.FirstOrDefaultAsync(x => x.Id.Equals(id));
         }
         
-        public async Task<bool> DeleteSaveAsync(Save save) {
+        public async Task DeleteSaveAsync(Save save) {
             _ibTimetablerContext.Remove(save);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
         }
     }
 }

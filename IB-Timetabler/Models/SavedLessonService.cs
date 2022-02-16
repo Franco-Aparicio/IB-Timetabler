@@ -27,32 +27,28 @@ namespace IB_Timetabler.Models {
             }
         }
         
-        public async Task<bool> InsertSavedLessonAsync(SavedLesson savedLesson) {
+        public async Task InsertSavedLessonAsync(SavedLesson savedLesson) {
             await _ibTimetablerContext.SavedLessons.AddAsync(savedLesson);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
         }
 
         public async Task<SavedLesson> GetSavedLessonAsync(long id) {
             return await _ibTimetablerContext.SavedLessons.FirstOrDefaultAsync(x => x.Id.Equals(id));
         }
         
-        public async Task<bool> UpdateSavedLessonAsync(SavedLesson savedLesson) {
+        public async Task UpdateSavedLessonAsync(SavedLesson savedLesson) {
             _ibTimetablerContext.SavedLessons.Update(savedLesson);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
         }
 
-        public async Task<bool> DeleteSavedLessonAsync(SavedLesson savedLesson) {
+        public async Task DeleteSavedLessonAsync(SavedLesson savedLesson) {
             _ibTimetablerContext.Remove(savedLesson);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
         }
         
-        public async Task<bool> DeleteSavedLessonsAsync(List<SavedLesson> savedLesson) {
+        public async Task DeleteSavedLessonsAsync(List<SavedLesson> savedLesson) {
             _ibTimetablerContext.RemoveRange(savedLesson);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
         }
     }
 }

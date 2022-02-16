@@ -4,7 +4,7 @@
 
 namespace IB_Timetabler.Models {
     
-    public partial class Save {
+    public class Save {
         
         [Key]
         public long Id { get; set; }

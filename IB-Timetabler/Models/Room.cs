@@ -4,7 +4,7 @@
 
 namespace IB_Timetabler.Models {
     
-    public partial class Room {
+    public class Room {
         
         [Key]
         public long Id { get; set; }

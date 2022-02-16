@@ -16,16 +16,14 @@ namespace IB_Timetabler.Models {
             return await _ibTimetablerContext.LessonIdblockIds.ToListAsync();
         }
         
-        public async Task<bool> InsertLessonIdblockIdAsync(LessonIdblockId lessonIdblockId) {
+        public async Task InsertLessonIdblockIdAsync(LessonIdblockId lessonIdblockId) {
             await _ibTimetablerContext.LessonIdblockIds.AddAsync(lessonIdblockId);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
         }
 
-        public async Task<bool> DeleteLessonIdblockIdsAsync(IEnumerable<LessonIdblockId> lessonIdblockIds) {
+        public async Task DeleteLessonIdblockIdsAsync(IEnumerable<LessonIdblockId> lessonIdblockIds) {
             _ibTimetablerContext.RemoveRange(lessonIdblockIds);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
         }
     }
 }

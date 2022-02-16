@@ -27,26 +27,14 @@ namespace IB_Timetabler.Models {
             }
         }
         
-        public async Task<bool> InsertTeacherAsync(Teacher teacher) {
+        public async Task InsertTeacherAsync(Teacher teacher) {
             await _ibTimetablerContext.Teachers.AddAsync(teacher);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
         }
         
-        public async Task<Teacher> GetTeacherAsync(long id) {
-            return await _ibTimetablerContext.Teachers.FirstOrDefaultAsync(x=>x.Id.Equals(id));
-        }
-        
-        public async Task<bool> UpdateTeacherAsync(Teacher teacher) {
-            _ibTimetablerContext.Teachers.Update(teacher);
-            await _ibTimetablerContext.SaveChangesAsync();
-            return true;
-        }
-        
-        public async Task<bool> DeleteTeacherAsync(Teacher teacher) {
+        public async Task DeleteTeacherAsync(Teacher teacher) {
             _ibTimetablerContext.Remove(teacher);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
         }
     }
 }

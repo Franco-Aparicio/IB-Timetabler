@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -83,7 +77,6 @@ namespace IB_Timetabler {
                 Height = 1000,
                 MinWidth = 500,
                 MinHeight = 300
-                // Icon = "Assets/favicon_32x32.png"
             };
             var window = await Electron.WindowManager.CreateWindowAsync(windowOptions);
 
@@ -92,13 +85,6 @@ namespace IB_Timetabler {
                     Label = "File",
                     Type = MenuType.submenu,
                     Submenu = new MenuItem[] {
-                        new MenuItem {
-                            Label = "New",
-                            Click = () => Electron.Dialog.ShowMessageBoxAsync("New menu clicked")
-                        },
-                        new MenuItem {
-                            Type = MenuType.separator
-                        },
                         new MenuItem {
                             Label = "Close",
                             Role = MenuRole.close
@@ -113,11 +99,6 @@ namespace IB_Timetabler {
                             Label = "Force Reload",
                             Role = MenuRole.forcereload,
                             Accelerator = "CmdOrCtrl+R"
-                        },
-                        new MenuItem {
-                            Label = "Test",
-                            Click = () => Electron.Dialog.ShowMessageBoxAsync("Test menu clicked"),
-                            Accelerator = "CmdOrCtrl+T"
                         },
                         new MenuItem {
                             Label = "Dev Tools",

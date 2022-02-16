@@ -4,7 +4,7 @@
 
 namespace IB_Timetabler.Models {
     
-    public partial class Period {
+    public class Period {
         
         [Key]
         public long Id { get; set; }

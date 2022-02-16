@@ -27,25 +27,14 @@ namespace IB_Timetabler.Models {
             }
         }
         
-        public async Task<bool> InsertPeriodAsync(Period period) {
+        public async Task InsertPeriodAsync(Period period) {
             await _ibTimetablerContext.Periods.AddAsync(period);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<Period> GetPeriodByIdAsync(long id) {
-            return await _ibTimetablerContext.Periods.FirstOrDefaultAsync(x => x.Id.Equals(id));
-        }
-
-        public async Task<Period> GetPeriodAsync(long week, long day, long timePeriod) {
-            return await _ibTimetablerContext.Periods.FirstOrDefaultAsync(x=>
-                x.Week == week && x.Day == day && x.TimePeriod == timePeriod);
         }
         
-        public async Task<bool> DeletePeriodAsync(Period period) {
+        public async Task DeletePeriodAsync(Period period) {
             _ibTimetablerContext.Remove(period);
             await _ibTimetablerContext.SaveChangesAsync();
-            return true;
         }
     }
 }
