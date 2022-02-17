@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using IB_Timetabler.Models;
 
-namespace IB_Timetabler.Models {
+namespace IB_Timetabler.Services {
     
     public class LessonService {
 

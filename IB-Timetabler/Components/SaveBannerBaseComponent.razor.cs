@@ -1,8 +1,9 @@
 using System;
 using IB_Timetabler.Models;
+using IB_Timetabler.Services;
 using Microsoft.AspNetCore.Components;
 
-namespace IB_Timetabler.Controls {
+namespace IB_Timetabler.Components {
 
     public class SaveBannerBaseComponent : ComponentBase, IDisposable {
 

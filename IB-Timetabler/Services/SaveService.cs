@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using IB_Timetabler.Models;
 
-namespace IB_Timetabler.Models {
+namespace IB_Timetabler.Services {
     
     public class SaveService {
         

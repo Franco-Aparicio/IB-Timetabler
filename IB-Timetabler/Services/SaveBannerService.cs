@@ -1,7 +1,8 @@
 using System;
 using System.Timers;
+using IB_Timetabler.Models;
 
-namespace IB_Timetabler.Models {
+namespace IB_Timetabler.Services {
     
     public class SaveBannerService : IDisposable {
 

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using ElectronNET.API;
 using ElectronNET.API.Entities;
 using IB_Timetabler.Models;
+using IB_Timetabler.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace IB_Timetabler {
