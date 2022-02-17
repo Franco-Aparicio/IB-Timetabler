@@ -30,10 +30,10 @@ else {
         <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
         <span>Delete Saved Timetable</span>
     </button> 
-    <button class="button is-outlined is-success" @onclick="SavePDF" style="margin: 0 0 15px 15px">
+    <NavLink class="button is-outlined is-success" href=@($"timetable/timetablePDF/{LoadedSaveId.ToString()}") style="margin: 0 0 15px 15px;text-decoration: none;">
         <span class="icon" style="margin-right: 7px"><i class="oi oi-data-transfer-download"></i></span>
         <span>Save as PDF</span>
-    </button>
+    </NavLink>
     <button class="button" style="float: right;" @onclick="OpenRenameSave">Rename Saved Timetable</button>
     <div class="tabs is-fullwidth is-boxed" style="@(LoadingTab ? "cursor: progress" : "auto")">
         <ul style="cursor: inherit">
@@ -276,10 +276,6 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         await RefreshSavedLessons();
         LoadedSaveId = sId;
         LoadSaveId(sId);
-    }
-
-    private void SavePDF() {
-        NavigationManager.NavigateTo($"timetable/timetablePDF/{LoadedSaveId.ToString()}");
     }
     
     private async Task DeleteSave() {
