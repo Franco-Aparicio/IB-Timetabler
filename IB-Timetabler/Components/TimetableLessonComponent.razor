@@ -1,10 +1,13 @@
+@* The structure for the draggable SavedLesson components in the TimetableContainerComponent *@
+
 <div class="draggable" draggable="true" title="@Lesson.Name"
-     @ondragstart="() => HandleDragStart(SavedLessonIdperiodId)">
+     @ondragstart="HandleDragStart">
     <p class="draggable-title">@Lesson.Name</p>
     <p class="timetable-lesson-description">Teacher: @Teacher.Name</p>
     <div class="select" style="width: 100%; min-width: 75px;">
+        @* Selection dropdown menu to edit the Room allocated to the SavedLesson with data binding and custom event handling *@
         <select @bind-value="SavedLesson.RoomId" @bind-value:event="oninput" @onchange="RoomUpdate" style="width: 100%; min-width: 75px;">
-            @foreach (var room in Container.Rooms.OrderBy(x=>x.Floor).ThenBy(x=>x.Number)) {
+            @foreach (var room in Container.Rooms.OrderBy(x => x.Floor).ThenBy(x => x.Number)) {
                 <option value="@room.Id.ToString()">@room.Number</option>
             }
         </select>
@@ -13,14 +16,18 @@
 
 @code {
     
-    [Parameter]
-    public TimetableContainerComponent Container { get; set; }
-    [Parameter]
-    public SavedLessonIdperiodId SavedLessonIdperiodId { get; set; }
-    SavedLesson SavedLesson;
+    /// The containing component (TimetableContainerComponent) from which this component can acquire data 
+    [Parameter] public TimetableContainerComponent Container { get; set; }
+    /// The SavedLessonIdperiodId this component represents 
+    [Parameter] public SavedLessonIdperiodId SavedLessonIdperiodId { get; set; }
+    /// The SavedLesson that the SavedLessonId corresponds to (used when updating rooms) 
+    SavedLesson SavedLesson = null;
+    /// The Lesson that the SavedLesson represents 
     Lesson Lesson = null;
+    /// The Teacher that teaches the Lesson 
     Teacher Teacher = null;
 
+    /// Initializes other properties after the Parameter properties have been assigned (upon creation of an instance of the component) 
     protected override void OnParametersSet() {
         SavedLesson = Container.SavedLessons.FirstOrDefault(y => y.Id ==
             SavedLessonIdperiodId.SavedLessonId);
@@ -28,10 +35,12 @@
         Teacher = Container.Teachers.FirstOrDefault(x=>x.Id == Lesson.TeacherId);
     }
 
-    private void HandleDragStart(SavedLessonIdperiodId selectedLessonIdperiodId) {
-        Container.Payload = selectedLessonIdperiodId;
+    /// Sets the Payload of the TimetableContainerComponent as the SavedLessonIdperiodId the current component represents when dragged 
+    private void HandleDragStart() {
+        Container.Payload = SavedLessonIdperiodId;
     }
 
+    /// Calls the method to update the Save in the Container 
     private async void RoomUpdate() {
         await Container.UpdateTimetableAsync(new [] {0, SavedLesson.Id});
     }

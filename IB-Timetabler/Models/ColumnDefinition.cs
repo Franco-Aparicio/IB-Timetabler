@@ -1,5 +1,6 @@
 namespace IB_Timetabler.Models {
     
+    /// The custom ColumnDefinition class that allows for sorting tables by properties in the application 
     public class ColumnDefinition {
 
         public ColumnDefinition() {

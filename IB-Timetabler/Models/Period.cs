@@ -4,6 +4,7 @@
 
 namespace IB_Timetabler.Models {
     
+    /// The Period object for the Period table in the database 
     public class Period {
         
         [Key]

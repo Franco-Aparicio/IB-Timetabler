@@ -4,6 +4,7 @@
 
 namespace IB_Timetabler.Models {
     
+    /// The LessonIdblockId object for the LessonIdblockId table in the database 
     public class LessonIdblockId {
         
         [Key]

@@ -36,6 +36,10 @@
                     <td class="has-text-centered" style="vertical-align: middle">@periodNum.ToString()</td>
                     @for (int day = 0; day < 5; day++) {
                         var period = GetPeriod(week, day, periodNum);
+                        if (period is null) {
+                            <td></td>
+                            continue;
+                        }
                         <td>
                             @foreach (var savedLessonIdperiodId in SavedLessonIdperiodIds.Where(x =>
                                 x.PeriodId == period.Id)) {

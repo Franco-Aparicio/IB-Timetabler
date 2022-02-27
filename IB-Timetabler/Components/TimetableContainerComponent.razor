@@ -1,5 +1,6 @@
 @inject SaveBannerService SaveBannerService
 
+@* Describes the format for each week of the generated timetable viewer and editor (with draggable elements) *@
 @for (int week = 0; week < 2; week++) {
     <div class="timetable">
         <h3>Week @(week == 0 ? "A" : "B")</h3>
@@ -7,6 +8,7 @@
         <table class="table is-bordered">
             <thead>
             <tr class="has-text-centered">
+                @* Sets the table column headers *@
                 <th style="cursor: auto">Period</th>
                 @foreach (var day in Days) {
                     <th style="cursor: auto">
@@ -16,20 +18,37 @@
             </tr>
             </thead>
             <tbody>
-            @for (long periodNum = 1; periodNum <= Periods.Where(x=>x.Week == week)
-                .Max(x=>x.TimePeriod); periodNum++) {
+            @* Loops for as many times as necessary (the maximum number of periods in a day of the week) *@
+            @for (long periodNum = 1; periodNum <= Periods.Where(x => x.Week == week)
+                  .Max(x => x.TimePeriod); periodNum++) {
                 <tr>
                     <td class="has-text-centered" style="vertical-align: middle">@periodNum.ToString()</td>
+                    @* For each day in the week, add a cell in the table with all the lessons in that period, day, and week *@
                     @for (int day = 0; day < 5; day++) {
                         var period = GetPeriod(week, day, periodNum);
-                        <td class="@(period == HoveredPeriod ? "period-dropzone" : null)"
-                            ondragover="event.preventDefault();"
-                            ondragstart="event.dataTransfer.setData('', event.target.id);"
-                            @ondrop="() => HandleDrop(period)">
-                            @foreach (var savedLessonIdperiodId in SavedLessonIdperiodIds.Where(x => x.PeriodId == period.Id)) {
-                                <TimetableLessonComponent Container="this" SavedLessonIdperiodId="savedLessonIdperiodId"/>
+                        @switch (period) {
+                            @* If the period does not exist, add a blank cell with a grey background *@
+                            case null: {
+                                <td ondragover="event.preventDefault();"
+                                    ondragstart="event.dataTransfer.setData('', event.target.id);"
+                                    @ondrop="() => HandleDrop(null)"
+                                    style="background-color: #c9c9c9;"></td>
+                                break;
                             }
-                        </td>
+                            @* Otherwise, add a cell with all lessons scheduled for this time and allow for custom drag event handling *@
+                            default: {
+                                <td ondragover="event.preventDefault();"
+                                    ondragstart="event.dataTransfer.setData('', event.target.id);"
+                                    @ondrop="() => HandleDrop(period)">
+                                    @foreach (var savedLessonIdperiodId in SavedLessonIdperiodIds
+                                              .Where(x => x.PeriodId == period.Id)) {
+                                        @* The draggable component representing a scheduled lesson *@
+                                        <TimetableLessonComponent Container="this" SavedLessonIdperiodId="savedLessonIdperiodId"/>
+                                    }
+                                </td>
+                                break;
+                            }
+                        }
                     }
                 </tr>
             }
@@ -40,27 +59,28 @@
 
 @code {
     
-    [Parameter]
-    public List<SavedLessonIdperiodId> SavedLessonIdperiodIds { get; set; }
-    [Parameter]
-    public List<SavedLesson> SavedLessons { get; set; }
-    [Parameter]
-    public List<Period> Periods { get; set; }
-    [Parameter]
-    public List<Lesson> Lessons { get; set; }
-    [Parameter]
-    public List<Teacher> Teachers { get; set; }
-    [Parameter]
-    public List<Room> Rooms { get; set; }
-    [Parameter]
-    public EventCallback<List<dynamic>> Update { get; set; }
-    private Period HoveredPeriod = null;
+    [Parameter] public List<SavedLessonIdperiodId> SavedLessonIdperiodIds { get; set; }
+    [Parameter] public List<SavedLesson> SavedLessons { get; set; }
+    [Parameter] public List<Period> Periods { get; set; }
+    [Parameter] public List<Lesson> Lessons { get; set; }
+    [Parameter] public List<Teacher> Teachers { get; set; }
+    [Parameter] public List<Room> Rooms { get; set; }
+    /// An EventCallback with a value corresponding to a list of dynamic objects that need to be updated in the database 
+    [Parameter] public EventCallback<List<dynamic>> Update { get; set; }
+    /// The SavedLessonIdperiodId that is being dragged at a given time 
     public SavedLessonIdperiodId Payload { get; set; }
     private string[] Days = new[] {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}; 
-
+    
+    /// Is called whenever a dragged object is dropped
+    /// <param name="droppedPeriod">The period over which the dragged object was dropped</param>
     private async Task HandleDrop(Period droppedPeriod) {
-        HoveredPeriod = null;
+        if (droppedPeriod is null) {
+            SaveBannerService.ShowBanner("This period does not exist! Please add it in the Periods page.", SaveBannerType.Error);
+            return;
+        }
+        // If the SavedLesson is dropped in its original location, do nothing and return 
         if (droppedPeriod.Id == Payload.PeriodId) return;
+        // Update the period of the SavedLesson if allowed 
         if (SavedLessonIdperiodIds.Where(x => x.PeriodId == droppedPeriod.Id).Any(
                 x => x.SavedLessonId == Payload.SavedLessonId)) {
             SaveBannerService.ShowBanner("A lesson cannot be scheduled at the same time " +
@@ -70,34 +90,30 @@
         await UpdateTimetableAsync(new [] {droppedPeriod.Id});
     }
 
-    private void HandleDragEnter(Period period) {
-        if (period.Id == Payload.PeriodId) return;
-        HoveredPeriod = period;
-        StateHasChanged();
-    }
-
-    private void HandleDragLeave() {
-        HoveredPeriod = null;
-        StateHasChanged();
-    }
-
+    /// Find specific Period within the Periods list 
     private Period GetPeriod(long week, long day, long period) {
         return Periods.FirstOrDefault(x=>x.Week == week && x.Day == day && x.TimePeriod == period);
     }
     
+    /// Updates the instance records of the data in the Save and invokes the Update Action to update the database
+    /// <param name="update">An array of 2 long numbers corresponding to a new Period Id for a SavedLesson Id</param>
     public async Task UpdateTimetableAsync(long[] update) {
+        // If the Period Id is 0, invoke an update of the SavedLesson (as its room was changed) 
         if (update[0] == 0) {
             await Update.InvokeAsync(SavedLessons.Where(x=>x.Id == update[1]).Select(
                 x=>(dynamic) x).ToList());
             return;
         } 
+        // Otherwise, find the original location of the dragged object (Payload) 
         var changed = SavedLessonIdperiodIds.SingleOrDefault(x =>
             x.SavedLessonId == Payload.SavedLessonId && x.PeriodId == Payload.PeriodId);
         if (changed is null) return;
+        // Remove the SavedLessonIdperiodId that corresponds to the dragged object and create a new one with the new PeriodId 
         SavedLessonIdperiodIds.Remove(changed);
         SavedLessonIdperiodId newSavedLessonIdperiodId = new SavedLessonIdperiodId {
             SavedLessonId = Payload.SavedLessonId, PeriodId = update[0]};
         SavedLessonIdperiodIds.Add(newSavedLessonIdperiodId);
+        // Invoke an update of the SavedLessonIdperiodIds list (delete old (changed) entry and add new one to database) 
         await Update.InvokeAsync(new List<dynamic> {changed, newSavedLessonIdperiodId});
     }
 }

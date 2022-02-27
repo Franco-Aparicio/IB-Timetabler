@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IB_Timetabler.Models {
     
+    /// The database context used by services to interact with the application database 
     public partial class IBTimetablerContext : DbContext {
         
         public IBTimetablerContext() { }
@@ -23,6 +24,7 @@ namespace IB_Timetabler.Models {
         public virtual DbSet<SavedLessonIdperiodId> SavedLessonIdperiodIds { get; set; }
         public virtual DbSet<Teacher> Teachers { get; set; }
         
+        /// Configures the application database and provides seed data if no database was found 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             OnModelCreatingPartial(modelBuilder);
             modelBuilder.Entity<Block>(entity => {

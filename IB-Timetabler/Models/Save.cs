@@ -4,6 +4,7 @@
 
 namespace IB_Timetabler.Models {
     
+    /// The Save object for the Save table in the database 
     public class Save {
         
         [Key]

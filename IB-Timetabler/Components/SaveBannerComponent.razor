@@ -1,5 +1,7 @@
+@* Uses properties and methods from the SaveBannerBaseComponent class *@
 @inherits SaveBannerBaseComponent
 
+@* Sets CSS classes depending on property values *@
 <div class="banner @(IsVisible ? "banner-visible" : "banner-hidden") @BackgroundCssClass">
     <div class="banner-icon">
         <i class="fas fa-@IconCssClass" aria-hidden="true"></i>

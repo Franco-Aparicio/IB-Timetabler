@@ -4,6 +4,7 @@
 
 namespace IB_Timetabler.Models {
     
+    /// The Room object for the Room table in the database 
     public class Room {
         
         [Key]

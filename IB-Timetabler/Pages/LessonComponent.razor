@@ -1,3 +1,5 @@
+@* To route to this page, an id parameter must be given in the URI *@ 
+
 @page "/lessons/{Id}"
 @using System.Linq
 @inject SaveBannerService SaveBannerService
@@ -12,10 +14,12 @@
 
 <TitleComponent Page="@($"Lesson: {Lesson.Name}")"/>
 <br/>
+@* Button to navigate back to the lessons page *@ 
 <NavLink class="button" href="lessons" style="text-decoration: none; margin-bottom: 15px">
     <span class="icon"><i class="sort left"></i></span>
     <span>Back to Lessons</span>
 </NavLink>
+@* Button to delete the current Lesson being viewed *@ 
 <button class="button is-danger" @onclick="Delete" style="margin-left: 15px;">
     <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
     <span>Delete Lesson</span>
@@ -35,104 +39,83 @@
         </thead>
         <tbody>
         <tr>
-            @foreach (var column in MainColumns) {
-                @switch (column.Title) {
-                    case "Name": {
-                        <td>
-                            <input class="input" value="@Lesson.Name" @oninput="HandleName" @onfocusout="SubmitName" type="text" placeholder="@Lesson.Name" style="width: 100%; min-width: 150px;"/>
-                            @if (NameWarn.Length > 0 && NameWarn.Substring(0, 4) == "INFO") {
-                                <span style="font-size: 12px; color: dodgerblue; display: block;">@NameWarn</span>
-                            }
-                            else {
-                                <span style="font-size: 12px; color: red; display: block;">@NameWarn</span>
-                            }
-                        </td>
-                        break;
-                    }
-                    case "Class Code": {
-                        <td>
-                            <input class="input" value="@Lesson.ClassCode" @oninput="HandleClassCode" @onfocusout="SubmitClassCode" type="text" placeholder="@Lesson.ClassCode" style="width: 100%; min-width: 150px;"/>
-                            @if (ClassCodeWarn.Length > 0 && ClassCodeWarn.Substring(0, 4) == "INFO") {
-                                <span style="font-size: 12px; color: dodgerblue; display: block;">@ClassCodeWarn</span>
-                            }
-                            else {
-                                <span style="font-size: 12px; color: red; display: block;">@ClassCodeWarn</span>
-                            }
-                        </td>
-                        break;
-                    }
-                    case "Year": {
-                        <td>
-                            <div class="select" style="width: 100%; min-width: 75px;">
-                                <select @bind-value="@CopyLesson.Year" @bind-value:event="oninput" @onchange="SubmitYear" style="width: 100%; min-width: 75px;">
-                                    <option value="12">12</option>
-                                    <option value="13">13</option>
-                                </select>
-                            </div>
-                        </td>
-                        break;
-                    }
-                    case "Level": {
-                        <td>
-                            <div class="select" style="width: 100%; min-width: 75px;">
-                                <select @bind-value="@CopyLesson.Level" @bind-value:event="oninput" @onchange="SubmitLevel" style="width: 100%; min-width: 75px;">
-                                    <option value="SL">SL</option>
-                                    <option value="HL">HL</option>
-                                </select>
-                            </div>
-                        </td>
-                        break;
-                    }
-                    case "Block(s)": {
-                        <td style="min-width: 100px">
-                            @foreach (Block b in Blocks) {
-                                <label for="@($"block-{@b.BlockNum.ToString()}")" style="display: inline-block;padding-right: 5px;padding-left: 5px; cursor: pointer;">
-                                    <label for="@($"block-{@b.BlockNum.ToString()}")" style="cursor: pointer;display:inline-flex;font-size:1.2rem; margin-bottom: 2px; margin-top: 2px;">@b.BlockNum.ToString()</label>
-                                    <input class="checkbox" type="checkbox" @onclick="() => {HandleBlockAsync(b.Id,LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id));}"
-                                           checked=@LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id)
-                                           @onclick:preventDefault="true" id="@($"block-{@b.BlockNum.ToString()}")"
-                                           style="align-items:center; margin-bottom: 2px; margin-top: 2px;"/>
-                                </label>
-                            }
-                            @if (BlockWarn.Length > 0 && BlockWarn.Substring(0, 4) == "INFO") {
-                                <span style="font-size: 12px; color: dodgerblue; display: block;">@BlockWarn</span>
-                            }
-                            else {
-                                <span style="font-size: 12px; color: red; display: block;">@BlockWarn</span>
-                            }
-                            <NavLink class="button is-small" href="blocks" style="text-decoration: none;">
-                                <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
-                                <span>Add</span>
-                            </NavLink>
-                        </td>
-                        break;
-                    }
-                    case "Lessons Per Cycle": {
-                        <td>
-                            <input class="input" value="@Lesson.NumLessons.ToString()" @oninput="HandleNumLessons"
-                                   @onfocusout="SubmitNumLessons" type="number" placeholder="@Lesson.NumLessons.ToString()" style="width: 100%; min-width: 50px;"/>
-                            <span style="font-size: 12px; color: red; display: block;">@NumLessonsWarn</span>
-                        </td>
-                        break;
-                    }
-                    case "Teacher": {
-                        <td>
-                            <div class="select" style="width: 100%; min-width: 75px;">
-                                <select @bind-value="@CopyLesson.TeacherId" @bind-value:event="oninput" @onchange="SubmitTeacher" style="width: 100%; min-width: 100px;">
-                                    @foreach (var teacher in Teachers.OrderBy(x=>x.Name)) {
-                                        <option value="@teacher.Id.ToString()">@teacher.Name</option>
-                                    }
-                                </select>
-                            </div>
-                            <NavLink class="button is-small" href="teachers" style="text-decoration: none; margin-top: 8px">
-                                <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
-                                <span>Add</span>
-                            </NavLink>
-                        </td>
-                        break;
-                    }
+            <td>
+                @* Cell with input box to change the Lesson name with custom event handler and live warning/error message *@ 
+                <input class="input" value="@Lesson.Name" @oninput="HandleName" @onfocusout="SubmitName" type="text"
+                       placeholder="@Lesson.Name" style="width: 100%; min-width: 150px;"/>
+                @if (NameWarn.Length > 0 && NameWarn[..4] == "INFO") {
+                    <span style="font-size: 12px; color: dodgerblue; display: block;">@NameWarn</span>
                 }
-            }
+                else {
+                    <span style="font-size: 12px; color: red; display: block;">@NameWarn</span>
+                }
+            </td>
+            <td>
+                @* Cell with input box to change the class code with custom event handler and live warning/error message *@ 
+                <input class="input" value="@Lesson.ClassCode" @oninput="HandleClassCode" @onfocusout="SubmitClassCode" type="text"
+                       placeholder="@Lesson.ClassCode" style="width: 100%; min-width: 150px;"/>
+                @if (ClassCodeWarn.Length > 0 && ClassCodeWarn[..4] == "INFO") {
+                    <span style="font-size: 12px; color: dodgerblue; display: block;">@ClassCodeWarn</span>
+                }
+                else {
+                    <span style="font-size: 12px; color: red; display: block;">@ClassCodeWarn</span>
+                }
+            </td>
+            <td>
+                <div class="select" style="width: 100%; min-width: 75px;">
+                    <select @bind-value="@CopyLesson.Year" @bind-value:event="oninput" @onchange="SubmitYear" style="width: 100%; min-width: 75px;">
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                    </select>
+                </div>
+            </td>
+            <td>
+                <div class="select" style="width: 100%; min-width: 75px;">
+                    <select @bind-value="@CopyLesson.Level" @bind-value:event="oninput" @onchange="SubmitLevel" style="width: 100%; min-width: 75px;">
+                        <option value="SL">SL</option>
+                        <option value="HL">HL</option>
+                    </select>
+                </div>
+            </td>
+            <td style="min-width: 100px">
+                @foreach (Block b in Blocks) {
+                    <label for="@($"block-{@b.BlockNum.ToString()}")" style="display: inline-block;padding-right: 5px;padding-left: 5px; cursor: pointer;">
+                        <label for="@($"block-{@b.BlockNum.ToString()}")" style="cursor: pointer;display:inline-flex;font-size:1.2rem; margin-bottom: 2px; margin-top: 2px;">@b.BlockNum.ToString()</label>
+                        <input class="checkbox" type="checkbox" @onclick="() => {HandleBlockAsync(b.Id,LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id));}"
+                               checked=@LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id)
+                               @onclick:preventDefault="true" id="@($"block-{@b.BlockNum.ToString()}")"
+                               style="align-items:center; margin-bottom: 2px; margin-top: 2px;"/>
+                    </label>
+                }
+                @if (BlockWarn.Length > 0 && BlockWarn[..4] == "INFO") {
+                    <span style="font-size: 12px; color: dodgerblue; display: block;">@BlockWarn</span>
+                }
+                else {
+                    <span style="font-size: 12px; color: red; display: block;">@BlockWarn</span>
+                }
+                <NavLink class="button is-small" href="blocks" style="text-decoration: none;">
+                    <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
+                    <span>Add</span>
+                </NavLink>
+            </td>
+            <td>
+                <input class="input" value="@Lesson.NumLessons.ToString()" @oninput="HandleNumLessons"
+                       @onfocusout="SubmitNumLessons" type="number" placeholder="@Lesson.NumLessons.ToString()" style="width: 100%; min-width: 50px;"/>
+                <span style="font-size: 12px; color: red; display: block;">@NumLessonsWarn</span>
+            </td>
+            <td>
+                <div class="select" style="width: 100%; min-width: 75px;">
+                    <select @bind-value="@CopyLesson.TeacherId" @bind-value:event="oninput" @onchange="SubmitTeacher" style="width: 100%; min-width: 100px;">
+                        @foreach (var teacher in Teachers.OrderBy(x=>x.Name)) {
+                            <option value="@teacher.Id.ToString()">@teacher.Name</option>
+                        }
+                    </select>
+                </div>
+                <NavLink class="button is-small" href="teachers" style="text-decoration: none; margin-top: 8px">
+                    <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
+                    <span>Add</span>
+                </NavLink>
+            </td>
         </tr>
         </tbody>
     </table>

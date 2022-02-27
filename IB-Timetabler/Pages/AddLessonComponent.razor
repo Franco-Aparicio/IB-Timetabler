@@ -12,10 +12,12 @@
 
 <TitleComponent Page="Add Lesson"/>
 <br/>
+@* Button to cancel adding a Lesson and return to the lessons page *@ 
 <NavLink class="button is-danger is-outlined" href="lessons" style="text-decoration: none; margin-bottom: 15px">
     <span class="icon"><i class="fas fa-ban"></i></span>
     <span>Cancel</span>
 </NavLink>
+@* Button to add Lesson after filling out Lesson details *@ 
 <button class="button is-success" @onclick="Save" style="margin-left: 15px;">
     <span class="icon"><i class="fas fa-check"></i></span>
     <span>Add Lesson</span>
@@ -26,112 +28,106 @@
     <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 100%">
         <thead>
         <tr>
-            @foreach (ColumnDefinition column in MainColumns) {
+            @foreach (string title in MainColumns) {
                 <th style="cursor: auto !important;">
-                    @column.Title
+                    @title
                 </th>
             }
         </tr>
         </thead>
         <tbody>
         <tr>
-            @foreach (var column in MainColumns) {
-                @switch (column.Title) {
-                    case "Name": {
-                        <td>
-                            <input class="input" @oninput="HandleName" type="text" placeholder="Lesson Name" style="width: 100%; min-width: 150px;"/>
-                            @if (NameWarn.Length > 0 && NameWarn.Substring(0, 4) == "INFO") {
-                                <span style="font-size: 12px; color: dodgerblue; display: block;">@NameWarn</span>
-                            }
-                            else {
-                                <span style="font-size: 12px; color: red; display: block;">@NameWarn</span>
-                            }
-                        </td>
-                        break;
-                    }
-                    case "Class Code": {
-                        <td>
-                            <input class="input" @oninput="HandleClassCode" type="text" placeholder="Class Code" style="width: 100%; min-width: 150px;"/>
-                            @if (ClassCodeWarn.Length > 0 && ClassCodeWarn.Substring(0, 4) == "INFO") {
-                                <span style="font-size: 12px; color: dodgerblue; display: block;">@ClassCodeWarn</span>
-                            }
-                            else {
-                                <span style="font-size: 12px; color: red; display: block;">@ClassCodeWarn</span>
-                            }
-                        </td>
-                        break;
-                    }
-                    case "Year": {
-                        <td>
-                            <div class="select" style="width: 100%; min-width: 75px;">
-                                <select @bind-value="@Lesson.Year" @bind-value:event="onchange" style="width: 100%; min-width: 75px;">
-                                    <option value="12">12</option>
-                                    <option value="13">13</option>
-                                </select>
-                            </div>
-                        </td>
-                        break;
-                    }
-                    case "Level": {
-                        <td>
-                            <div class="select" style="width: 100%; min-width: 75px;">
-                                <select @bind-value="@Lesson.Level" @bind-value:event="onchange" style="width: 100%; min-width: 75px;">
-                                    <option value="SL">SL</option>
-                                    <option value="HL">HL</option>
-                                </select>
-                            </div>
-                        </td>
-                        break;
-                    }
-                    case "Block(s)": {
-                        <td style="min-width: 100px">
-                            @foreach (Block b in Blocks) {
-                                <label for="@($"block-{@b.BlockNum.ToString()}")" style="display: inline-block;padding-right: 5px;padding-left: 5px; cursor: pointer;">
-                                    <label for="@($"block-{@b.BlockNum.ToString()}")" style="cursor: pointer;display:inline-flex;font-size:1.2rem; margin-bottom: 2px; margin-top: 2px;">@b.BlockNum.ToString()</label>
-                                    <input class="checkbox" type="checkbox" @onclick="() => {HandleBlockAsync(b.Id,LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id));}"
-                                           checked=@LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id)
-                                           @onclick:preventDefault="true" id="@($"block-{@b.BlockNum.ToString()}")"
-                                           style="align-items:center; margin-bottom: 2px; margin-top: 2px;"/>
-                                </label>
-                            }
-                            @if (BlockWarn.Length > 0 && BlockWarn.Substring(0, 4) == "INFO") {
-                                <span style="font-size: 12px; color: dodgerblue; display: block;">@BlockWarn</span>
-                            }
-                            else {
-                                <span style="font-size: 12px; color: red; display: block;">@BlockWarn</span>
-                            }
-                            <NavLink class="button is-small" href="blocks" style="text-decoration: none;">
-                                <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
-                                <span>Add</span>
-                            </NavLink>
-                        </td>
-                        break;
-                    }
-                    case "Lessons Per Cycle": {
-                        <td>
-                            <input class="input" @oninput="HandleNumLessons" type="number" placeholder="Lessons Per Cycle" style="width: 100%; min-width: 50px;"/>
-                            <span style="font-size: 12px; color: red; display: block;">@NumLessonsWarn</span>
-                        </td>
-                        break;
-                    }
-                    case "Teacher": {
-                        <td>
-                            <div class="select" style="width: 100%; min-width: 75px;">
-                                <select @bind-value="@Lesson.TeacherId" @bind-value:event="oninput" style="width: 100%; min-width: 100px;">
-                                    @foreach (var teacher in Teachers.OrderBy(x=>x.Name)) {
-                                        <option value="@teacher.Id.ToString()">@teacher.Name</option>
-                                    }
-                                </select>
-                            </div>
-                            <NavLink class="button is-small" href="teachers" style="text-decoration: none; margin-top: 8px">
-                                <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
-                                <span>Add</span>
-                            </NavLink>
-                        </td>
-                        break;
-                    }
+            @* Cell with input box for the new Lesson name with custom event handler and live warning/error message *@ 
+            <td>
+                <input class="input" @oninput="HandleName" type="text" placeholder="Lesson Name"
+                       style="width: 100%; min-width: 150px;"/>
+                @if (NameWarn.Length > 0 && NameWarn.Substring(0, 4) == "INFO") {
+                    <span style="font-size: 12px; color: dodgerblue; display: block;">@NameWarn</span>
                 }
-            }
+                else {
+                    <span style="font-size: 12px; color: red; display: block;">@NameWarn</span>
+                }
+            </td>
+            @* Cell with input box for the new Lesson class code with custom event handler and live warning/error message *@ 
+            <td>
+                <input class="input" @oninput="HandleClassCode" type="text" placeholder="Class Code"
+                       style="width: 100%; min-width: 150px;"/>
+                @if (ClassCodeWarn.Length > 0 && ClassCodeWarn.Substring(0, 4) == "INFO") {
+                    <span style="font-size: 12px; color: dodgerblue; display: block;">@ClassCodeWarn</span>
+                }
+                else {
+                    <span style="font-size: 12px; color: red; display: block;">@ClassCodeWarn</span>
+                }
+            </td>
+            @* Cell with dropdown menu for the new Lesson year group with data binding *@ 
+            <td>
+                <div class="select" style="width: 100%; min-width: 75px;">
+                    <select @bind-value="@Lesson.Year" @bind-value:event="onchange" style="width: 100%; min-width: 75px;">
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                    </select>
+                </div>
+            </td>
+            @* Cell with dropdown menu for the new Lesson level with data binding *@ 
+            <td>
+                <div class="select" style="width: 100%; min-width: 75px;">
+                    <select @bind-value="@Lesson.Level" @bind-value:event="onchange" style="width: 100%; min-width: 75px;">
+                        <option value="SL">SL</option>
+                        <option value="HL">HL</option>
+                    </select>
+                </div>
+            </td>
+            @* Cell with multiple selection boxes to select the blocks that the Lesson belongs in with custom event handling *@ 
+            <td style="min-width: 100px">
+                @foreach (Block b in Blocks) {
+                    <label for="@($"block-{@b.BlockNum.ToString()}")"
+                           style="display: inline-block;padding-right: 5px;padding-left: 5px; cursor: pointer;">
+                        <label for="@($"block-{@b.BlockNum.ToString()}")"
+                               style="cursor:pointer;display:inline-flex;font-size:1.2rem; margin-bottom: 2px; margin-top: 2px;">
+                            @b.BlockNum.ToString()
+                        </label>
+                        <input class="checkbox" type="checkbox" 
+                               @onclick=
+                               "() => {HandleBlock(b.Id, LessonIdblockIds.Select(x=>x.BlockId)
+                                            .Contains(b.Id));}"
+                               checked="@(LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id) ? "true" : null)"
+                               @onclick:preventDefault="true" id="@($"block-{@b.BlockNum.ToString()}")"
+                               style="align-items:center; margin-bottom: 2px; margin-top: 2px;"/>
+                    </label>
+                }
+                @if (BlockWarn.Length > 0 && BlockWarn.Substring(0, 4) == "INFO") {
+                    <span style="font-size: 12px; color: dodgerblue; display: block;">@BlockWarn</span>
+                }
+                else {
+                    <span style="font-size: 12px; color: red; display: block;">@BlockWarn</span>
+                }
+                @* Button to navigate to the blocks page *@ 
+                <NavLink class="button is-small" href="blocks" style="text-decoration: none;">
+                    <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
+                    <span>Add</span>
+                </NavLink>
+            </td>
+            @* Cell with numerical spinner to input the number of lessons of the new Lessons with custom event handling *@ 
+            <td>
+                <input class="input" @oninput="HandleNumLessons" type="number" placeholder="Lessons Per Cycle"
+                       style="width: 100%; min-width: 50px;"/>
+                <span style="font-size: 12px; color: red; display: block;">@NumLessonsWarn</span>
+            </td>
+            @* Cell with dropdown menu to select the teacher for the new Lesson *@ 
+            <td>
+                <div class="select" style="width: 100%; min-width: 75px;">
+                    <select @bind-value="@Lesson.TeacherId" @bind-value:event="oninput" style="width: 100%; min-width: 100px;">
+                        @foreach (var teacher in Teachers.OrderBy(x=>x.Name)) {
+                            <option value="@teacher.Id.ToString()">@teacher.Name</option>
+                        }
+                    </select>
+                </div>
+                @* Button to navigate to the teachers page *@ 
+                <NavLink class="button is-small" href="teachers" style="text-decoration: none; margin-top: 8px">
+                    <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
+                    <span>Add</span>
+                </NavLink>
+            </td>
         </tr>
         </tbody>
     </table>
@@ -139,14 +135,18 @@
 <br/>
 
 @if (true) {
+    @* Table to select which rooms the given room may be taught in *@ 
     bool checkAll = Selected.Count == Rooms.Count;
     <div style="overflow-x: auto">
         <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 50%; margin: auto">
             <thead>
             <tr>
+                @* Custom event handling for selecting all rooms *@ 
                 <th @onclick="() => HandleSelectAllRooms(checkAll)" style="width: 25px">
-                    <input type="checkbox" checked=@checkAll @onclick="@(() => HandleSelectAllRooms(checkAll))" @onclick:preventDefault="true" style="cursor: pointer;"/>
+                    <input type="checkbox" checked="@(checkAll ? "true" : null)" @onclick="@(() => HandleSelectAllRooms(checkAll))"
+                           @onclick:preventDefault="true" style="cursor: pointer;"/>
                 </th>
+                @* Custom event handling for clicking on a room column header *@ 
                 @foreach (ColumnDefinition column in RoomColumns) {
                     <th @onclick="@(() => SortData(column))">
                         @column.Title
@@ -159,9 +159,12 @@
             @foreach (Room r in Rooms) {
                 bool check = Selected.Contains(r.Id);
                 <tr>
+                    @* Custom event handling for selecting a room for the new Lesson *@ 
                     <td @onclick="() => HandleSelectedRooms(r.Id, check)" style="cursor: pointer;">
-                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedRooms(r.Id, check))" @onclick:preventDefault="true" style="cursor: pointer;"/>
+                        <input type="checkbox" checked="@(check ? "true" : null)" @onchange="@(() => HandleSelectedRooms(r.Id, check))"
+                               @onclick:preventDefault="true" style="cursor: pointer;"/>
                     </td>
+                    @* Get the values of each property of Room r (as defined in RoomColumns) *@ 
                     @foreach (var column in RoomColumns) {
                         <td>
                             @r.GetType().GetProperty(column.Property)?.GetValue(r)
@@ -174,6 +177,7 @@
     </div>
 }
 <br/><br/><br/><br/>
+
 @code {
     
     Lesson Lesson = null;
@@ -182,7 +186,7 @@
     List<LessonIdblockId> LessonIdblockIds = null;
     List<RoomIdlessonId> RoomIdlessonIds = null;
     List<Room> Rooms = null;
-    List<ColumnDefinition> MainColumns = null;
+    List<string> MainColumns = null;
     List<ColumnDefinition> RoomColumns = null;
     List<long> Selected = null;
     string NameWarn;
@@ -190,17 +194,10 @@
     string BlockWarn;
     string NumLessonsWarn;
 
+    /// Initializes properties once the page is ready to start 
     protected override async void OnInitialized() {
         await base.OnInitializedAsync();
-        MainColumns = new List<ColumnDefinition> {
-            new ColumnDefinition {Property = "Name", Title = "Name"},
-            new ColumnDefinition {Property = "ClassCode", Title = "Class Code"},
-            new ColumnDefinition {Property = "Year", Title = "Year"},
-            new ColumnDefinition {Property = "Level", Title = "Level"},
-            new ColumnDefinition {Property = "Block", Title = "Block(s)"},
-            new ColumnDefinition {Property = "NumLessons", Title = "Lessons Per Cycle"},
-            new ColumnDefinition {Property = "TeacherId", Title = "Teacher"}
-        };
+        MainColumns = new List<string> { "Name", "Class Code", "Year", "Level", "Block(s)", "Lessons Per Cycle", "Teacher"};
         Teachers = await TeacherService.GetAllTeachersAsync();
         Lesson = new Lesson {Id = await LessonService.GetNextId(), Name = "", ClassCode = "",
             Year = 12, Level = "SL", NumLessons = 0, TeacherId = Teachers.OrderBy(x=>x.Name).First().Id};
@@ -220,9 +217,10 @@
         SortData();
     }
     
+    /// Custom event handler for the new name field to determine the warning message 
     private void HandleName(ChangeEventArgs args) {
-        Lesson.Name = args.Value.ToString().Trim();
-        if (Lesson.Name.Length == 0) {
+        Lesson.Name = args.Value?.ToString()?.Trim();
+        if (Lesson.Name?.Length == 0) {
             NameWarn = "The lesson must have a name!";
             return;
         }
@@ -232,9 +230,10 @@
             NameWarn = "INFO: This name is already in use";
     }
 
+    /// Custom event handler for the new class code field to determine the warning message 
     private void HandleClassCode(ChangeEventArgs args) {
-        Lesson.ClassCode = args.Value.ToString().Trim();
-        if (Lesson.ClassCode.Trim().Length == 0) {
+        Lesson.ClassCode = args.Value?.ToString()?.Trim();
+        if (Lesson.ClassCode?.Trim().Length == 0) {
             ClassCodeWarn = "The lesson must have a class code!";
             return;
         }
@@ -244,15 +243,18 @@
             ClassCodeWarn = "INFO: This code is already in use";
     }
     
-    private void HandleBlockAsync(long id, bool value) {
+    /// Custom event handler for the new blocks field 
+    private void HandleBlock(long id, bool value) {
         if (LessonIdblockIds.Count == 1 && value) {
             BlockWarn = "There must be at least one block selected!";
             StateHasChanged();
             return;
         }
         BlockWarn = "";
+        // If the box was initially unchecked (user clicked to check it), add to LessonIdblockIds 
         if (!value)
             LessonIdblockIds.Add(new LessonIdblockId {BlockId = id, LessonId = Lesson.Id});
+        // Otherwise, remove it from LessonIdblockIds 
         else
             LessonIdblockIds = LessonIdblockIds.Where(x=>x.BlockId != id).ToList();
         if (LessonIdblockIds.Count > 1 && !value)
@@ -260,9 +262,10 @@
         StateHasChanged();
     }
 
+    /// Custom event handler for the new NumLessons field to determine the warning message 
     private void HandleNumLessons(ChangeEventArgs args) {
         try {
-            Lesson.NumLessons = long.Parse(args.Value.ToString().Trim());
+            Lesson.NumLessons = long.Parse(args.Value?.ToString().Trim());
             if (Lesson.NumLessons.ToString().Length == 0 || Lesson.NumLessons <= 0) {
                 NumLessonsWarn = "There must be at least one lesson per cycle!";
                 return;
@@ -275,12 +278,15 @@
         }
     }
     
+    /// Custom event handler for the room selection table 
     private void HandleSelectedRooms(long id, bool checkedValue) {
+        // If the box was initially unchecked (user clicked to check it), add Room Id to RoomIdlessonIds 
         if (!checkedValue) {
             if (Selected.Contains(id)) return;
             Selected.Add(id);
             RoomIdlessonIds.Add(new RoomIdlessonId { LessonId = Lesson.Id, RoomId = id });
         }
+        // Otherwise remove it (if it is not the only remaining Room selected) 
         else {
             if (!Selected.Contains(id)) return;
             if (Selected.Count == 1) {
@@ -294,12 +300,14 @@
         StateHasChanged();
     }
 
+    /// Custom event handler to select all rooms in the room selection table 
     private void HandleSelectAllRooms(bool checkAll) {
         if (checkAll) {
             SaveBannerService.ShowBanner("Cannot deselect all! There must be at least one available room selected",
                 SaveBannerType.Warning);
             return;
         }
+        // If not already selected, select each room in Rooms 
         foreach (Room r in Rooms) {
             if (Selected.Contains(r.Id)) continue;
             Selected.Add(r.Id);
@@ -308,19 +316,24 @@
         StateHasChanged();
     }
     
+    /// Saves the new Lesson to the database and returns to the lessons page 
     private async void Save() {
-        string message = $"Are you sure you want to add {Lesson.Name}?";
-        var options = new MessageBoxOptions(message) {
-            Title = "Confirm Action",
-            Buttons = new []{"Confirm", "Cancel"}
-        };
-        var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
-        if (choice.Response == 1) return;
+        // Check if all fields are valid and displays error if not valid 
         if (Lesson.Name == "" || Lesson.ClassCode == "" || Lesson.NumLessons <= 0
             || LessonIdblockIds.Count == 0 || RoomIdlessonIds.Count == 0) {
             SaveBannerService.ShowBanner("All fields must be complete and valid!", SaveBannerType.Error);
             return;
         }
+        string message = $"Are you sure you want to add {Lesson.Name}?";
+        var options = new MessageBoxOptions(message) {
+            Title = "Confirm Action",
+            Buttons = new []{"Confirm", "Cancel"}
+        };
+        // Displays a popup window with the above message, title, and option buttons 
+        var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
+        // If cancel was clicked (or the box was quit), do not yet add the lesson to the database (and stay on current page) 
+        if (choice.Response == 1) return;
+        // Otherwise, add new Lesson (along with LessonIdblockIds and RoomIdlessonIds) to the database 
         await LessonService.InsertLessonAsync(Lesson);
         foreach (LessonIdblockId l in LessonIdblockIds) {
             await LessonIdblockIdService.InsertLessonIdblockIdAsync(l);
@@ -332,40 +345,50 @@
         NavigationManager.NavigateTo("lessons");
     }
     
+    /// Determines the CSS class for the sort arrow next to the header of the column being sorted 
     private string SortClass(ColumnDefinition column) {
         return column.SortDirection != SortDirection.NotSet ? $"sort {column.SortDirection.ToString().ToLower()}" : "no-sort";
     }
     
+    /// Sorts the room order in the room selection table according to the given property and direction 
     private void SortData(ColumnDefinition sortByColumn = null) {
         bool initial = sortByColumn is null;
-        if (sortByColumn is null) {
+        if (initial) {
             sortByColumn = RoomColumns.FirstOrDefault(x => x.SortDirection != SortDirection.NotSet);
             if (sortByColumn is null) return;
         }
         foreach (ColumnDefinition column in RoomColumns) {
             if (column.Property != sortByColumn.Property) column.SortDirection = SortDirection.NotSet;
         }
+        // Determines the sort behavior of a header when clicked 
         if (!initial)
             switch (sortByColumn.SortDirection) {
+                // If not currently sorting by the clicked property, sort by ascending 
                 case SortDirection.NotSet:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
+                // If currently sorting ascending by the clicked property, sort by descending 
                 case SortDirection.Ascending:
                     sortByColumn.SortDirection = SortDirection.Descending;
                     break;
+                // If currently sorting descending by the clicked property, sort by ascending 
                 case SortDirection.Descending:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
+                // Otherwise sort clicked property by ascending 
                 default:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
             }
+        // Sort Rooms by the given property 
         switch (sortByColumn.Property) {
             case "Floor": {
                 Rooms.Sort((x, y) => {
                     int first = x.Floor.CompareTo(y.Floor);
+                    // Sort by Floor numbers first, then alphabetically by Room Number 
                     return first != 0 ? first : x.Number.CompareTo(y.Number);
                 });
+                // Sort in the opposite direction 
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
                     Rooms.Sort((x, y) => {
                         int first = y.Floor.CompareTo(x.Floor);
@@ -375,7 +398,9 @@
                 break;
             }
             case "Number": {
+                // Only compare Room Numbers alphabetically 
                 Rooms.Sort((x, y) => x.Number.CompareTo(y.Number));
+                // Sort in the opposite direction 
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
                     Rooms.Sort((x, y) => y.Number.CompareTo(x.Number));
                 }

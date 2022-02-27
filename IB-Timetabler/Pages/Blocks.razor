@@ -7,72 +7,77 @@
 
 <TitleComponent Page="Manage Option Blocks"/>
 <br/>
+@* Button to activate the AddBlock modal element *@ 
 <button class="button is-success is-outlined" @onclick="OpenAddBlockModal" style="margin-bottom: 15px">
     <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
     <span>Add Block</span>
 </button>
-@if (Selected.Count == 1) {
+@if (Selected.Count >= 1) { 
+    @* Button to delete the selected Block(s) *@ 
     <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
         <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
-        <span>Delete Selected Block</span>
+        <span>@(Selected.Count == 1 ? "Delete Selected Block" : "Delete Selected Blocks")</span>
     </button>
-}
-else if (Selected.Count > 1) {
-    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
-        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
-        <span>Delete Selected Blocks</span>
-    </button>}
+} 
 <br/>
-
+@* The modal menu to add a new block. Only use is-active CSS class if ShowAddBlock (otherwise it is hidden) *@ 
 <div class="modal @(ShowAddBlock ? "is-active" : null)">
-  <div class="modal-background"></div>
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title">Add Block</p>
-    </header>
-      <section class="modal-card-body">
-          <table class="table is-narrow has-text-centered" style="width: 75%; margin: auto">
-              <thead>
-              <tr>
-                  <th style="cursor: auto;">
-                      Option Block Number
-                  </th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr>
-                  <td>
-                      <input class="input" type="number" @oninput="HandleNewNum" placeholder="Block Number" value="@NewBlockNum" style="max-width: 100px;"/>
-                      <span style="font-size: 12px; color: red; display: block;">@NumWarn</span>
-                  </td>
-              </tr>
-              </tbody>
-          </table>
-      </section>
-      <footer class="modal-card-foot" style="padding: 5px !important;">
-          <div style="margin: auto">
-              <button class="button is-success is-small" @onclick="AddBlock" style="margin: 5px;">
-                  <span class="icon"><i class="fas fa-check"></i></span>
-                  <span>Add Block</span>
-              </button>
-              <button class="button is-dark is-outlined is-small" @onclick="CloseAddBlockModal" style="margin: 5px;">
-                  <span class="icon"><i class="fas fa-ban"></i></span>
-                  <span>Cancel</span>
-              </button>
-          </div>
-      </footer>
-  </div>
+    @* The dark, translucent background that covers the main part of the blocks page *@ 
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Add Block</p>
+        </header>
+        <section class="modal-card-body">
+            <table class="table is-narrow has-text-centered" style="width: 75%; margin: auto">
+                <thead>
+                <tr>
+                    <th style="cursor: auto;">
+                        Option Block Number
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        @* Number spinner input with custom event handling and live waning message *@ 
+                        <input class="input" type="number" @oninput="HandleNewNum" placeholder="Block Number" value="@NewBlockNum"
+                               style="max-width: 100px;"/>
+                        <span style="font-size: 12px; color: red; display: block;">@NumWarn</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+        @* Buttons to either save the new Block or cancel the action and close the modal window *@ 
+        <footer class="modal-card-foot" style="padding: 5px !important;">
+            <div style="margin: auto">
+                <button class="button is-success is-small" @onclick="AddBlock" style="margin: 5px;">
+                    <span class="icon"><i class="fas fa-check"></i></span>
+                    <span>Add Block</span>
+                </button>
+                <button class="button is-dark is-outlined is-small" @onclick="CloseAddBlockModal" style="margin: 5px;">
+                    <span class="icon"><i class="fas fa-ban"></i></span>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </footer>
+    </div>
 </div>
 
 @if (true) {
+    @* Determines whether the top checkbox should be checked (if all blocks have been selected) *@ 
     bool checkAll = Selected.Count == AllBlocks.Count;
     <div style="overflow-x: auto">
         <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 50%; margin: auto">
             <thead>
             <tr>
+                @* Custom event handler for selecting all rooms when the top checkbox (or the cell it is in) is clicked *@ 
                 <th @onclick="() => HandleSelectAllBlocks(checkAll)" style="width: 25px">
-                    <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllBlocks(checkAll))" style="cursor: pointer;"/>
+                    <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllBlocks(checkAll))"
+                           style="cursor: pointer;"/>
                 </th>
+                @* Custom event handling for clicking on a block column header to sort by that property *@ 
                 @foreach (ColumnDefinition column in BlockColumns) {
                     <th @onclick="@(() => SortData(column))">
                         @column.Title
@@ -82,12 +87,16 @@ else if (Selected.Count > 1) {
             </tr>
             </thead>
             <tbody>
+            @* Loop for all blocks (in AllBlocks) with custom event handling for clicked checkboxes *@ 
             @foreach (Block b in AllBlocks) {
+                @* Determines whether the checkbox for a given block should be checked *@ 
                 bool check = Selected.Contains(b.Id);
                 <tr>
                     <td @onclick="() => HandleSelectedBlocks(b.Id, check)" style="cursor: pointer;">
-                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedBlocks(b.Id, check))" style="cursor: pointer;"/>
+                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedBlocks(b.Id, check))"
+                               style="cursor: pointer;"/>
                     </td>
+                    @* Get the value of each property in BlockColumns (to display in the table) *@ 
                     @foreach (var column in BlockColumns) {
                         <td>
                             @b.GetType().GetProperty(column.Property)?.GetValue(b)
@@ -99,18 +108,22 @@ else if (Selected.Count > 1) {
         </table>
     </div>
 }
-
 <br/><br/><br/><br/>
+
 @code {
     
     List<Block> AllBlocks = null;
     List<LessonIdblockId> LessonIdblockIds = null;
     List<ColumnDefinition> BlockColumns = null;
     List<long> Selected = null;
+    /// If true, the AddBlock modal window will be displayed 
     bool ShowAddBlock = false;
+    /// The default number for the next added block (the current highest block number +1) 
     long NewBlockNum;
+    /// Custom warning message when adding a block in the AddBlock modal window 
     string NumWarn;
 
+    /// Initializes properties once page is ready to start 
     protected override async void OnInitialized() {
         await RefreshBlocks();
         await RefreshLessonIdblockIds();
@@ -123,14 +136,17 @@ else if (Selected.Count > 1) {
         SortData();
     }
 
+    /// Retrieves all blocks currently recorded in the database and updates AllBlocks 
     private async Task RefreshBlocks() {
         AllBlocks = await BlockService.GetAllBlocksAsync();
     }
 
+    /// Retrieves all LessonIdblockIds currently in the database and updates LessonIdblockIds 
     private async Task RefreshLessonIdblockIds() {
         LessonIdblockIds = await LessonIdblockIdService.GetAllLessonIdblockIdsAsync();
     }
-    
+
+    /// Custom event handler for clicking on checkboxes in the blocks table 
     private void HandleSelectedBlocks(long id, bool checkedValue) {
         if (!checkedValue) {
             if (!Selected.Contains(id)) {
@@ -144,6 +160,7 @@ else if (Selected.Count > 1) {
         }
     }
 
+    /// Custom event handler for clicking the select/deselect all checkbox in the blocks table 
     private void HandleSelectAllBlocks(bool checkAll) {
         if (!checkAll) {
             foreach (Block b in AllBlocks) {
@@ -156,32 +173,38 @@ else if (Selected.Count > 1) {
         }
     }
     
+    /// Custom event handler to customize warning message in the AddBlock modal window 
     private void HandleNewNum(ChangeEventArgs args) {
+        // Try converting the numerical spinner value into a number 
         try {
-            NewBlockNum = long.Parse(args.Value.ToString().Trim());
+            NewBlockNum = long.Parse(args.Value?.ToString().Trim());
             NumWarn = "";
             if (NewBlockNum <= 0) 
                 NumWarn = "The option number must be a positive integer!";
             else if (AllBlocks.Any(x => x.BlockNum == NewBlockNum)) 
                 NumWarn = "This option number is already in use!";
         }
+        // Otherwise tell user the value must be a positive integer 
         catch (FormatException) {
             NewBlockNum = 0;
             NumWarn = "The option number must be a positive integer!";
         }
     }
 
+    /// Sets ShowAddBlock to true and updates NewBlockNum 
     private void OpenAddBlockModal() {
         ShowAddBlock = true;
         NewBlockNum = AllBlocks.OrderBy(x=>x.BlockNum).Last().BlockNum + 1;
     }
 
+    /// Sets ShowAddBlock to false, updates NewBlockNum, and resets NumWarn 
     private void CloseAddBlockModal() {
         ShowAddBlock = false;
         NewBlockNum = AllBlocks.OrderBy(x=>x.BlockNum).Last().BlockNum + 1;
         NumWarn = "";
     }
     
+    /// If valid block number submitted: update database, RefreshBlocks(), and CloseAddBlockModal(). Otherwise: display error. 
     private async void AddBlock() {
         if (NewBlockNum <= 0) {
             SaveBannerService.ShowBanner("The option number must be a positive integer!", SaveBannerType.Error);
@@ -198,29 +221,41 @@ else if (Selected.Count > 1) {
         SaveBannerService.ShowBanner("New block added successfully!", SaveBannerType.Success);
     }
     
+    /// Ask for confirmation and remove selected blocks from the database 
     private async void DeleteSelected() {
         string message = Selected.Count > 1 ? $"Are you sure you want to delete {Selected.Count.ToString()} blocks?" :
-            $"Are you sure you want to delete block {AllBlocks.Find(x=>x.Id == Selected[0]).BlockNum.ToString()}?";
+            $"Are you sure you want to delete block {AllBlocks.Find(x=>x.Id == Selected[0])?.BlockNum.ToString()}?";
         message += "\nWarning: Lessons left without a block will also be deleted!";
         var options = new MessageBoxOptions(message) {
             Title = "Confirm Action",
             Buttons = new []{"Confirm", "Cancel"}
         };
+        // Display action confirmation popup window and await user response 
         var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
+        // If operation cancelled, do nothing and return 
         if (choice.Response == 1) return;
         List<long> lessons = new List<long>();
+        // Loop through the blocks marked for deletion 
         while (Selected.Count > 0) {
             Block b = AllBlocks.Find(x => x.Id == Selected[0]);
+            // Delete the current block from the database 
             await BlockService.DeleteBlockAsync(b);
-            var temp = LessonIdblockIds.Where(x => x.BlockId == b.Id).ToList();
+            // Collect all LessonIdblockIds with a BlockId corresponding to the current block 
+            var temp = LessonIdblockIds.Where(x => x.BlockId == b?.Id).ToList();
+            // Store the lessons with the corresponding LessonId numbers in the collected LessonIdblockIds 
             lessons.AddRange(temp.Select(x=>x.LessonId));
+            // Delete the collected LessonIdblockIds from the database 
             await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(temp);
             Selected.RemoveAt(0);
         }
+        // Refresh Blocks and LessonIdblockIds to match with the database 
         await RefreshBlocks();
         await RefreshLessonIdblockIds();
+        // Loop through all collected lessons (from the removed blocks) 
         foreach (long id in lessons) {
+            // If the current Lesson still belongs to an additional Block, continue to the next Lesson 
             if (LessonIdblockIds.Any(x => x.LessonId == id)) continue;
+            // Otherwise, delete the Lesson from the database as well as all RoomIdlessonIds with the same LessonId as the deleted Lesson 
             await LessonService.DeleteLessonAsync(LessonService.GetLessonAsync(id).Result);
             await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIdService
                 .GetAllRoomIdlessonIdsAsync().Result.Where(x=>x.LessonId == id));
@@ -230,10 +265,12 @@ else if (Selected.Count > 1) {
         SaveBannerService.ShowBanner("Block(s) deleted successfully", SaveBannerType.Success);
     }
     
+    /// Determines the CSS class for the sort arrow next to the header of the column being sorted 
     private string SortClass(ColumnDefinition column) {
         return column.SortDirection != SortDirection.NotSet ? $"sort {column.SortDirection.ToString().ToLower()}" : "no-sort";
     }
     
+    /// Sorts the block order in the block table according to the given property and direction 
     private void SortData(ColumnDefinition sortByColumn = null) {
         bool initial = sortByColumn is null;
         if (sortByColumn is null) {
@@ -244,22 +281,28 @@ else if (Selected.Count > 1) {
             if (column.Property != sortByColumn.Property) column.SortDirection = SortDirection.NotSet;
         }
         if (!initial)
+            // Determines the sort behavior of a header when clicked 
             switch (sortByColumn.SortDirection) {
+                // If not currently sorting by the clicked property, sort by ascending 
                 case SortDirection.NotSet:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
+                // If currently sorting ascending by the clicked property, sort by descending 
                 case SortDirection.Ascending:
                     sortByColumn.SortDirection = SortDirection.Descending;
                     break;
+                // If currently sorting descending by the clicked property, sort by ascending 
                 case SortDirection.Descending:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
+                // Otherwise sort clicked property by ascending 
                 default:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
             }
+        // Only compare blocks numerically to determine sort order 
         AllBlocks.Sort((x, y)=>x.BlockNum.CompareTo(y.BlockNum));
         if (sortByColumn.SortDirection == SortDirection.Descending) 
             AllBlocks.Sort((x, y)=>y.BlockNum.CompareTo(x.BlockNum));
-        }
+    }
 }
