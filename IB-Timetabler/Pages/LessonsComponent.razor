@@ -41,7 +41,8 @@ else {
              <thead>
              <tr>
                  <th @onclick="() => HandleSelectAllLesssons(checkAll)" style="width: 25px">
-                     <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllLesssons(checkAll))" style="cursor: pointer;"/>
+                     <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllLesssons(checkAll))"
+                            style="cursor: pointer;"/>
                  </th>
                  @foreach (ColumnDefinition column in Columns) {
                      <th @onclick="@(() => SortData(column))">
@@ -56,7 +57,8 @@ else {
                  bool check = Selected.Contains(l.Id);
                  <tr>
                      <td @onclick="() => HandleSelectedLesssons(l.Id, check)" style="cursor: pointer;">
-                         <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedLesssons(l.Id, check))" style="cursor: pointer;"/>
+                         <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedLesssons(l.Id, check))"
+                                style="cursor: pointer;"/>
                      </td>
                      @foreach (var column in Columns) {
                          @if (column.Title == "Name") {
@@ -66,13 +68,13 @@ else {
                          }
                          else if (column.Title == "Teacher") {
                              <td>
-                                 @Teachers.Find(x=>x.Id == l.TeacherId).Name
+                                 @Teachers.Find(x=>x.Id == l.TeacherId)?.Name
                              </td>
                          }
                          else if (column.Title == "Block(s)") {
                              <td>
                                  @string.Join(", ", LessonIdblockIds.Where(x=>x.LessonId == l.Id)
-                                     .Select(x=>Blocks.Find(y=>y.Id == x.BlockId).BlockNum).OrderBy(x=>x))
+                                     .Select(x=>Blocks.Find(y=>y.Id == x.BlockId)?.BlockNum).OrderBy(x=>x))
                              </td>
                          }
                          else {
@@ -165,7 +167,7 @@ else {
 
     private async void DeleteSelected() {
         string message = Selected.Count > 1 ? $"Are you sure you want to delete {Selected.Count.ToString()} lessons?" :
-            $"Are you sure you want to delete {Lessons.Find(x=>x.Id == Selected[0]).Name}?";
+            $"Are you sure you want to delete {Lessons.Find(x=>x.Id == Selected[0])?.Name}?";
         var options = new MessageBoxOptions(message) {
             Title = "Confirm Action",
             Buttons = new []{"Confirm", "Cancel"}

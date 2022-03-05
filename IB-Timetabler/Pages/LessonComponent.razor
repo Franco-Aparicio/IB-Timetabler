@@ -64,7 +64,8 @@
             <td>
                 @* Cell with dropdown menu for the new Lesson year group with data binding *@ 
                 <div class="select" style="width: 100%; min-width: 75px;">
-                    <select @bind-value="@CopyLesson.Year" @bind-value:event="oninput" @onchange="SubmitYear" style="width: 100%; min-width: 75px;">
+                    <select @bind-value="@CopyLesson.Year" @bind-value:event="oninput" @onchange="SubmitYear"
+                            style="width: 100%; min-width: 75px;">
                         <option value="12">12</option>
                         <option value="13">13</option>
                     </select>
@@ -73,7 +74,8 @@
             <td>
                 @* Cell with dropdown menu for the new Lesson level with data binding *@ 
                 <div class="select" style="width: 100%; min-width: 75px;">
-                    <select @bind-value="@CopyLesson.Level" @bind-value:event="oninput" @onchange="SubmitLevel" style="width: 100%; min-width: 75px;">
+                    <select @bind-value="@CopyLesson.Level" @bind-value:event="oninput" @onchange="SubmitLevel"
+                            style="width: 100%; min-width: 75px;">
                         <option value="SL">SL</option>
                         <option value="HL">HL</option>
                     </select>
@@ -82,11 +84,15 @@
             <td style="min-width: 100px">
                 @* Cell with multiple selection boxes to select the blocks that the Lesson belongs in with custom event handling *@ 
                 @foreach (Block b in Blocks) {
-                    <label for="@($"block-{@b.BlockNum.ToString()}")" style="display: inline-block;padding-right: 5px;padding-left: 5px; cursor: pointer;">
-                        <label for="@($"block-{@b.BlockNum.ToString()}")" 
-                               style="cursor: pointer;display:inline-flex;font-size:1.2rem; margin-bottom: 2px; margin-top: 2px;">@b.BlockNum.ToString()</label>
+                    <label for="@($"block-{@b.BlockNum.ToString()}")" 
+                           style="display: inline-block;padding-right: 5px;padding-left: 5px; cursor: pointer;">
+                        <label for="@($"block-{@b.BlockNum.ToString()}")"
+                               style="cursor: pointer;display:inline-flex;font-size:1.2rem; margin-bottom: 2px; margin-top: 2px;">
+                            @b.BlockNum.ToString()
+                        </label>
                         <input class="checkbox" type="checkbox" 
-                               @onclick="() => {HandleBlockAsync(b.Id,LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id));}"
+                               @onclick=
+                               "() => {HandleBlockAsync(b.Id,LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id));}"
                                checked=@LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id)
                                @onclick:preventDefault="true" id="@($"block-{@b.BlockNum.ToString()}")"
                                style="align-items:center; margin-bottom: 2px; margin-top: 2px;"/>
@@ -105,12 +111,14 @@
             </td>
             <td>
                 <input class="input" value="@Lesson.NumLessons.ToString()" @oninput="HandleNumLessons"
-                       @onfocusout="SubmitNumLessons" type="number" placeholder="@Lesson.NumLessons.ToString()" style="width: 100%; min-width: 50px;"/>
+                       @onfocusout="SubmitNumLessons" type="number" placeholder="@Lesson.NumLessons.ToString()"
+                       style="width: 100%; min-width: 50px;"/>
                 <span style="font-size: 12px; color: red; display: block;">@NumLessonsWarn</span>
             </td>
             <td>
                 <div class="select" style="width: 100%; min-width: 75px;">
-                    <select @bind-value="@CopyLesson.TeacherId" @bind-value:event="oninput" @onchange="SubmitTeacher" style="width: 100%; min-width: 100px;">
+                    <select @bind-value="@CopyLesson.TeacherId" @bind-value:event="oninput" @onchange="SubmitTeacher"
+                            style="width: 100%; min-width: 100px;">
                         @foreach (var teacher in Teachers.OrderBy(x=>x.Name)) {
                             <option value="@teacher.Id.ToString()">@teacher.Name</option>
                         }
@@ -134,7 +142,8 @@
             <thead>
             <tr>
                 <th @onclick="() => HandleSelectAllRooms(checkAll)" style="width: 25px">
-                    <input type="checkbox" checked=@checkAll @onclick="@(() => HandleSelectAllRooms(checkAll))" @onclick:preventDefault="true" style="cursor: pointer;"/>
+                    <input type="checkbox" checked=@checkAll @onclick="@(() => HandleSelectAllRooms(checkAll))"
+                           @onclick:preventDefault="true" style="cursor: pointer;"/>
                 </th>
                 @foreach (ColumnDefinition column in RoomColumns) {
                     <th @onclick="@(() => SortData(column))">
@@ -149,7 +158,8 @@
                 bool check = Selected.Contains(r.Id);
                 <tr>
                     <td @onclick="() => HandleSelectedRooms(r.Id, check)" style="cursor: pointer;">
-                        <input type="checkbox" checked=@check @onclick="@(() => HandleSelectedRooms(r.Id, check))" @onclick:preventDefault="true" style="cursor: pointer;"/>
+                        <input type="checkbox" checked=@check @onclick="@(() => HandleSelectedRooms(r.Id, check))"
+                               @onclick:preventDefault="true" style="cursor: pointer;"/>
                     </td>
                     @foreach (var column in RoomColumns) {
                         <td>

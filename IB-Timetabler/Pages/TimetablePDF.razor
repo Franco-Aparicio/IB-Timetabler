@@ -46,10 +46,16 @@
                                 Lesson lesson = Lessons.FirstOrDefault(x => x.Id == SavedLessons.FirstOrDefault(
                                     y => y.Id == savedLessonIdperiodId.SavedLessonId)?.LessonId);
                                 <div style="border-bottom: 1px solid #dbdbdb; padding: 5px 0; font-size: 14px;">
-                                    <p style="margin: auto">@lesson?.Name</p>
-                                    <p style="margin: auto">Teacher: @Teachers.FirstOrDefault(x=>x.Id == lesson?.TeacherId)?.Name</p>
-                                    <p style="margin: auto">@Rooms.FirstOrDefault(x => x.Id == SavedLessons.FirstOrDefault(
-                                        y => y.Id == savedLessonIdperiodId.SavedLessonId)?.RoomId)?.Number</p>
+                                    <p style="margin: auto">
+                                        @lesson?.Name
+                                    </p>
+                                    <p style="margin: auto">
+                                        Teacher: @Teachers.FirstOrDefault(x => x.Id == lesson?.TeacherId)?.Name
+                                    </p>
+                                    <p style="margin: auto">
+                                        @Rooms.FirstOrDefault(x => x.Id == SavedLessons.FirstOrDefault(
+                                                 y => y.Id == savedLessonIdperiodId.SavedLessonId)?.RoomId)?.Number
+                                    </p>
                                 </div>
                             }
                         </td>

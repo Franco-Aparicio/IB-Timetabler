@@ -45,11 +45,13 @@ else if (Selected.Count > 1) {
               <tbody>
               <tr>
                   <td>
-                      <input class="input" type="text" @oninput="HandleNewNum" placeholder="Room Number" value="@NewRoomNum" style="max-width: 150px;"/>
+                      <input class="input" type="text" @oninput="HandleNewNum" placeholder="Room Number" value="@NewRoomNum"
+                             style="max-width: 150px;"/>
                       <span style="font-size: 12px; color: dodgerblue; display: block;">@NumWarn</span>
                   </td>
                   <td>
-                      <input class="input" type="number" @bind-value="@NewRoomFloor" @bind-value:event="oninput" placeholder="Floor" style="max-width: 100px;"/>
+                      <input class="input" type="number" @bind-value="@NewRoomFloor" @bind-value:event="oninput" placeholder="Floor"
+                             style="max-width: 100px;"/>
                   </td>
               </tr>
               </tbody>
@@ -77,7 +79,8 @@ else if (Selected.Count > 1) {
             <thead>
             <tr>
                 <th @onclick="() => HandleSelectAllRooms(checkAll)" style="width: 25px">
-                    <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllRooms(checkAll))" style="cursor: pointer;"/>
+                    <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllRooms(checkAll))"
+                           style="cursor: pointer;"/>
                 </th>
                 @foreach (ColumnDefinition column in RoomColumns) {
                     <th @onclick="@(() => SortData(column))">
@@ -92,7 +95,8 @@ else if (Selected.Count > 1) {
                 bool check = Selected.Contains(r.Id);
                 <tr>
                     <td @onclick="() => HandleSelectedRooms(r.Id, check)" style="cursor: pointer;">
-                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedRooms(r.Id, check))" style="cursor: pointer;"/>
+                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedRooms(r.Id, check))"
+                               style="cursor: pointer;"/>
                     </td>
                     @foreach (var column in RoomColumns) {
                         <td>

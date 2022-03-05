@@ -16,7 +16,8 @@
 <br/>
 @if (LoadedSaveId == 0) {
     <div>There are no saved timetables</div>
-    <button class="button is-info @(Generating ? "is-loading" : null)" @onclick="GetNewTimetable" style="font-size: 22px; width: 250px; height: 75px; margin: auto calc(50% - 125px)">
+    <button class="button is-info @(Generating ? "is-loading" : null)" @onclick="GetNewTimetable" 
+            style="font-size: 22px; width: 250px; height: 75px; margin: auto calc(50% - 125px)">
         <span class="icon" style=""><i class="fas fa-calculator"></i></span>
         <span style="margin-right: -7px;">Generate Timetable</span>
     </button>
@@ -30,7 +31,8 @@ else {
         <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
         <span>Delete Saved Timetable</span>
     </button> 
-    <NavLink class="button is-outlined is-success" href=@($"timetable/timetablePDF/{LoadedSaveId.ToString()}") style="margin: 0 0 15px 15px;text-decoration: none;">
+    <NavLink class="button is-outlined is-success" href=@($"timetable/timetablePDF/{LoadedSaveId.ToString()}")
+             style="margin: 0 0 15px 15px;text-decoration: none;">
         <span class="icon" style="margin-right: 7px"><i class="oi oi-data-transfer-download"></i></span>
         <span>Save as PDF</span>
     </NavLink>
@@ -65,7 +67,8 @@ else {
                     <tbody>
                     <tr>
                         <td>
-                            <input class="input" type="text" @oninput="HandleRename" placeholder="@Saves.Find(x => x.Id == LoadedSaveId)?.Name"
+                            <input class="input" type="text" @oninput="HandleRename"
+                                   placeholder="@Saves.Find(x => x.Id == LoadedSaveId)?.Name"
                                    value="@NewSaveName" style="max-width: 150px;"/>
                             <span style="font-size: 12px; color: red; display: block;">@NameWarn</span>
                         </td>

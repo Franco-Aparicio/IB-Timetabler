@@ -77,7 +77,8 @@ namespace IB_Timetabler.Services {
             foreach (Group g in groups) {
                 var rooms = _ibTimetablerContext.Rooms.Select(x=>x.Id).ToList();
                 List<int> indexes = solution.FindAll(x => int.Parse(x.Split(',')[0].ToString()) == g.Year 
-                    && int.Parse(x.Split(',')[1].ToString()) == g.Block && x.Split(',')[2].ToString() == g.Level)
+                    && int.Parse(x.Split(',')[1].ToString()) == g.Block &&
+                    x.Split(',')[2].ToString() == g.Level)
                     .Select(x => int.Parse(x.Split(',')[3])).ToList();
                 List<PeriodVar> periods = new List<PeriodVar>();
                 foreach (int index in indexes) {
@@ -93,7 +94,8 @@ namespace IB_Timetabler.Services {
                     }
                     long roomId;
                     try {
-                        roomId = roomIdlessonIds.Where(x => x.LessonId == l.Id).Select(x => x.RoomId)
+                        roomId = roomIdlessonIds.Where(x => x.LessonId == l.Id)
+                            .Select(x => x.RoomId)
                             .OrderBy(x => r.Next()).First(x => rooms.Contains(x));
                     }
                     catch (InvalidOperationException) {

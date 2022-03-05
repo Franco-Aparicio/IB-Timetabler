@@ -43,7 +43,8 @@ else if (Selected.Count > 1) {
               <tbody>
               <tr>
                   <td>
-                      <input class="input" type="text" @oninput="HandleNewName" placeholder="Teacher Name" value="@NewTeachName" style="max-width: 150px;"/>
+                      <input class="input" type="text" @oninput="HandleNewName" placeholder="Teacher Name" value="@NewTeachName"
+                             style="max-width: 150px;"/>
                       <span style="font-size: 12px; color: red; display: block;">@NameWarn</span>
                   </td>
               </tr>
@@ -72,7 +73,8 @@ else if (Selected.Count > 1) {
             <thead>
             <tr>
                 <th @onclick="() => HandleSelectAllTeachers(checkAll)" style="width: 25px">
-                    <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllTeachers(checkAll))" style="cursor: pointer;"/>
+                    <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllTeachers(checkAll))"
+                           style="cursor: pointer;"/>
                 </th>
                 @foreach (ColumnDefinition column in TeacherColumns) {
                     <th @onclick="@(() => SortData(column))">
@@ -87,7 +89,8 @@ else if (Selected.Count > 1) {
                 bool check = Selected.Contains(t.Id);
                 <tr>
                     <td @onclick="() => HandleSelectedTeachers(t.Id, check)" style="cursor: pointer;">
-                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedTeachers(t.Id, check))" style="cursor: pointer;"/>
+                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedTeachers(t.Id, check))"
+                               style="cursor: pointer;"/>
                     </td>
                     @foreach (var column in TeacherColumns) {
                         <td>
@@ -158,9 +161,9 @@ else if (Selected.Count > 1) {
     }
     
     private void HandleNewName(ChangeEventArgs args) {
-        NewTeachName = args.Value.ToString().Trim();
+        NewTeachName = args.Value?.ToString()?.Trim();
         NameWarn = "";
-        if (NewTeachName.Length == 0) 
+        if (NewTeachName?.Length == 0) 
             NameWarn = "The teacher must have a name!";
         else if (AllTeachers.Any(x => x.Name == NewTeachName)) 
             NameWarn = "This teacher already exists!";
@@ -196,7 +199,7 @@ else if (Selected.Count > 1) {
     
     private async void DeleteSelected() {
         string message = Selected.Count > 1 ? $"Are you sure you want to delete {Selected.Count.ToString()} teachers?" :
-            $"Are you sure you want to delete {AllTeachers.Find(x=>x.Id == Selected[0]).Name}?";
+            $"Are you sure you want to delete {AllTeachers.Find(x=>x.Id == Selected[0])?.Name}?";
         message += "\nWarning: Lessons left without a teacher will also be deleted!";
         var options = new MessageBoxOptions(message) {
             Title = "Confirm Action",
@@ -208,7 +211,7 @@ else if (Selected.Count > 1) {
         while (Selected.Count > 0) {
             Teacher t = AllTeachers.Find(x => x.Id == Selected[0]);
             await TeacherService.DeleteTeacherAsync(t);
-            lessons.AddRange(Lessons.Where(x => x.TeacherId == t.Id));
+            lessons.AddRange(Lessons.Where(x => x.TeacherId == t?.Id));
             Selected.RemoveAt(0);
         }
         await RefreshTeachers();

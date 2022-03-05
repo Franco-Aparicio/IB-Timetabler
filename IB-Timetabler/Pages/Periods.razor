@@ -65,7 +65,8 @@ else if (Selected.Count > 1) {
                       </div>
                   </td>
                   <td>
-                      <input class="input" type="number" @oninput="HandleNewPeriod" placeholder="Period" value="@NewPeriod" style="max-width: 100px;"/>
+                      <input class="input" type="number" @oninput="HandleNewPeriod" placeholder="Period" value="@NewPeriod"
+                             style="max-width: 100px;"/>
                       <span style="font-size: 12px; color: red; display: block;">@PeriodWarn</span>
                   </td>
               </tr>
@@ -94,7 +95,8 @@ else if (Selected.Count > 1) {
             <thead>
             <tr>
                 <th @onclick="() => HandleSelectAllPeriods(checkAll)" style="width: 25px">
-                    <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllPeriods(checkAll))" style="cursor: pointer;"/>
+                    <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllPeriods(checkAll))"
+                           style="cursor: pointer;"/>
                 </th>
                 @foreach (ColumnDefinition column in PeriodColumns) {
                     <th @onclick="@(() => SortData(column))">
@@ -109,7 +111,8 @@ else if (Selected.Count > 1) {
                 bool check = Selected.Contains(p.Id);
                 <tr>
                     <td @onclick="() => HandleSelectedPeriods(p.Id, check)" style="cursor: pointer;">
-                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedPeriods(p.Id, check))" style="cursor: pointer;"/>
+                        <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedPeriods(p.Id, check))"
+                               style="cursor: pointer;"/>
                     </td>
                     @foreach (var column in PeriodColumns) {
                         @if (column.Title == "Week") {
