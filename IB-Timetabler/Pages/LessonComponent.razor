@@ -62,6 +62,7 @@
                 }
             </td>
             <td>
+                @* Cell with dropdown menu for the new Lesson year group with data binding *@ 
                 <div class="select" style="width: 100%; min-width: 75px;">
                     <select @bind-value="@CopyLesson.Year" @bind-value:event="oninput" @onchange="SubmitYear" style="width: 100%; min-width: 75px;">
                         <option value="12">12</option>
@@ -70,6 +71,7 @@
                 </div>
             </td>
             <td>
+                @* Cell with dropdown menu for the new Lesson level with data binding *@ 
                 <div class="select" style="width: 100%; min-width: 75px;">
                     <select @bind-value="@CopyLesson.Level" @bind-value:event="oninput" @onchange="SubmitLevel" style="width: 100%; min-width: 75px;">
                         <option value="SL">SL</option>
@@ -78,10 +80,13 @@
                 </div>
             </td>
             <td style="min-width: 100px">
+                @* Cell with multiple selection boxes to select the blocks that the Lesson belongs in with custom event handling *@ 
                 @foreach (Block b in Blocks) {
                     <label for="@($"block-{@b.BlockNum.ToString()}")" style="display: inline-block;padding-right: 5px;padding-left: 5px; cursor: pointer;">
-                        <label for="@($"block-{@b.BlockNum.ToString()}")" style="cursor: pointer;display:inline-flex;font-size:1.2rem; margin-bottom: 2px; margin-top: 2px;">@b.BlockNum.ToString()</label>
-                        <input class="checkbox" type="checkbox" @onclick="() => {HandleBlockAsync(b.Id,LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id));}"
+                        <label for="@($"block-{@b.BlockNum.ToString()}")" 
+                               style="cursor: pointer;display:inline-flex;font-size:1.2rem; margin-bottom: 2px; margin-top: 2px;">@b.BlockNum.ToString()</label>
+                        <input class="checkbox" type="checkbox" 
+                               @onclick="() => {HandleBlockAsync(b.Id,LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id));}"
                                checked=@LessonIdblockIds.Select(x=>x.BlockId).Contains(b.Id)
                                @onclick:preventDefault="true" id="@($"block-{@b.BlockNum.ToString()}")"
                                style="align-items:center; margin-bottom: 2px; margin-top: 2px;"/>
