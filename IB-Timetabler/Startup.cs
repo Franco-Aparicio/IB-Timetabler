@@ -17,9 +17,10 @@ namespace IB_Timetabler {
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services) {
+            // Register all services used in the application (including database context) 
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddDbContext<IBTimetablerContext>(option => {
@@ -59,12 +60,12 @@ namespace IB_Timetabler {
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
-            
-            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope()) {
-                var context = serviceScope.ServiceProvider.GetRequiredService<IBTimetablerContext>();
-                context.Database.Migrate();
+            // Apply the database migration (to create and initialize a database with seed data) if no database found 
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>()?.CreateScope()) {
+                var context = serviceScope?.ServiceProvider.GetRequiredService<IBTimetablerContext>();
+                context?.Database.Migrate();
             }
-
+            // Create the electron window 
             if (HybridSupport.IsElectronActive) {
                 CreateWindow();
             }
@@ -79,6 +80,7 @@ namespace IB_Timetabler {
                 MinWidth = 500,
                 MinHeight = 300
             };
+            // Creates window with the specified options above 
             var window = await Electron.WindowManager.CreateWindowAsync(windowOptions);
 
             var menu = new MenuItem[] {
@@ -109,6 +111,7 @@ namespace IB_Timetabler {
                     }
                 }
             };
+            // Sets the application menu to the custom menu defined above 
             Electron.Menu.SetApplicationMenu(menu);
             
             await window.WebContents.Session.ClearCacheAsync();

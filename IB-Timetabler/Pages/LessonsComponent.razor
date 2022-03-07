@@ -9,41 +9,40 @@
 <TitleComponent Page="Manage Lessons"/>
 
 <br/>
+@* Button to navigate to the addlessons page *@ 
 <NavLink class="button is-success is-outlined" href="lessons/addLesson" style="text-decoration: none; margin-bottom: 15px">
     <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
     <span>Add Lesson</span>
 </NavLink>
-@if (Selected.Count == 1) {
+@if (Selected.Count >= 1) {
+    @* Button to delete the selected Lesson(s) *@ 
     <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
         <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
-        <span>Delete Selected Lesson</span>
-    </button>
-}
-else if (Selected.Count > 1) {
-    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
-        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
-        <span>Delete Selected Lessons</span>
+        <span>Delete Selected Lesson@(Selected.Count == 1 ? "" : "s")</span>
     </button>
 }
 
 <br/>
 Click on a lesson name to edit!
 <br/>
-
+@* If there are currently no Lessons loaded, show loading symbol *@ 
 @if (Lessons is null) {
     <button class="button is-loading is-large border-0 has-text-centered" style="margin: auto"></button>
 }
 else {
+    @* Determines whether the top checkbox should be checked (if all Lessons have been selected) *@ 
     bool checkAll = Selected.Count == Lessons.Count;
     <br/>
      <div style="overflow-x: auto">
          <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 100%">
              <thead>
              <tr>
-                 <th @onclick="() => HandleSelectAllLesssons(checkAll)" style="width: 25px">
-                     <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllLesssons(checkAll))"
+                 @* Custom event handler for selecting all rooms when the top checkbox (or the cell it is in) is clicked *@ 
+                 <th @onclick="() => HandleSelectAllLessons(checkAll)" style="width: 25px">
+                     <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllLessons(checkAll))"
                             style="cursor: pointer;"/>
                  </th>
+                 @* Custom event handling for clicking on a block column header to sort by that property *@ 
                  @foreach (ColumnDefinition column in Columns) {
                      <th @onclick="@(() => SortData(column))">
                          @column.Title
@@ -53,34 +52,46 @@ else {
              </tr>
              </thead>
              <tbody>
+             @* Loop trough all Lessons with custom event handling for clicked checkboxes *@ 
              @foreach (Lesson l in Lessons) {
+                 @* Determines whether the checkbox for a given Lesson should be checked *@ 
                  bool check = Selected.Contains(l.Id);
                  <tr>
-                     <td @onclick="() => HandleSelectedLesssons(l.Id, check)" style="cursor: pointer;">
-                         <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedLesssons(l.Id, check))"
+                     <td @onclick="() => HandleSelectedLessons(l.Id, check)" style="cursor: pointer;">
+                         <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedLessons(l.Id, check))"
                                 style="cursor: pointer;"/>
                      </td>
                      @foreach (var column in Columns) {
-                         @if (column.Title == "Name") {
-                             <td>
-                                 <a href="@($"lessons/{l.Id.ToString()}")">@l.Name</a>
-                             </td>
-                         }
-                         else if (column.Title == "Teacher") {
-                             <td>
-                                 @Teachers.Find(x=>x.Id == l.TeacherId)?.Name
-                             </td>
-                         }
-                         else if (column.Title == "Block(s)") {
-                             <td>
-                                 @string.Join(", ", LessonIdblockIds.Where(x=>x.LessonId == l.Id)
-                                     .Select(x=>Blocks.Find(y=>y.Id == x.BlockId)?.BlockNum).OrderBy(x=>x))
-                             </td>
-                         }
-                         else {
-                             <td>
-                                 @l.GetType().GetProperty(column.Property)?.GetValue(l)
-                             </td>
+                         @switch (column.Title) {
+                             case "Name": {
+                                 // Make the name entry for each Lesson a clickable link that leads to the editing page of that Lesson
+                                 <td>
+                                     <a href="@($"lessons/{l.Id.ToString()}")">@l.Name</a>
+                                 </td>
+                                 break;
+                             }
+                             case "Teacher": {
+                                 // Find the teacher's name based on a Lesson's associated TeacherId 
+                                 <td>
+                                     @Teachers.Find(x => x.Id == l.TeacherId)?.Name
+                                 </td>
+                                 break;
+                             }
+                             case "Block(s)": {
+                                 // List the Blocks that the Lesson belongs to as a string in ascending order 
+                                 <td>
+                                     @string.Join(", ", LessonIdblockIds.Where(x => x.LessonId == l.Id)
+                                         .Select(x => Blocks.Find(y => y.Id == x.BlockId)?.BlockNum).OrderBy(x => x))
+                                 </td>
+                                 break;
+                             }
+                             default: {
+                                 <td>
+                                     @* Get the value of any other property in Columns *@ 
+                                     @l.GetType().GetProperty(column.Property)?.GetValue(l)
+                                 </td>
+                                 break;
+                             }
                          }
                      }
                  </tr>
@@ -89,8 +100,8 @@ else {
          </table>
      </div>
 }
-
 <br/><br/>
+
 @code {
 
     List<Lesson> Lessons = null;
@@ -101,6 +112,7 @@ else {
     List<ColumnDefinition> Columns = null;
     List<long> Selected = null;
 
+    /// Initializes properties once the page is ready to start 
     protected override async void OnInitialized() {
         await base.OnInitializedAsync();
         Columns = new List<ColumnDefinition> {
@@ -120,27 +132,33 @@ else {
         SortData();
     }
 
+    /// Retrieves all Lessons currently recorded in the database and updates Lessons 
     private async Task RefreshLessons() {
         Lessons = await LessonService.GetAllLessonsAsync();
     }
 
+    /// Retrieves all Teachers currently recorded in the database and updates Teachers 
     private async Task RefreshTeachers() {
         Teachers = await TeacherService.GetAllTeachersAsync();
     }
 
+    /// Retrieves all Blocks currently recorded in the database and updates Blocks 
     private async Task RefreshBlocks() {
         Blocks = await BlockService.GetAllBlocksAsync();
     }
     
+    /// Retrieves all LessonIdblockIds currently recorded in the database and updates LessonIdblockIds 
     private async Task RefreshLessonIdblockIds() {
         LessonIdblockIds = await LessonIdblockIdService.GetAllLessonIdblockIdsAsync();
     }
     
+    /// Retrieves all RoomIdlessonIds currently recorded in the database and updates RoomIdlessonIds 
     private async Task RefreshRoomIdlessonIds() {
         RoomIdlessonIds = await RoomIdlessonIdService.GetAllRoomIdlessonIdsAsync();
     }
 
-    private void HandleSelectedLesssons(long id, bool checkedValue) {
+    /// Custom event handler for clicking on checkboxes in the Lessons table 
+    private void HandleSelectedLessons(long id, bool checkedValue) {
         if (!checkedValue) {
             if (!Selected.Contains(id)) {
                 Selected.Add(id);
@@ -153,7 +171,8 @@ else {
         }
     }
 
-    private void HandleSelectAllLesssons(bool checkAll) {
+    /// Custom event handler for clicking the select/deselect all checkbox in the Lessons table 
+    private void HandleSelectAllLessons(bool checkAll) {
         if (!checkAll) {
             foreach (Lesson l in Lessons) {
                 if (Selected.Contains(l.Id)) continue;
@@ -165,6 +184,7 @@ else {
         }
     }
 
+    /// Ask for confirmation and remove selected Lessons from the database 
     private async void DeleteSelected() {
         string message = Selected.Count > 1 ? $"Are you sure you want to delete {Selected.Count.ToString()} lessons?" :
             $"Are you sure you want to delete {Lessons.Find(x=>x.Id == Selected[0])?.Name}?";
@@ -172,16 +192,20 @@ else {
             Title = "Confirm Action",
             Buttons = new []{"Confirm", "Cancel"}
         };
+        // Display action confirmation popup window and await user response 
         var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
+        // If operation cancelled, do nothing and return 
         if (choice.Response == 1) return;
+        // Otherwise, delete the Lessons (along with LessonIdblockIds and RoomIdlessonIds) from the database 
         while (Selected.Count > 0) {
             Lesson l = Lessons.Find(x => x.Id == Selected[0]);
             await LessonService.DeleteLessonAsync(l);
-            await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIds.Where(x => x.LessonId == l.Id));
+            await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIds.Where(x => x.LessonId == l?.Id));
             await RefreshLessonIdblockIds();
-            await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds.Where(x=>x.LessonId == l.Id));
+            await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds.Where(x=>x.LessonId == l?.Id));
             Selected.RemoveAt(0);
         }
+        // Refresh lists to match with the database 
         await RefreshLessons();
         await RefreshTeachers();
         await RefreshBlocks();
@@ -191,10 +215,12 @@ else {
         SaveBannerService.ShowBanner("Lesson(s) deleted successfully", SaveBannerType.Success);
     }
     
+    /// Determines the CSS class for the sort arrow next to the header of the column being sorted 
     private string SortClass(ColumnDefinition column) {
         return column.SortDirection != SortDirection.NotSet ? $"sort {column.SortDirection.ToString().ToLower()}" : "no-sort";
     }
 
+    /// Sorts the Lesson order according to the given property and direction 
     private void SortData(ColumnDefinition sortByColumn = null) {
         bool initial = sortByColumn is null;
         if (sortByColumn is null) {
@@ -205,26 +231,34 @@ else {
             if (column.Property != sortByColumn.Property) column.SortDirection = SortDirection.NotSet;
         }
         if (!initial)
+            // Determines the sort behavior of a header when clicked 
             switch (sortByColumn.SortDirection) {
+                // If not currently sorting by the clicked property, sort by ascending 
                 case SortDirection.NotSet:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
+                // If currently sorting ascending by the clicked property, sort by descending 
                 case SortDirection.Ascending:
                     sortByColumn.SortDirection = SortDirection.Descending;
                     break;
+                // If currently sorting descending by the clicked property, sort by ascending 
                 case SortDirection.Descending:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
+                // Otherwise sort clicked property by ascending 
                 default:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
             }
+        // Sort Lessons by the given property 
         switch (sortByColumn.Property) {
             case "NumLessons": {
                 Lessons.Sort((x, y) => {
                     int first = x.NumLessons.CompareTo(y.NumLessons);
+                    // Sort by NumLessons numbers first, then alphabetically by Name  
                     return first != 0 ? first : x.Name.CompareTo(y.Name);
                 });
+                // Sort in the opposite direction 
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
                     Lessons.Sort((x, y) => {
                         int first = y.NumLessons.CompareTo(x.NumLessons);
@@ -237,8 +271,10 @@ else {
                 Lessons.Sort((x, y) => {
                     int first = Teachers.Find(t => t.Id == x.TeacherId).Name
                         .CompareTo(Teachers.Find(t => t.Id == y.TeacherId).Name);
+                    // Sort by Teacher names first, then alphabetically by Lesson name 
                     return first != 0 ? first : x.Name.CompareTo(y.Name);
                 });
+                // Sort in the opposite direction 
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
                     Lessons.Sort((x, y) => {
                         int first = Teachers.Find(t => t.Id == y.TeacherId).Name
@@ -256,8 +292,10 @@ else {
                         .CompareTo(LessonIdblockIds.Where(l=>l.LessonId == y.Id)
                             .Select(l=>Blocks.Find(b=>b.Id == l.BlockId).BlockNum)
                             .OrderBy(x=>x).ToList()[0]);
+                    // Sort by Block numbers first, then alphabetically by Lesson name 
                     return first != 0 ? first : x.Name.CompareTo(y.Name);
                 });
+                // Sort in the opposite direction 
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
                     Lessons.Sort((x, y) => {
                         int first = LessonIdblockIds.Where(l=>l.LessonId == y.Id)
@@ -275,8 +313,10 @@ else {
                 Lessons.Sort((x, y) => {
                     int first = x.GetType().GetProperty(sortByColumn.Property).GetValue(x).ToString()
                         .CompareTo(y.GetType().GetProperty(sortByColumn.Property).GetValue(y).ToString());
+                    // Sort by the given property first, then alphabetically by Lesson name 
                     return first != 0 ? first : x.Name.CompareTo(y.Name);
                 });
+                // Sort in the opposite direction 
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
                     Lessons.Sort((x, y) => {
                         int first = y.GetType().GetProperty(sortByColumn.Property).GetValue(y).ToString()

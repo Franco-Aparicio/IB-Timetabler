@@ -5,13 +5,13 @@
     padding: 3px;
 }
 
-.descending {
+.ascending {
     transform: rotate(-135deg);
     -webkit-transform: rotate(-135deg);
     margin: 10px 4px 0 4px;
 }
 
-.ascending {
+.descending {
     transform: rotate(45deg);
     -webkit-transform: rotate(45deg);
     margin: 5px 4px 0 4px;

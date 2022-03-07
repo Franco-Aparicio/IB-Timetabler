@@ -41,7 +41,7 @@
             <td>
                 <input class="input" @oninput="HandleName" type="text" placeholder="Lesson Name"
                        style="width: 100%; min-width: 150px;"/>
-                @if (NameWarn.Length > 0 && NameWarn.Substring(0, 4) == "INFO") {
+                @if (NameWarn.Length > 0 && NameWarn[..4] == "INFO") {
                     <span style="font-size: 12px; color: dodgerblue; display: block;">@NameWarn</span>
                 }
                 else {
@@ -52,7 +52,7 @@
             <td>
                 <input class="input" @oninput="HandleClassCode" type="text" placeholder="Class Code"
                        style="width: 100%; min-width: 150px;"/>
-                @if (ClassCodeWarn.Length > 0 && ClassCodeWarn.Substring(0, 4) == "INFO") {
+                @if (ClassCodeWarn.Length > 0 && ClassCodeWarn[..4] == "INFO") {
                     <span style="font-size: 12px; color: dodgerblue; display: block;">@ClassCodeWarn</span>
                 }
                 else {
@@ -95,7 +95,7 @@
                                style="align-items:center; margin-bottom: 2px; margin-top: 2px;"/>
                     </label>
                 }
-                @if (BlockWarn.Length > 0 && BlockWarn.Substring(0, 4) == "INFO") {
+                @if (BlockWarn.Length > 0 && BlockWarn[..4] == "INFO") {
                     <span style="font-size: 12px; color: dodgerblue; display: block;">@BlockWarn</span>
                 }
                 else {
@@ -329,7 +329,7 @@
             Title = "Confirm Action",
             Buttons = new []{"Confirm", "Cancel"}
         };
-        // Displays a popup window with the above message, title, and option buttons 
+        // Displays a popup confirmation window with the above message, title, and option buttons 
         var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
         // If cancel was clicked (or the box was quit), do not yet add the lesson to the database (and stay on current page) 
         if (choice.Response == 1) return;
@@ -398,11 +398,17 @@
                 break;
             }
             case "Number": {
-                // Only compare Room Numbers alphabetically 
-                Rooms.Sort((x, y) => x.Number.CompareTo(y.Number));
+                Rooms.Sort((x, y) => {
+                    int first = x.Number.CompareTo(y.Number);
+                    // Sort by Room numbers first, then alphabetically by Floor Number 
+                    return first != 0 ? first : x.Floor.CompareTo(y.Floor);
+                });
                 // Sort in the opposite direction 
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
-                    Rooms.Sort((x, y) => y.Number.CompareTo(x.Number));
+                    Rooms.Sort((x, y) => {
+                        int first = y.Number.CompareTo(x.Number);
+                        return first != 0 ? first : x.Floor.CompareTo(y.Floor);
+                    });
                 }
                 break;
             }

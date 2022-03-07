@@ -16,11 +16,11 @@
     @* Button to delete the selected Block(s) *@ 
     <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
         <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
-        <span>@(Selected.Count == 1 ? "Delete Selected Block" : "Delete Selected Blocks")</span>
+        <span>Delete Selected Block@(Selected.Count == 1 ? "" : "s")</span>
     </button>
 } 
 <br/>
-@* The modal menu to add a new block. Only use is-active CSS class if ShowAddBlock (otherwise it is hidden) *@ 
+@* The modal menu to add a new block. Only uses is-active CSS class if ShowAddBlock (otherwise it is hidden) *@ 
 <div class="modal @(ShowAddBlock ? "is-active" : null)">
     @* The dark, translucent background that covers the main part of the blocks page *@ 
     <div class="modal-background"></div>
@@ -72,7 +72,7 @@
         <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 50%; margin: auto">
             <thead>
             <tr>
-                @* Custom event handler for selecting all rooms when the top checkbox (or the cell it is in) is clicked *@ 
+                @* Custom event handler for selecting all blocks when the top checkbox (or the cell it is in) is clicked *@ 
                 <th @onclick="() => HandleSelectAllBlocks(checkAll)" style="width: 25px">
                     <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllBlocks(checkAll))"
                            style="cursor: pointer;"/>
@@ -235,14 +235,14 @@
         // If operation cancelled, do nothing and return 
         if (choice.Response == 1) return;
         List<long> lessons = new List<long>();
-        // Loop through the blocks marked for deletion 
+        // Otherwise, loop through the blocks marked for deletion 
         while (Selected.Count > 0) {
             Block b = AllBlocks.Find(x => x.Id == Selected[0]);
             // Delete the current block from the database 
             await BlockService.DeleteBlockAsync(b);
             // Collect all LessonIdblockIds with a BlockId corresponding to the current block 
             var temp = LessonIdblockIds.Where(x => x.BlockId == b?.Id).ToList();
-            // Store the lessons with the corresponding LessonId numbers in the collected LessonIdblockIds 
+            // Store the lessons with the corresponding LessonId numbers from the collected LessonIdblockIds 
             lessons.AddRange(temp.Select(x=>x.LessonId));
             // Delete the collected LessonIdblockIds from the database 
             await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(temp);
@@ -270,7 +270,7 @@
         return column.SortDirection != SortDirection.NotSet ? $"sort {column.SortDirection.ToString().ToLower()}" : "no-sort";
     }
     
-    /// Sorts the block order in the block table according to the given property and direction 
+    /// Sorts the block order according to the given property and direction 
     private void SortData(ColumnDefinition sortByColumn = null) {
         bool initial = sortByColumn is null;
         if (sortByColumn is null) {

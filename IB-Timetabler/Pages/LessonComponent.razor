@@ -104,29 +104,33 @@
                 else {
                     <span style="font-size: 12px; color: red; display: block;">@BlockWarn</span>
                 }
+                @* Button to navigate to blocks page *@ 
                 <NavLink class="button is-small" href="blocks" style="text-decoration: none;">
                     <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
                     <span>Add</span>
                 </NavLink>
             </td>
             <td>
+                @* Cell with numerical spinner to input the number of lessons of the new Lessons with custom event handling *@ 
                 <input class="input" value="@Lesson.NumLessons.ToString()" @oninput="HandleNumLessons"
                        @onfocusout="SubmitNumLessons" type="number" placeholder="@Lesson.NumLessons.ToString()"
                        style="width: 100%; min-width: 50px;"/>
                 <span style="font-size: 12px; color: red; display: block;">@NumLessonsWarn</span>
             </td>
             <td>
+                @* Cell with dropdown menu to select the teacher for the new Lesson *@ 
                 <div class="select" style="width: 100%; min-width: 75px;">
                     <select @bind-value="@CopyLesson.TeacherId" @bind-value:event="oninput" @onchange="SubmitTeacher"
                             style="width: 100%; min-width: 100px;">
-                        @foreach (var teacher in Teachers.OrderBy(x=>x.Name)) {
+                        @foreach (var teacher in Teachers.OrderBy(x => x.Name)) {
                             <option value="@teacher.Id.ToString()">@teacher.Name</option>
                         }
                     </select>
                 </div>
+                @* Button to navigate to the teachers page *@ 
                 <NavLink class="button is-small" href="teachers" style="text-decoration: none; margin-top: 8px">
                     <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
-                    <span>Add</span>
+                    <span>Add</span>0
                 </NavLink>
             </td>
         </tr>
@@ -136,15 +140,18 @@
 <br/>
 
 @if (true) {
+     @* Table to select which rooms the given room may be taught in *@ 
     bool checkAll = Selected.Count == Rooms.Count;
     <div style="overflow-x: auto">
         <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 50%; margin: auto">
             <thead>
             <tr>
+                @* Custom event handling for selecting all rooms *@ 
                 <th @onclick="() => HandleSelectAllRooms(checkAll)" style="width: 25px">
                     <input type="checkbox" checked=@checkAll @onclick="@(() => HandleSelectAllRooms(checkAll))"
                            @onclick:preventDefault="true" style="cursor: pointer;"/>
                 </th>
+                @* Custom event handling for clicking on a room column header *@ 
                 @foreach (ColumnDefinition column in RoomColumns) {
                     <th @onclick="@(() => SortData(column))">
                         @column.Title
@@ -157,10 +164,12 @@
             @foreach (Room r in Rooms) {
                 bool check = Selected.Contains(r.Id);
                 <tr>
+                    @* Custom event handling for selecting a room for the new Lesson *@ 
                     <td @onclick="() => HandleSelectedRooms(r.Id, check)" style="cursor: pointer;">
                         <input type="checkbox" checked=@check @onclick="@(() => HandleSelectedRooms(r.Id, check))"
                                @onclick:preventDefault="true" style="cursor: pointer;"/>
                     </td>
+                    @* Get the values of each property of Room r (as defined in RoomColumns) *@ 
                     @foreach (var column in RoomColumns) {
                         <td>
                             @r.GetType().GetProperty(column.Property)?.GetValue(r)
@@ -173,10 +182,10 @@
     </div>
 }
 <br/><br/><br/><br/>
+
 @code {
 
-    [Parameter]
-    public string Id { get; set; }
+    [Parameter] public string Id { get; set; }
     
     Lesson Lesson = null;
     Lesson CopyLesson = null;
@@ -193,6 +202,7 @@
     string BlockWarn;
     string NumLessonsWarn;
 
+    /// Initializes properties once the page is ready to start 
     protected override async void OnInitialized() {
         await base.OnInitializedAsync();
         MainColumns = new List<ColumnDefinition> {
@@ -210,6 +220,7 @@
         RefreshLessonIdblockIds();
         RefreshRoomIdlessonIds();
         Rooms = await RoomService.GetAllRoomsAsync();
+        // Initializes a copy Lesson that will be edited live to ensure the original/saved version remains valid  
         CopyLesson = new Lesson {Id = Lesson.Id, ClassCode = Lesson.ClassCode, Level = Lesson.Level,
             Name = Lesson.Name, NumLessons = Lesson.NumLessons, TeacherId = Lesson.TeacherId, Year = Lesson.Year};
         NameWarn = "";
@@ -220,79 +231,85 @@
             new ColumnDefinition {Property = "Number", Title = "Room Number"},
             new ColumnDefinition {Property = "Floor", Title = "Floor", SortDirection = SortDirection.Ascending}
         };
+        // Initializes the rooms currently selected for the lesson to be taught in 
         Selected = Rooms.Where(x=>RoomIdlessonIds.Select(y=>y.RoomId).Contains(x.Id))
             .Select(x=>x.Id).ToList();
         SortData();
     }
 
+    /// Retrieves all LessonIdblockIds currently recorded in the database and updates LessonIdblockIds 
     private void RefreshLessonIdblockIds() {
         LessonIdblockIds = LessonIdblockIdService.GetAllLessonIdblockIdsAsync().Result
             .Where(x=>x.LessonId == Lesson.Id).ToList();
     }
 
+    /// Retrieves all RoomIdlessonIds currently recorded in the database and updates RoomIdlessonIds 
     private void RefreshRoomIdlessonIds() {
         RoomIdlessonIds = RoomIdlessonIdService.GetAllRoomIdlessonIdsAsync().Result
             .Where(x=>x.LessonId == Lesson.Id).ToList();
     }
     
+    /// Custom event handler for the new name field to determine the warning message 
     private void HandleName(ChangeEventArgs args) {
-        if (args.Value.ToString().Trim().Length == 0) {
+        if (args.Value?.ToString()?.Trim().Length == 0) {
             NameWarn = "The lesson must have a name!";
             CopyLesson.Name = Lesson.Name;
             return;
         }
-        CopyLesson.Name = args.Value.ToString();
+        CopyLesson.Name = args.Value?.ToString();
         NameWarn = "";
         if (LessonService.GetAllLessonsAsync().Result.Any(x =>
             x.Id != CopyLesson.Id && x.Name == CopyLesson.Name))
             NameWarn = "INFO: This name is already in use";
     }
 
+    /// Submits a new and valid name after the name input is deselected 
     private async void SubmitName() {
-        bool saved = Lesson.Name != CopyLesson.Name;
+        if (Lesson.Name == CopyLesson.Name) return; 
         Lesson.Name = CopyLesson.Name;
         await LessonService.UpdateLessonAsync(Lesson);
-        if (saved) SaveBannerService.ShowBanner(
-            "Lesson name updated successfully", SaveBannerType.Success);
+        SaveBannerService.ShowBanner("Lesson name updated successfully", SaveBannerType.Success);
     }
     
+    /// Custom event handler for the new class code field to determine the warning message 
     private void HandleClassCode(ChangeEventArgs args) {
-        if (args.Value.ToString().Trim().Length == 0) {
+        if (args.Value?.ToString()?.Trim().Length == 0) {
             ClassCodeWarn = "The lesson must have a class code!";
             CopyLesson.ClassCode = Lesson.ClassCode;
             return;
         }
-        CopyLesson.ClassCode = args.Value.ToString();
+        CopyLesson.ClassCode = args.Value?.ToString();
         ClassCodeWarn = "";
         if (LessonService.GetAllLessonsAsync().Result.Any(x =>
             x.Id != CopyLesson.Id && x.ClassCode == CopyLesson.ClassCode))
             ClassCodeWarn = "INFO: This code is already in use";
     }
 
+    /// Submits a new and valid class code after the class code input is deselected 
     private async void SubmitClassCode() {
-        bool saved = Lesson.ClassCode != CopyLesson.ClassCode;
+        if (Lesson.ClassCode == CopyLesson.ClassCode) return; 
         Lesson.ClassCode = CopyLesson.ClassCode;
         await LessonService.UpdateLessonAsync(Lesson);
-        if (saved) SaveBannerService.ShowBanner(
-            "Class code updated successfully", SaveBannerType.Success);
+        SaveBannerService.ShowBanner("Class code updated successfully", SaveBannerType.Success);
     }
 
+    /// Submits a new and valid year after the dropdown option is changed 
     private async void SubmitYear() {
-        bool saved = Lesson.Year != CopyLesson.Year;
+        if (Lesson.Year == CopyLesson.Year) return;
         Lesson.Year = CopyLesson.Year;
         await LessonService.UpdateLessonAsync(Lesson);
-        if (saved) SaveBannerService.ShowBanner(
-            "Year group updated successfully", SaveBannerType.Success);
+        SaveBannerService.ShowBanner("Year group updated successfully", SaveBannerType.Success);
     }
 
+    /// Submits a new and valid level after the dropdown option is changed 
     private async void SubmitLevel() {
-        bool saved = Lesson.Level != CopyLesson.Level;
+        if (Lesson.Level == CopyLesson.Level) return; 
         Lesson.Level = CopyLesson.Level;
         await LessonService.UpdateLessonAsync(Lesson);
-        if (saved) SaveBannerService.ShowBanner(
-            "Lesson level updated successfully", SaveBannerType.Success);
+        SaveBannerService.ShowBanner("Lesson level updated successfully", SaveBannerType.Success);
     }
     
+    /// Custom event handler for the new blocks field 
     private async void HandleBlockAsync(long id, bool value) {
         if (LessonIdblockIds.Count == 1 && value) {
             BlockWarn = "There must be at least one block selected!";
@@ -300,49 +317,56 @@
             return;
         }
         BlockWarn = "";
+        // If the box was initially unchecked (user clicked to check it), add to LessonIdblockIds table in database  
         if (!value) await LessonIdblockIdService.InsertLessonIdblockIdAsync(
             new LessonIdblockId { BlockId = id, LessonId = Lesson.Id });
+        // Otherwise, remove it from the LessonIdblockIds table in the database 
         else await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(
             LessonIdblockIds.FindAll(x=>x.BlockId == id));
+        // Refresh the current LessonIdblockIds list to match database 
         RefreshLessonIdblockIds();
         if (LessonIdblockIds.Count > 1 && !value)
             BlockWarn = "INFO: This is normally only for lessons such as BTEC and PPS";
         SaveBannerService.ShowBanner("Lesson blocks updated successfully", SaveBannerType.Success);
     }
 
+    /// Custom event handler for the new NumLessons field to determine the warning message 
     private void HandleNumLessons(ChangeEventArgs args) {
-        if (args.Value.ToString().Trim().Length == 0 || long.Parse(args.Value.ToString()) <= 0) {
+        if (args.Value?.ToString()?.Trim().Length == 0 || long.Parse(args.Value?.ToString()) <= 0) {
             NumLessonsWarn = "There must be at least one lesson per cycle!";
             CopyLesson.NumLessons = Lesson.NumLessons;
             return;
         }
-        CopyLesson.NumLessons = long.Parse(args.Value.ToString());
+        CopyLesson.NumLessons = long.Parse(args.Value?.ToString());
         NumLessonsWarn = "";
     }
 
+    /// Submits a new and valid NumLessons after the input spinner is deselected 
     private async void SubmitNumLessons() {
-        bool saved = Lesson.NumLessons != CopyLesson.NumLessons;
+        if (Lesson.NumLessons == CopyLesson.NumLessons) return; 
         Lesson.NumLessons = CopyLesson.NumLessons;
         await LessonService.UpdateLessonAsync(Lesson);
-        if (saved) SaveBannerService.ShowBanner(
-            "Lessons per cycle updated successfully", SaveBannerType.Success);
+        SaveBannerService.ShowBanner("Lessons per cycle updated successfully", SaveBannerType.Success);
     }
     
+    /// Submits a new and valid teacher after the dropdown option is changed 
     private async void SubmitTeacher() {
-        bool saved = Lesson.TeacherId != CopyLesson.TeacherId;
+        if (Lesson.TeacherId == CopyLesson.TeacherId) return;
         Lesson.TeacherId = CopyLesson.TeacherId;
         await LessonService.UpdateLessonAsync(Lesson);
-        if (saved) SaveBannerService.ShowBanner(
-            "Teacher updated successfully", SaveBannerType.Success);
+        SaveBannerService.ShowBanner("Teacher updated successfully", SaveBannerType.Success);
     }
 
+    /// Custom event handler for the room selection table 
     private async void HandleSelectedRooms(long id, bool checkedValue) {
+        // If the box was initially unchecked (user clicked to check it), add it to the database 
         if (!checkedValue) {
             if (Selected.Contains(id)) return;
             Selected.Add(id);
             await RoomIdlessonIdService.InsertRoomIdlessonIdAsync(new RoomIdlessonId {
                 RoomId = id, LessonId = Lesson.Id});
         }
+        // Otherwise remove it from the database (if it is not the only remaining Room selected) 
         else {
             if (!Selected.Contains(id)) return;
             if (Selected.Count == 1) {
@@ -354,17 +378,20 @@
             await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds
                 .FindAll(x=>x.RoomId == id));
         }
+        // Refresh the current RoomIdlessonIds list to match the database 
         RefreshRoomIdlessonIds();
         StateHasChanged();
         SaveBannerService.ShowBanner("Available rooms updated successfully", SaveBannerType.Success);
     }
 
+    /// Custom event handler to select all rooms in the room selection table 
     private async void HandleSelectAllRooms(bool checkAll) {
         if (checkAll) {
             SaveBannerService.ShowBanner("Cannot deselect all! There must be at least one available room selected",
                 SaveBannerType.Warning);
             return;
         }
+        // If not already selected, select each room in Rooms 
         foreach (Room r in Rooms) {
             if (Selected.Contains(r.Id)) continue;
             Selected.Add(r.Id);
@@ -376,14 +403,18 @@
         SaveBannerService.ShowBanner("Available rooms updated successfully", SaveBannerType.Success);
     }
     
+    /// Removes the current Lesson and it's references in other tables from the database, then returns to the lessons page 
     private async void Delete() {
         string message = $"Are you sure you want to delete {Lesson.Name}?";
         var options = new MessageBoxOptions(message) {
             Title = "Confirm Action",
             Buttons = new []{"Confirm", "Cancel"}
         };
+        // Displays a popup confirmation window with the above message, title, and option buttons 
         var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
+        // If cancel was clicked (or the box was quit), do not yet add the lesson to the database (and stay on current page) 
         if (choice.Response == 1) return;
+        // Otherwise, delete old Lesson (along with LessonIdblockIds and RoomIdlessonIds) from the database 
         await LessonService.DeleteLessonAsync(Lesson);
         await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIds);
         await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(RoomIdlessonIds);
@@ -391,10 +422,12 @@
         NavigationManager.NavigateTo("lessons");
     }
     
+    /// Determines the CSS class for the sort arrow next to the header of the column being sorted 
     private string SortClass(ColumnDefinition column) {
         return column.SortDirection != SortDirection.NotSet ? $"sort {column.SortDirection.ToString().ToLower()}" : "no-sort";
     }
     
+    /// Sorts the room order in the room selection table according to the given property and direction 
     private void SortData(ColumnDefinition sortByColumn = null) {
         bool initial = sortByColumn is null;
         if (sortByColumn is null) {
@@ -404,27 +437,35 @@
         foreach (ColumnDefinition column in RoomColumns) {
             if (column.Property != sortByColumn.Property) column.SortDirection = SortDirection.NotSet;
         }
+        // Determines the sort behavior of a header when clicked 
         if (!initial)
             switch (sortByColumn.SortDirection) {
+                // If not currently sorting by the clicked property, sort by ascending 
                 case SortDirection.NotSet:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
+                // If currently sorting ascending by the clicked property, sort by descending 
                 case SortDirection.Ascending:
                     sortByColumn.SortDirection = SortDirection.Descending;
                     break;
+                // If currently sorting descending by the clicked property, sort by ascending 
                 case SortDirection.Descending:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
+                // Otherwise sort clicked property by ascending 
                 default:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
             }
+        // Sort Rooms by the given property 
         switch (sortByColumn.Property) {
             case "Floor": {
                 Rooms.Sort((x, y) => {
                     int first = x.Floor.CompareTo(y.Floor);
+                    // Sort by Floor numbers first, then alphabetically by Room Number 
                     return first != 0 ? first : x.Number.CompareTo(y.Number);
                 });
+                // Sort in the opposite direction 
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
                     Rooms.Sort((x, y) => {
                         int first = y.Floor.CompareTo(x.Floor);
@@ -434,7 +475,9 @@
                 break;
             }
             case "Number": {
+                // Only compare Room Numbers alphabetically 
                 Rooms.Sort((x, y) => x.Number.CompareTo(y.Number));
+                // Sort in the opposite direction 
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
                     Rooms.Sort((x, y) => y.Number.CompareTo(x.Number));
                 }

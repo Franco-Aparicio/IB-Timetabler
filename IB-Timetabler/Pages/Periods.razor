@@ -7,97 +7,102 @@
 
 <TitleComponent Page="Manage Available Periods"/>
 <br/>
+@* Button to activate the AddPeriod modal element *@ 
 <button class="button is-success is-outlined" @onclick="OpenAddPeriodModal" style="margin-bottom: 15px">
     <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
     <span>Add Period</span>
 </button>
-@if (Selected.Count == 1) {
+@if (Selected.Count >= 1) {
+    @* Button to delete the selected Period(s) *@ 
     <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
         <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
-        <span>Delete Selected Period</span>
+        <span>Delete Selected Period@(Selected.Count == 1 ? "" : "s")</span>
     </button>
 }
-else if (Selected.Count > 1) {
-    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
-        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
-        <span>Delete Selected Periods</span>
-    </button>}
 <br/>
-
+@* The modal menu to add a new Period. Only uses is-active CSS class if ShowAddBlock (otherwise it is hidden) *@ 
 <div class="modal @(ShowAddPeriod ? "is-active" : null)">
-  <div class="modal-background"></div>
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title">Add Period</p>
-    </header>
-      <section class="modal-card-body">
-          <table class="table is-narrow has-text-centered" style="width: 75%; margin: auto">
-              <thead>
-              <tr>
-                  <th style="cursor: auto;">
-                      Week
-                  </th>
-                  <th style="cursor: auto;">
-                      Day
-                  </th>
-                  <th style="cursor: auto;">
-                      Period
-                  </th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr>
-                  <td>
-                      <div class="select" style="width: 100%; min-width: 75px;">
-                          <select @bind-value="@NewPeriodWeek" @bind-value:event="onchange" style="width: 100%; min-width: 75px;">
-                              <option value="0">A</option>
-                              <option value="1">B</option>
-                          </select>
-                      </div>
-                  </td>
-                  <td>
-                      <div class="select" style="width: 100%; min-width: 75px;">
-                          <select @bind-value="@NewPeriodDay" @bind-value:event="onchange" style="width: 100%; min-width: 75px;">
-                              @for (int i = 0; i < Days.Length; i++) {
-                                  <option value="@i.ToString()">@Days[i]</option>
-                              }
-                          </select>
-                      </div>
-                  </td>
-                  <td>
-                      <input class="input" type="number" @oninput="HandleNewPeriod" placeholder="Period" value="@NewPeriod"
-                             style="max-width: 100px;"/>
-                      <span style="font-size: 12px; color: red; display: block;">@PeriodWarn</span>
-                  </td>
-              </tr>
-              </tbody>
-          </table>
-      </section>
-      <footer class="modal-card-foot" style="padding: 5px !important;">
-          <div style="margin: auto">
-              <button class="button is-success is-small" @onclick="AddPeriod" style="margin: 5px;">
-                  <span class="icon"><i class="fas fa-check"></i></span>
-                  <span>Add Period</span>
-              </button>
-              <button class="button is-dark is-outlined is-small" @onclick="CloseAddPeriodModal" style="margin: 5px;">
-                  <span class="icon"><i class="fas fa-ban"></i></span>
-                  <span>Cancel</span>
-              </button>
-          </div>
-      </footer>
-  </div>
+    @* The dark, translucent background that covers the main part of the blocks page *@
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Add Period</p>
+        </header>
+        <section class="modal-card-body">
+            <table class="table is-narrow has-text-centered" style="width: 75%; margin: auto">
+                <thead>
+                <tr>
+                    <th style="cursor: auto;">
+                        Week
+                    </th>
+                    <th style="cursor: auto;">
+                        Day
+                    </th>
+                    <th style="cursor: auto;">
+                        Period
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        @* Drop-down selection with automatic data binding when changed to select week of new Period *@ 
+                        <div class="select" style="width: 100%; min-width: 75px;">
+                            <select @bind-value="@NewPeriodWeek" @bind-value:event="onchange" style="width: 100%; min-width: 75px;">
+                                <option value="0">A</option>
+                                <option value="1">B</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        @* Drop-down selection with automatic data binding when changed to select Day of new Period *@
+                        <div class="select" style="width: 100%; min-width: 75px;">
+                            <select @bind-value="@NewPeriodDay" @bind-value:event="onchange" style="width: 100%; min-width: 75px;">
+                                @for (int i = 0; i < Days.Length; i++) {
+                                    <option value="@i.ToString()">@Days[i]</option>
+                                }
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        @* Number spinner input with custom event handling and live waning message to enter the new TimePeriod *@ 
+                        <input class="input" type="number" @oninput="HandleNewPeriod" placeholder="Period" value="@NewPeriod"
+                               style="max-width: 100px;"/>
+                        <span style="font-size: 12px; color: red; display: block;">@PeriodWarn</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+        @* Buttons to either save the new Block or cancel the action and close the modal window *@ 
+        <footer class="modal-card-foot" style="padding: 5px !important;">
+            <div style="margin: auto">
+                <button class="button is-success is-small" @onclick="AddPeriod" style="margin: 5px;">
+                    <span class="icon"><i class="fas fa-check"></i></span>
+                    <span>Add Period</span>
+                </button>
+                <button class="button is-dark is-outlined is-small" @onclick="CloseAddPeriodModal" style="margin: 5px;">
+                    <span class="icon"><i class="fas fa-ban"></i></span>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </footer>
+    </div>
 </div>
 
 @if (true) {
+    @* Determines whether the top checkbox should be checked (if all Periods have been selected) *@ 
     bool checkAll = Selected.Count == AllPeriods.Count;
     <div style="overflow-x: auto">
         <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 50%; margin: auto">
             <thead>
             <tr>
+                @* Custom event handler for selecting all rooms when the top checkbox (or the cell it is in) is clicked *@ 
                 <th @onclick="() => HandleSelectAllPeriods(checkAll)" style="width: 25px">
                     <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllPeriods(checkAll))"
                            style="cursor: pointer;"/>
                 </th>
+                @* Custom event handling for clicking on a period column header to sort by that property *@ 
                 @foreach (ColumnDefinition column in PeriodColumns) {
                     <th @onclick="@(() => SortData(column))">
                         @column.Title
@@ -107,38 +112,33 @@ else if (Selected.Count > 1) {
             </tr>
             </thead>
             <tbody>
+            @* Loop for all Periods (in AllPeriods) with custom event handling for clicked checkboxes *@ 
             @foreach (Period p in AllPeriods) {
+                @* Determines whether the checkbox for a given Period should be checked *@ 
                 bool check = Selected.Contains(p.Id);
                 <tr>
                     <td @onclick="() => HandleSelectedPeriods(p.Id, check)" style="cursor: pointer;">
                         <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedPeriods(p.Id, check))"
                                style="cursor: pointer;"/>
                     </td>
-                    @foreach (var column in PeriodColumns) {
-                        @if (column.Title == "Week") {
-                            <td>
-                                @(p.Week == 0 ? "A" : "B")
-                            </td>
-                        }
-                        else if (column.Title == "Day") {
-                            <td>
-                                @Days[p.Day]
-                            </td>
-                        }
-                        else {
-                            <td>
-                                @p.GetType().GetProperty(column.Property)?.GetValue(p)
-                            </td>
-                        }
-                    }
+                    @* Get the value of each property (to display in the table) *@ 
+                    <td>
+                        @(p.Week == 0 ? "A" : "B")
+                    </td>
+                    <td>
+                        @Days[p.Day]
+                    </td>
+                    <td>
+                        @p.TimePeriod.ToString()
+                    </td>
                 </tr>
             }
             </tbody>
         </table>
     </div>
 }
-
 <br/><br/><br/><br/>
+
 @code {
     
     List<Period> AllPeriods = null;
@@ -146,12 +146,16 @@ else if (Selected.Count > 1) {
     List<ColumnDefinition> PeriodColumns = null;
     List<long> Selected = null;
     string[] Days = new[] {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+    /// If true, the AddPeriod modal window will be displayed 
     bool ShowAddPeriod = false;
+    // The numbers input for the next added Period 
     long NewPeriodWeek;
     long NewPeriodDay;
     long NewPeriod;
+    /// Custom warning message when adding a block in the AddPeriod modal window 
     string PeriodWarn;
 
+    /// Initializes properties once page is ready to start 
     protected override async void OnInitialized() {
         await RefreshPeriods();
         await RefreshSavedLessonIdperiodIds();
@@ -168,14 +172,17 @@ else if (Selected.Count > 1) {
         SortData();
     }
 
+    /// Retrieves all Periods currently recorded in the database and updates AllPeriods 
     private async Task RefreshPeriods() {
         AllPeriods = await PeriodService.GetAllPeriodsAsync();
     }
 
+    /// Retrieves all LessonIdperiodIds currently in the database and updates LessonIdperiodIds 
     private async Task RefreshSavedLessonIdperiodIds() {
         SavedLessonIdperiodIds = await SavedLessonIdperiodIdService.GetAllSavedLessonIdperiodIdsAsync();
     }
     
+    /// Custom event handler for clicking on checkboxes in the Periods table 
     private void HandleSelectedPeriods(long id, bool checkedValue) {
         if (!checkedValue) {
             if (!Selected.Contains(id)) {
@@ -189,6 +196,7 @@ else if (Selected.Count > 1) {
         }
     }
 
+    /// Custom event handler for clicking the select/deselect all checkbox in the blocks table 
     private void HandleSelectAllPeriods(bool checkAll) {
         if (!checkAll) {
             foreach (Period p in AllPeriods) {
@@ -201,9 +209,11 @@ else if (Selected.Count > 1) {
         }
     }
     
+    /// Custom event handler to customize warning message in the AddPeriod modal window 
     private void HandleNewPeriod(ChangeEventArgs args) {
+        // Try converting the numerical spinner value into a number 
         try {
-            NewPeriod = long.Parse(args.Value.ToString().Trim());
+            NewPeriod = long.Parse(args.Value?.ToString().Trim());
             PeriodWarn = "";
             if (NewPeriod <= 0) 
                 PeriodWarn = "The period must be a positive integer!";
@@ -211,17 +221,20 @@ else if (Selected.Count > 1) {
                                          && x.TimePeriod == NewPeriod)) 
                 PeriodWarn = "This period already exists!";
         }
+        // Otherwise tell user the value must be a positive integer 
         catch (FormatException) {
             NewPeriod = 0;
             PeriodWarn = "The period must be a positive integer!";
         }
     }
 
+    /// Sets ShowAddPeriod to true and resets NewPeriod 
     private void OpenAddPeriodModal() {
         ShowAddPeriod = true;
         NewPeriod = 0;
     }
 
+    /// Sets ShowAddBlock to false and resets NumWarn 
     private void CloseAddPeriodModal() {
         ShowAddPeriod = false;
         NewPeriodWeek = 0;
@@ -230,6 +243,7 @@ else if (Selected.Count > 1) {
         PeriodWarn = "";
     }
     
+    /// If valid Period number submitted: update database, RefreshPeriods(), and CloseAddPeriodModal(). Otherwise: display error. 
     private async void AddPeriod() {
         if (NewPeriod <= 0) {
             SaveBannerService.ShowBanner("The period must be a positive integer!", SaveBannerType.Error);
@@ -248,6 +262,7 @@ else if (Selected.Count > 1) {
         SaveBannerService.ShowBanner("New period added successfully!", SaveBannerType.Success);
     }
     
+    /// Ask for confirmation and remove selected blocks from the database 
     private async void DeleteSelected() {
         string message = Selected.Count > 1 ? $"Are you sure you want to delete {Selected.Count.ToString()} periods?" :
             $"Are you sure you want to delete {AllPeriods.Find(x=>x.Id == Selected[0])}?";
@@ -256,21 +271,30 @@ else if (Selected.Count > 1) {
             Title = "Confirm Action",
             Buttons = new []{"Confirm", "Cancel"}
         };
+        // Display action confirmation popup window and await user response 
         var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
         if (choice.Response == 1) return;
         List<long> lessons = new List<long>();
         while (Selected.Count > 0) {
             Period p = AllPeriods.Find(x => x.Id == Selected[0]);
+            // Delete the current Period from the database 
             await PeriodService.DeletePeriodAsync(p);
-            var temp = SavedLessonIdperiodIds.Where(x => x.PeriodId == p.Id).ToList();
+            // Collect all SavedLessonIdperiodIds with a PeriodId corresponding to the current Period 
+            var temp = SavedLessonIdperiodIds.Where(x => x.PeriodId == p?.Id).ToList();
+            // Store the SavedLessons with the corresponding SavedLessonId numbers from the collected SavedLessonIdperiodIds 
             lessons.AddRange(temp.Select(x=>x.SavedLessonId));
+            // Delete the collected SavedLessonIdperiodIds from the database 
             await SavedLessonIdperiodIdService.DeleteSavedLessonIdperiodIdsAsync(temp);
             Selected.RemoveAt(0);
         }
+        // Refresh Periods and SavedLessonIdperiodIds to match with the database 
         await RefreshPeriods();
         await RefreshSavedLessonIdperiodIds();
+        // Loop through all collected lessons (from the removed Periods) 
         foreach (long id in lessons) {
+            // If the current SavedLesson still belongs to an additional Period, continue to the next Lesson 
             if (SavedLessonIdperiodIds.Any(x => x.SavedLessonId == id)) continue;
+            // Otherwise, delete the SavedLesson from the database 
             await SavedLessonService.DeleteSavedLessonAsync(SavedLessonService.GetSavedLessonAsync(id).Result);
         }
         SortData();
@@ -278,10 +302,12 @@ else if (Selected.Count > 1) {
         SaveBannerService.ShowBanner("Period(s) deleted successfully", SaveBannerType.Success);
     }
     
+    /// Determines the CSS class for the sort arrow next to the header of the column being sorted 
     private string SortClass(ColumnDefinition column) {
         return column.SortDirection != SortDirection.NotSet ? $"sort {column.SortDirection.ToString().ToLower()}" : "no-sort";
     }
     
+    /// Sorts the block order according to the given property and direction 
     private void SortData(ColumnDefinition sortByColumn = null) {
         bool initial = sortByColumn is null;
         if (sortByColumn is null) {
@@ -292,27 +318,35 @@ else if (Selected.Count > 1) {
             if (column.Property != sortByColumn.Property) column.SortDirection = SortDirection.NotSet;
         }
         if (!initial)
+            // Determines the sort behavior of a header when clicked 
             switch (sortByColumn.SortDirection) {
+                // If not currently sorting by the clicked property, sort by ascending 
                 case SortDirection.NotSet:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
+                // If currently sorting ascending by the clicked property, sort by descending 
                 case SortDirection.Ascending:
                     sortByColumn.SortDirection = SortDirection.Descending;
                     break;
+                // If currently sorting descending by the clicked property, sort by ascending 
                 case SortDirection.Descending:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
+                // Otherwise sort clicked property by ascending 
                 default:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
             }
+        // Sort Rooms by the given property 
         switch (sortByColumn.Property) {
             case "Week": {
                 AllPeriods.Sort((x, y) => {
                     int first = x.Week.CompareTo(y.Week);
                     int second = x.Day.CompareTo(y.Day);
+                    // Sort by week first, then by day, then by period 
                     return first != 0 ? first : second != 0 ? second : x.TimePeriod.CompareTo(y.TimePeriod);
                 });
+                // Sort in the opposite direction 
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
                     AllPeriods.Sort((x, y) => {
                         int first = y.Week.CompareTo(x.Week);
@@ -326,8 +360,10 @@ else if (Selected.Count > 1) {
                 AllPeriods.Sort((x, y) => {
                     int first = x.Day.CompareTo(y.Day);
                     int second = x.TimePeriod.CompareTo(y.TimePeriod);
+                    // Sort by day first, then by period, then by week 
                     return first != 0 ? first : second != 0 ? second : x.Week.CompareTo(y.Week);
                 });
+                // Sort in the opposite direction 
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
                     AllPeriods.Sort((x, y) => {
                         int first = y.Day.CompareTo(x.Day);
@@ -341,8 +377,10 @@ else if (Selected.Count > 1) {
                 AllPeriods.Sort((x, y) => {
                     int first = x.TimePeriod.CompareTo(y.TimePeriod);
                     int second = x.Day.CompareTo(y.Day);
+                    // Sort by period first, then by day, then by week 
                     return first != 0 ? first : second != 0 ? second : x.Week.CompareTo(y.Week);
                 });
+                // Sort in the opposite direction 
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
                     AllPeriods.Sort((x, y) => {
                         int first = y.TimePeriod.CompareTo(x.TimePeriod);

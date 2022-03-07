@@ -1,3 +1,5 @@
+@* To route to this page, a SaveId parameter must be given in the URI *@ 
+
 @page "/timetable/timetablePDF/{SaveId}"
 @layout EmptyLayout
 @inject NavigationManager NavigationManager
@@ -9,11 +11,13 @@
 @inject TeacherService TeacherService
 @inject RoomService RoomService
 
+@* Display the date in the top right corner of the top page *@ 
 <div class="px-4" style="justify-content: flex-end; display: flex; align-items: center;">
     <DateTimeComponent/>
 </div>
 <h2 style="text-align: center">@($"Timetable: {Save.Name}")</h2>
 
+@* Display both weeks' timetables *@ 
 @for (int week = 0; week < 2; week++) {
     <div>
         <h3>Week @(week == 0 ? "A" : "B")</h3>
@@ -30,19 +34,23 @@
             </tr>
             </thead>
             <tbody>
-            @for (long periodNum = 1; periodNum <= Periods.Where(x=>x.Week == week)
-                .Max(x=>x.TimePeriod); periodNum++) {
+            @* Loop as many times as the maximum number of periods on a given day of the week *@ 
+            @for (long periodNum = 1; periodNum <= Periods.Where(x => x.Week == week)
+                .Max(x => x.TimePeriod); periodNum++) {
                 <tr>
                     <td class="has-text-centered" style="vertical-align: middle">@periodNum.ToString()</td>
                     @for (int day = 0; day < 5; day++) {
                         var period = GetPeriod(week, day, periodNum);
+                        // If the Period does not exist on the given day, place an empty cell
                         if (period is null) {
                             <td></td>
                             continue;
                         }
                         <td>
+                            @* Loop for each SavedLesson has been scheduled for the current Period *@ 
                             @foreach (var savedLessonIdperiodId in SavedLessonIdperiodIds.Where(x =>
                                 x.PeriodId == period.Id)) {
+                                @* Find the Lesson that the SavedLesson represents *@ 
                                 Lesson lesson = Lessons.FirstOrDefault(x => x.Id == SavedLessons.FirstOrDefault(
                                     y => y.Id == savedLessonIdperiodId.SavedLessonId)?.LessonId);
                                 <div style="border-bottom: 1px solid #dbdbdb; padding: 5px 0; font-size: 14px;">
@@ -54,7 +62,7 @@
                                     </p>
                                     <p style="margin: auto">
                                         @Rooms.FirstOrDefault(x => x.Id == SavedLessons.FirstOrDefault(
-                                                 y => y.Id == savedLessonIdperiodId.SavedLessonId)?.RoomId)?.Number
+                                            y => y.Id == savedLessonIdperiodId.SavedLessonId)?.RoomId)?.Number
                                     </p>
                                 </div>
                             }
@@ -69,8 +77,8 @@
 
 @code {
     
-    [Parameter]
-    public string SaveId { get; set; }
+    /// Id of the Save that the PDF will be generated for 
+    [Parameter] public string SaveId { get; set; }
 
     private Save Save;
     private List<SavedLessonIdperiodId> SavedLessonIdperiodIds;
@@ -81,7 +89,9 @@
     private List<Room> Rooms;
     private string[] Days = new[] {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}; 
 
+    /// Initializes properties once page has received parameters (the SaveId) 
     protected override async void OnParametersSet() {
+        // Loads all necessary data from the database 
         Save = await SaveService.GetSaveAsync(long.Parse(SaveId));
         SavedLessons = await SavedLessonService.GetAllSavedLessonsAsync();
         SavedLessons = SavedLessons.Where(x => x.SaveId == Save.Id).ToList();
@@ -92,17 +102,23 @@
         Periods = await PeriodService.GetAllPeriodsAsync();
         Teachers = await TeacherService.GetAllTeachersAsync();
         Rooms = await RoomService.GetAllRoomsAsync();
+        // Save the page as a PDF 
         bool success = await SavePDF();
+        // Return to the timetable page and set the parameter to whether the PDF was saved or not 
         NavigationManager.NavigateTo($"timetable/{success.ToString()}");
     }
 
+    /// Returns the Period object corresponding to a specific week, day, and period combination 
     private Period GetPeriod(long week, long day, long period) {
         return Periods.FirstOrDefault(x=>x.Week == week && x.Day == day && x.TimePeriod == period);
     }
     
+    /// Saves the page as a PDF 
     private async Task<bool> SavePDF() {
         bool success = false;
+        // Electron is required for this process 
         if (HybridSupport.IsElectronActive) {
+            // Gets the current application window object 
             BrowserWindow mainWindow = Electron.WindowManager.BrowserWindows.First();
             var saveOptions = new SaveDialogOptions {
                 Title = "Save a PDF-File",
@@ -111,8 +127,11 @@
                     new FileFilter { Name = "PDF", Extensions = new string[] { "pdf" } }
                 }
             };
+            // Display native save file dialogue with the above options and await user response 
             var path = await Electron.Dialog.ShowSaveDialogAsync(mainWindow, saveOptions);
-            path += path.Length <= 4 || path.Substring(path.Length - 4) != ".pdf" ? ".pdf" : "";
+            // Ensure the file extension is ".pdf" 
+            path += path.Length <= 4 || path[^4..] != ".pdf" ? ".pdf" : "";
+            // If the path was not originally blank and PDF generated successfully, open the PDF in the user's default application 
             if (path != ".pdf" && await mainWindow.WebContents.PrintToPDFAsync(path, new PrintToPDFOptions {
                 Landscape = false,
                 PageSize = "A4",

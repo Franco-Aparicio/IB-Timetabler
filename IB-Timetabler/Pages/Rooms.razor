@@ -7,81 +7,85 @@
 
 <TitleComponent Page="Manage Available Rooms"/>
 <br/>
+@* Button to activate the AddRoom modal element *@ 
 <button class="button is-success is-outlined" @onclick="() => { ShowAddRoom = true; }" style="margin-bottom: 15px">
     <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-plus"></i></span>
     <span>Add Room</span>
 </button>
-@if (Selected.Count == 1) {
+@if (Selected.Count >= 1) {
+    @* Button to delete the selected Room(s) *@ 
     <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
         <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
-        <span>Delete Selected Room</span>
+        <span>Delete Selected Room@(Selected.Count == 1 ? "" : "s")</span>
     </button>
 }
-else if (Selected.Count > 1) {
-    <button class="button is-danger" @onclick="DeleteSelected" style="margin-left: 15px">
-        <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
-        <span>Delete Selected Rooms</span>
-    </button>}
 <br/>
-
+@* The modal menu to add a new Room. Only uses is-active CSS class if ShowAddRoom (otherwise it is hidden) *@ 
 <div class="modal @(ShowAddRoom ? "is-active" : null)">
-  <div class="modal-background"></div>
-  <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title">Add Room</p>
-    </header>
-      <section class="modal-card-body">
-          <table class="table is-narrow has-text-centered" style="width: 75%; margin: auto">
-              <thead>
-              <tr>
-                  <th style="cursor: auto;">
-                      Room Number
-                  </th>
-                  <th style="cursor: auto;">
-                      Floor
-                  </th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr>
-                  <td>
-                      <input class="input" type="text" @oninput="HandleNewNum" placeholder="Room Number" value="@NewRoomNum"
-                             style="max-width: 150px;"/>
-                      <span style="font-size: 12px; color: dodgerblue; display: block;">@NumWarn</span>
-                  </td>
-                  <td>
-                      <input class="input" type="number" @bind-value="@NewRoomFloor" @bind-value:event="oninput" placeholder="Floor"
-                             style="max-width: 100px;"/>
-                  </td>
-              </tr>
-              </tbody>
-          </table>
-      </section>
-      <footer class="modal-card-foot" style="padding: 5px !important;">
-          <div style="margin: auto">
-              <button class="button is-success is-small" @onclick="AddRoom" style="margin: 5px;">
-                  <span class="icon"><i class="fas fa-check"></i></span>
-                  <span>Add Room</span>
-              </button>
-              <button class="button is-dark is-outlined is-small" @onclick="CloseAddRoomModal" style="margin: 5px;">
-                  <span class="icon"><i class="fas fa-ban"></i></span>
-                  <span>Cancel</span>
-              </button>
-          </div>
-      </footer>
-  </div>
+    @* The dark, translucent background that covers the main part of the rooms page *@
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Add Room</p>
+        </header>
+        <section class="modal-card-body">
+            <table class="table is-narrow has-text-centered" style="width: 75%; margin: auto">
+                <thead>
+                <tr>
+                    <th style="cursor: auto;">
+                        Room Number
+                    </th>
+                    <th style="cursor: auto;">
+                        Floor
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        @* Text input with custom event handling and live waning message *@ 
+                        <input class="input" type="text" @oninput="HandleNewNum" placeholder="Room Number" value="@NewRoomNum"
+                               style="max-width: 150px;"/>
+                        <span style="font-size: 12px; color: dodgerblue; display: block;">@NumWarn</span>
+                    </td>
+                    <td>
+                        @* Number spinner input with automatic data binding *@ 
+                        <input class="input" type="number" @bind-value="@NewRoomFloor" @bind-value:event="oninput" placeholder="Floor"
+                               style="max-width: 100px;"/>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+        @* Buttons to either save the new Room or cancel the action and close the modal window *@ 
+        <footer class="modal-card-foot" style="padding: 5px !important;">
+            <div style="margin: auto">
+                <button class="button is-success is-small" @onclick="AddRoom" style="margin: 5px;">
+                    <span class="icon"><i class="fas fa-check"></i></span>
+                    <span>Add Room</span>
+                </button>
+                <button class="button is-dark is-outlined is-small" @onclick="CloseAddRoomModal" style="margin: 5px;">
+                    <span class="icon"><i class="fas fa-ban"></i></span>
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </footer>
+    </div>
 </div>
 
 @if (true) {
+    @* Determines whether the top checkbox should be checked (if all Rooms have been selected) *@ 
     bool checkAll = Selected.Count == AllRooms.Count;
     <div style="overflow-x: auto">
         <table class="table is-bordered is-striped is-hoverable has-text-centered" style="width: 50%; margin: auto">
             <thead>
             <tr>
+                @* Custom event handler for selecting all Rooms when the top checkbox (or the cell it is in) is clicked *@ 
                 <th @onclick="() => HandleSelectAllRooms(checkAll)" style="width: 25px">
                     <input type="checkbox" checked=@checkAll @onchange="@(() => HandleSelectAllRooms(checkAll))"
                            style="cursor: pointer;"/>
                 </th>
+                @* Custom event handling for clicking on a room column header to sort by that property *@ 
                 @foreach (ColumnDefinition column in RoomColumns) {
                     <th @onclick="@(() => SortData(column))">
                         @column.Title
@@ -91,13 +95,16 @@ else if (Selected.Count > 1) {
             </tr>
             </thead>
             <tbody>
+            @* Loop for all Rooms (in AllTeachers) with custom event handling for clicked checkboxes *@ 
             @foreach (Room r in AllRooms) {
+                @* Determines whether the checkbox for a given Room should be checked *@ 
                 bool check = Selected.Contains(r.Id);
                 <tr>
                     <td @onclick="() => HandleSelectedRooms(r.Id, check)" style="cursor: pointer;">
                         <input type="checkbox" checked=@check @onchange="@(() => HandleSelectedRooms(r.Id, check))"
                                style="cursor: pointer;"/>
                     </td>
+                    @* Get the value of each property in RoomColumns (to display in the table) *@ 
                     @foreach (var column in RoomColumns) {
                         <td>
                             @r.GetType().GetProperty(column.Property)?.GetValue(r)
@@ -117,11 +124,16 @@ else if (Selected.Count > 1) {
     List<Room> AllRooms = null;
     List<ColumnDefinition> RoomColumns = null;
     List<long> Selected = null;
+    /// If true, the AddRoom modal window will be displayed 
     bool ShowAddRoom = false;
+    /// The number/name for a new room 
     string NewRoomNum;
+    /// Custom warning message when adding a Room in the AddRoom modal window 
     string NumWarn;
+    /// The floor number for a new room 
     int NewRoomFloor;
 
+    /// Initializes properties once page is ready to start 
     protected override async void OnInitialized() {
         await RefreshRooms();
         await RefreshRoomIdlessonIds();
@@ -136,14 +148,17 @@ else if (Selected.Count > 1) {
         SortData();
     }
 
+    /// Retrieves all Rooms currently recorded in the database and updates AllRooms 
     private async Task RefreshRooms() {
         AllRooms = await RoomService.GetAllRoomsAsync();
     }
 
+    /// Retrieves all RoomIdlessonIds currently recorded in the database and updates RoomIdLessonIds 
     private async Task RefreshRoomIdlessonIds() {
         RoomIdlessonIds = await RoomIdlessonIdService.GetAllRoomIdlessonIdsAsync();
     }
     
+    /// Custom event handler for clicking on checkboxes in the Rooms table 
     private void HandleSelectedRooms(long id, bool checkedValue) {
         if (!checkedValue) {
             if (!Selected.Contains(id)) {
@@ -157,6 +172,7 @@ else if (Selected.Count > 1) {
         }
     }
 
+    /// Custom event handler for clicking the select/deselect all checkbox in the Rooms table 
     private void HandleSelectAllRooms(bool checkAll) {
         if (!checkAll) {
             foreach (Room r in AllRooms) {
@@ -169,13 +185,15 @@ else if (Selected.Count > 1) {
         }
     }
     
+    /// Custom event handler to customize warning message in the AddRoom modal window 
     private void HandleNewNum(ChangeEventArgs args) {
-        NewRoomNum = args.Value.ToString().Trim();
+        NewRoomNum = args.Value?.ToString()?.Trim();
         NumWarn = "";
         if (AllRooms.Any(x => x.Number == NewRoomNum))
             NumWarn = "INFO: This room number is already in use";
     }
 
+    /// Sets ShowAddRoom to false and resets NewRoomNum, NumWarn, and NewRoomFloor 
     private void CloseAddRoomModal() {
         ShowAddRoom = false;
         NewRoomNum = "";
@@ -183,6 +201,7 @@ else if (Selected.Count > 1) {
         NewRoomFloor = 0;
     }
     
+    /// If valid: update database, RefreshRooms(), and CloseAddRoomModal(). Otherwise: display error. 
     private async void AddRoom() {
         if (NewRoomNum.Length == 0) {
             SaveBannerService.ShowBanner("The new room needs a number!", SaveBannerType.Error);
@@ -196,29 +215,41 @@ else if (Selected.Count > 1) {
         SaveBannerService.ShowBanner("New room added successfully!", SaveBannerType.Success);
     }
     
+    /// Ask for confirmation and remove selected Rooms from the database 
     private async void DeleteSelected() {
         string message = Selected.Count > 1 ? $"Are you sure you want to delete {Selected.Count.ToString()} rooms?" :
-            $"Are you sure you want to delete room {AllRooms.Find(x=>x.Id == Selected[0]).Number}?";
+            $"Are you sure you want to delete room {AllRooms.Find(x=>x.Id == Selected[0])?.Number}?";
         message += "\nWarning: Lessons left without any available rooms will also be deleted!";
         var options = new MessageBoxOptions(message) {
             Title = "Confirm Action",
             Buttons = new []{"Confirm", "Cancel"}
         };
+        // Display action confirmation popup window and await user response 
         var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
+        // If operation cancelled, do nothing and return 
         if (choice.Response == 1) return;
         List<long> lessons = new List<long>();
+        // Otherwise, loop through the Rooms marked for deletion 
         while (Selected.Count > 0) {
             Room r = AllRooms.Find(x => x.Id == Selected[0]);
+            // Delete the current Room from the database 
             await RoomService.DeleteRoomAsync(r);
-            var temp = RoomIdlessonIds.Where(x => x.RoomId == r.Id).ToList();
+            // Collect all RoomIdlessonIds with a RoomId corresponding to the current Room 
+            var temp = RoomIdlessonIds.Where(x => x.RoomId == r?.Id).ToList();
+            // / Store the lessons with the corresponding LessonId numbers from the collected RoomIdlessonIds 
             lessons.AddRange(temp.Select(x=>x.LessonId));
+            // Delete the collected RoomIdlessonIds from the database 
             await RoomIdlessonIdService.DeleteRoomIdlessonIdsAsync(temp);
             Selected.RemoveAt(0);
         }
+        // Refresh Rooms and RoomIdlessonIds to match with the database 
         await RefreshRooms();
         await RefreshRoomIdlessonIds();
+        // Loop through all collected lessons (from the removed Rooms) 
         foreach (long id in lessons) {
+            // If the current Lesson still belongs to an additional Room, continue to the next Lesson 
             if (RoomIdlessonIds.Any(x => x.LessonId == id)) continue;
+            // Otherwise, delete the Lesson from the database as well as all LessonIdblockIds with the same LessonId as the deleted Lesson 
             await LessonService.DeleteLessonAsync(LessonService.GetLessonAsync(id).Result);
             await LessonIdblockIdService.DeleteLessonIdblockIdsAsync(LessonIdblockIdService
                 .GetAllLessonIdblockIdsAsync().Result.Where(x=>x.LessonId == id));
@@ -228,10 +259,12 @@ else if (Selected.Count > 1) {
         SaveBannerService.ShowBanner("Room(s) deleted successfully", SaveBannerType.Success);
     }
     
+    /// Determines the CSS class for the sort arrow next to the header of the column being sorted 
     private string SortClass(ColumnDefinition column) {
         return column.SortDirection != SortDirection.NotSet ? $"sort {column.SortDirection.ToString().ToLower()}" : "no-sort";
     }
     
+    /// Sorts the Room order according to the given property and direction 
     private void SortData(ColumnDefinition sortByColumn = null) {
         bool initial = sortByColumn is null;
         if (sortByColumn is null) {
@@ -242,26 +275,35 @@ else if (Selected.Count > 1) {
             if (column.Property != sortByColumn.Property) column.SortDirection = SortDirection.NotSet;
         }
         if (!initial)
+            if (!initial)
+            // Determines the sort behavior of a header when clicked 
             switch (sortByColumn.SortDirection) {
+                // If not currently sorting by the clicked property, sort by ascending 
                 case SortDirection.NotSet:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
+                // If currently sorting ascending by the clicked property, sort by descending 
                 case SortDirection.Ascending:
                     sortByColumn.SortDirection = SortDirection.Descending;
                     break;
+                // If currently sorting descending by the clicked property, sort by ascending 
                 case SortDirection.Descending:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
+                // Otherwise sort clicked property by ascending 
                 default:
                     sortByColumn.SortDirection = SortDirection.Ascending;
                     break;
             }
+        // Sort Rooms by the given property 
         switch (sortByColumn.Property) {
             case "Floor": {
                 AllRooms.Sort((x, y) => {
                     int first = x.Floor.CompareTo(y.Floor);
+                    // Sort by Floor numbers first, then alphabetically by Room Number 
                     return first != 0 ? first : x.Number.CompareTo(y.Number);
                 });
+                // Sort in the opposite direction 
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
                     AllRooms.Sort((x, y) => {
                         int first = y.Floor.CompareTo(x.Floor);
@@ -273,8 +315,10 @@ else if (Selected.Count > 1) {
             case "Number": {
                 AllRooms.Sort((x, y) => {
                     int first = x.Number.CompareTo(y.Number);
+                    // Sort by Room numbers first, then alphabetically by Floor Number 
                     return first != 0 ? first : x.Floor.CompareTo(y.Floor);
                 });
+                // Sort in the opposite direction 
                 if (sortByColumn.SortDirection == SortDirection.Descending) {
                     AllRooms.Sort((x, y) => {
                         int first = y.Number.CompareTo(x.Number);

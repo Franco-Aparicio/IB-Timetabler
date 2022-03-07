@@ -1,4 +1,6 @@
-﻿@page "/timetable"
+﻿@* Has 2 different routes to the same page (one has a parameter) *@ 
+
+@page "/timetable"
 @page "/timetable/{SaveSuccess}"
 @inject NavigationManager NavigationManager
 @inject SchedulerService SchedulerService
@@ -14,31 +16,42 @@
 <TitleComponent Page="Timetable"/>
 
 <br/>
+@* Show a message and larger button to generate new timetable if there are no saved timetables *@ 
 @if (LoadedSaveId == 0) {
     <div>There are no saved timetables</div>
+    @* If Generating, show a loading spinner on the button *@ 
     <button class="button is-info @(Generating ? "is-loading" : null)" @onclick="GetNewTimetable" 
             style="font-size: 22px; width: 250px; height: 75px; margin: auto calc(50% - 125px)">
         <span class="icon" style=""><i class="fas fa-calculator"></i></span>
         <span style="margin-right: -7px;">Generate Timetable</span>
     </button>
 }
+@* Otherwise, if there are saved timetables *@ 
 else {
+    @* Button to generate a new timetable *@ 
     <button class="button is-info @(Generating ? "is-loading" : null)" @onclick="GetNewTimetable" style="margin-bottom: 15px">
         <span class="icon" style="margin-right: 7px"><i class="fas fa-calculator"></i></span>
         <span>Generate Timetable</span>
     </button>
+    @* Button to delete the timetable currently being viewed *@ 
     <button class="button is-danger" @onclick="DeleteSave" style="margin-left: 15px;">
         <span class="icon" style="font-size: 10px; margin-right: 7px"><i class="fas fa-trash"></i></span>
         <span>Delete Saved Timetable</span>
     </button> 
+    @* Button to export timetable as a PDF file *@ 
     <NavLink class="button is-outlined is-success" href=@($"timetable/timetablePDF/{LoadedSaveId.ToString()}")
              style="margin: 0 0 15px 15px;text-decoration: none;">
         <span class="icon" style="margin-right: 7px"><i class="oi oi-data-transfer-download"></i></span>
         <span>Save as PDF</span>
     </NavLink>
-    <button class="button" style="float: right;" @onclick="OpenRenameSave">Rename Saved Timetable</button>
+    @* Button to rename the current timetable *@ 
+    <button class="button" style="float: right;" @onclick="OpenRenameSave">
+        Rename Saved Timetable
+    </button>
+    @* Tabs to switch between saved timetables *@ 
     <div class="tabs is-fullwidth is-boxed" style="@(LoadingTab ? "cursor: progress" : "auto")">
         <ul style="cursor: inherit">
+            @* Make a tab for each saved timetable with custom click event handler (to switch current timetable) *@ 
             @foreach (Save s in Saves) {
                 <li class="@(s.Id == LoadedSaveId ? "is-active" : null)" @onclick="@(() => {SetTimetable(s.Id); LoadingTab = true;})"
                     style="cursor: inherit">
@@ -49,6 +62,7 @@ else {
             }
         </ul>
     </div>
+    @* Modal window to rename current timetable *@ 
     <div class="modal @(ShowRename ? "is-active" : null)">
         <div class="modal-background"></div>
         <div class="modal-card">
@@ -67,6 +81,7 @@ else {
                     <tbody>
                     <tr>
                         <td>
+                            @* Text input with custom event handling and live waning message *@ 
                             <input class="input" type="text" @oninput="HandleRename"
                                    placeholder="@Saves.Find(x => x.Id == LoadedSaveId)?.Name"
                                    value="@NewSaveName" style="max-width: 150px;"/>
@@ -76,6 +91,7 @@ else {
                     </tbody>
                 </table>
             </section>
+            @* Buttons to either save the new name or cancel the action and close the modal window *@ 
             <footer class="modal-card-foot" style="padding: 5px !important;">
                 <div style="margin: auto">
                     <button class="button is-success is-small" @onclick="RenameCurrentSave" style="margin: 5px;">
@@ -91,6 +107,7 @@ else {
         </div>
     </div>
 }
+@* If a timetable was attempted to be generated but did not finish successfully *@ 
 @if (Lessons is not null && Lessons.Count == 0) {
     <div>
         <br/>
@@ -103,11 +120,14 @@ else {
         </div>
     </div>
 }
+@* If there are saved timetables and a timetable is loaded *@ 
 @if (LoadedSaveId != 0 && Lessons is not null && SavedLessonIdperiodIds is not null) {
+    @* The custom TimetableContainerComponent with a grid of the scheduled classes that can be dragged to different times *@ 
     <TimetableContainerComponent Lessons="Lessons" Periods="Periods" Teachers="TeacherService.GetAllTeachersAsync().Result"
          SavedLessons="SavedLessons" SavedLessonIdperiodIds="SavedLessonIdperiodIds"
          Rooms="RoomService.GetAllRoomsAsync().Result" Update="HandleUpdate"/>
 }
+@* Otherwise, if no timetable is loaded, show a loading icon *@ 
 else if (LoadedSaveId != 0 && Lessons is null) {
     <button class="button is-loading is-large border-0 has-text-centered" style="margin: auto"></button>
 }
@@ -115,8 +135,9 @@ else if (LoadedSaveId != 0 && Lessons is null) {
 
 @code{
 
-    [Parameter]
-    public string SaveSuccess { get; set; } = null;
+    /// Parameter to signify which the SaveBannerComponent should be displayed upon loading the page
+    /// when returning from TimetablePDF  
+    [Parameter] public string SaveSuccess { get; set; } = null;
     
     List<Save> Saves; 
     List<Lesson> Lessons = null;
@@ -131,6 +152,7 @@ else if (LoadedSaveId != 0 && Lessons is null) {
     string NewSaveName;
     string NameWarn;
 
+    /// Initializes properties once page is ready to start 
     protected override async void OnInitialized() {
         await RefreshSaves();
         await RefreshSavedLessonIdperiodIds();
@@ -143,42 +165,55 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         LoadedSaveId = 0;
         NewSaveName = "";
         NameWarn = "";
+        // If there are no saved timetables, return here 
         if (Saves.Count <= 0) return;
+        // Otherwise, load the first Save 
         LoadedSaveId = Saves[0].Id;
         SetTimetable(Saves[0].Id);
+        // If the parameter was not given (other route was used), return here 
         if (SaveSuccess is null) return;
+        // Otherwise, display the SaveBannerComponent with the appropriate style and message 
         string message = SaveSuccess.ToLower() == "true" ? "Timetable successfully saved as PDF file" :
             "Failed to create timetable PDF file";
         SaveBannerType type = SaveSuccess.ToLower() == "true" ? SaveBannerType.Success : SaveBannerType.Error;
         SaveBannerService.ShowBanner(message, type);
     }
 
+    /// Retrieves all Saves currently recorded in the database and updates Saves 
     private async Task RefreshSaves() {
         Saves = await SaveService.GetAllSavesAsync();
     }
     
+    /// Retrieves all SavedLessonIdperiodIds currently recorded in the database and updates AllSavedLessonIdperiodIds 
     private async Task RefreshSavedLessonIdperiodIds() {
         AllSavedLessonIdperiodIds = await SavedLessonIdperiodIdService.GetAllSavedLessonIdperiodIdsAsync();
     }
 
+    /// Retrieves all SavedLessons currently recorded in the database and updates SavedLessons 
     private async Task RefreshSavedLessons() {
         SavedLessons = await SavedLessonService.GetAllSavedLessonsAsync();
     }
 
+    /// Renames the currently loaded save to the user-specified value 
     private async void RenameCurrentSave() {
+        // If the name is empty, display an error and return 
         if (NewSaveName.Length == 0) {
             SaveBannerService.ShowBanner("The save must have a name!", SaveBannerType.Error);
             return;
         }
+        // Otherwise try to make name unique name (if one of the same name already exists) 
         int count = Saves.Count(x => x.Name.Contains(NewSaveName));
         string makeUniqueName = count == 0 ? "" : $"({count.ToString()})";
+        // Gets the current save, renames it, then updates the database 
         Save save = await SaveService.GetSaveAsync(LoadedSaveId);
         save.Name = NewSaveName + makeUniqueName;
         await SaveService.UpdateSaveAsync(save);
+        // Closes the rename modal window and displays success message 
         CloseRenameSave();
         SaveBannerService.ShowBanner($"Successfully renamed timetable to {save.Name}", SaveBannerType.Success);
     }
 
+    /// Custom event handler to customize warning message in the rename modal window 
     private void HandleRename(ChangeEventArgs args) {
         NewSaveName = args.Value?.ToString()?.Trim();
         NameWarn = "";
@@ -186,23 +221,28 @@ else if (LoadedSaveId != 0 && Lessons is null) {
             NameWarn = "The save must have a name!";
     }
 
+    /// Sets ShowRename to true and resets NewSaveName 
     private void OpenRenameSave() {
         ShowRename = true;
         NewSaveName = "";
     }
     
+    /// Sets ShowRename to false and resets NewSaveName and NameWarn 
     private void CloseRenameSave() {
         ShowRename = false;
         NewSaveName = "";
         NameWarn = "";
     }
 
+    /// Method called to update database when there is a change in the TimetableContainerComponent 
     private async Task HandleUpdate(List<dynamic> update) {
+        // If a SavedLesson was updated to a different Room, reflect the update in the database 
         if (update[0].GetType().ToString().ToLower() == "ib_timetabler.models.savedlesson") {
             await SavedLessonService.UpdateSavedLessonAsync((SavedLesson) update[0]);
             SaveBannerService.ShowBanner("Successfully updated saved room", SaveBannerType.Success);
             return;
         }
+        // Otherwise, the change was removing a SavedLessonIdperiodId and adding a different SavedLessonIdperiodId 
         await SavedLessonIdperiodIdService.DeleteSavedLessonIdperiodIdsAsync(update.Take(1).Select(x=>(SavedLessonIdperiodId) x));
         await SavedLessonIdperiodIdService.InsertSavedLessonIdperiodIdAsync((SavedLessonIdperiodId) update[1]);
         StateHasChanged();
@@ -210,7 +250,9 @@ else if (LoadedSaveId != 0 && Lessons is null) {
             SaveBannerType.Success);
     }
     
+    /// Asynchronous method used to get and save a new timetable 
     private async Task GetNewTimetable() {
+        // Ensure all lists are synchronized with the database and reset important values 
         await RefreshSaves();
         await RefreshSavedLessonIdperiodIds();
         await RefreshSavedLessons();
@@ -219,18 +261,23 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         Periods = await PeriodService.GetAllPeriodsAsync();
         Generating = false;
         LoadingTab = false;
+        // Start a task to generate the new timetable (so that the current thread does not stall) 
         Task task = new Task(() => SaveTimetable(SchedulerService.GenerateTimetable()));
+        // Show user that the timetable is being generated 
         Generating = true;
         task.Start();
+        // Wait for the timetable to finish generating 
         await task;
         Generating = false;
         StateHasChanged();
+        // If a timetable could be generated, display a success message, otherwise an error message 
         if (Lessons.Count > 0) 
             SaveBannerService.ShowBanner("New timetable generated successfully", SaveBannerType.Success);
         else 
             SaveBannerService.ShowBanner("Failed to generate timetable before timeout", SaveBannerType.Error);
     }
 
+    /// Sets and loads a different saved timetable 
     private async void SetTimetable(long id) {
         Lessons = null;
         SavedLessonIdperiodIds = null;
@@ -238,6 +285,7 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         StateHasChanged();
     }
 
+    /// Asynchronously calls for the necessary data from the database for the saved timetable 
     private async Task LoadTimetable(long id) {
         LoadedSaveId = id;
         Task task = new Task(() => LoadSaveId(id));
@@ -247,6 +295,7 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         LoadingTab = false;
     }
     
+    /// Loads the necessary data for a saved timetable from the database 
     private void LoadSaveId(long id) {
         var temp = SavedLessons.Where(x => x.SaveId == id).ToList();
         Lessons = temp.Select(x => LessonService.GetLessonAsync(x.LessonId).Result).ToList();
@@ -254,26 +303,34 @@ else if (LoadedSaveId != 0 && Lessons is null) {
             temp.Select(y => y.Id).Contains(x.SavedLessonId)).ToList();
     }
     
+    /// Saves the newly generated timetable to the database 
     private async void SaveTimetable(List<LessonVar> lessons) {
+        // If there are no lessons in the completed database, set the loaded Lessons to an empty list 
         if (lessons.Count == 0) {
             Lessons = new List<Lesson>();
             return;
         }
+        // Ensure Saves are synchronized with the database 
         await RefreshSaves();
         int count = Saves.Count(x => x.Name.Contains("Unnamed"));
         string makeUniqueName = count == 0 ? "" : $"({count.ToString()})";
+        // Gets the Id to be used for the new Save 
         long sId = await SaveService.GetNextId();
+        // Adds the new Save to the database with the unique "Unnamed" name 
         await SaveService.InsertSaveAsync(new Save { Id = sId, Name = "Unnamed" + makeUniqueName });
+        // Loops through each LessonVar in the completed timetable and converts them to SavedLessons in the database 
         foreach (LessonVar l in lessons) {
             long savedLessonId = await SavedLessonService.GetNextId();
             await SavedLessonService.InsertSavedLessonAsync(new SavedLesson {
                 Id = savedLessonId,
                 SaveId = sId, LessonId = l.Id, RoomId = l.RoomId});
+            // Adds the corresponding SavedLessonIdperiodIds from the new timetable 
             foreach (PeriodVar p in l.Periods) {
                 await SavedLessonIdperiodIdService.InsertSavedLessonIdperiodIdAsync(
                     new SavedLessonIdperiodId { PeriodId = p.Id, SavedLessonId = savedLessonId });
             }
         }
+        // Re-synchronize lists with the database and load the new timetable 
         await RefreshSaves();
         await RefreshSavedLessonIdperiodIds();
         await RefreshSavedLessons();
@@ -281,6 +338,7 @@ else if (LoadedSaveId != 0 && Lessons is null) {
         LoadSaveId(sId);
     }
     
+    // Delete the currently loaded saved timetable from the database 
     private async Task DeleteSave() {
         Save save = Saves.Find(x => x.Id == LoadedSaveId);
         string message = $"Are you sure you want to delete {save?.Name}?";
@@ -288,13 +346,17 @@ else if (LoadedSaveId != 0 && Lessons is null) {
             Title = "Confirm Action",
             Buttons = new []{"Confirm", "Cancel"}
         };
+        // Display action confirmation popup window and await user response 
         var choice = await Electron.Dialog.ShowMessageBoxAsync(Electron.WindowManager.BrowserWindows.First(), options);
-        if (choice.Response == 1) return;
+        // If operation cancelled, do nothing and return 
+        if (choice.Response == 1) return; 
+        // Delete the Save along with the SavedLessons and SavedLessonIdperiodIds corresponding to it 
         await SaveService.DeleteSaveAsync(save);
         var temp = SavedLessons.Where(x => x.SaveId == LoadedSaveId).ToList();
         await SavedLessonService.DeleteSavedLessonsAsync(temp);
         await SavedLessonIdperiodIdService.DeleteSavedLessonIdperiodIdsAsync(SavedLessonIdperiodIds.Where(
             x => temp.Select(y => y.Id).Contains(x.SavedLessonId)).ToList());
+        // Re-synchronize lists with the database and load the first timetable (if a saved timetable still exists) 
         await RefreshSaves();
         await RefreshSavedLessons();
         await RefreshSavedLessonIdperiodIds();
